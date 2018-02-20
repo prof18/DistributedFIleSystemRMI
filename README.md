@@ -21,3 +21,7 @@ Ogni singolo file creato viene replicato sin dall’inizio per garantire fault tol
 * Gestire l'uscita del nodo, ogni tot tempo ogni nodo controlla se c'è almeno una replica per ogni file
 * Se un nodo rientra, controlla se i propri file sono aggiornati alla versione più recente
 * Implementare interfaccia grafica per la gestione del FileSystem 
+
+### Comando di lancio
+java Prova -Djava.security.policy = server.policy -Djava.rmi.server.hostname=10.8.0.4:1099
+
