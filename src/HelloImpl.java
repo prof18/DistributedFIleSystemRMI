@@ -15,6 +15,7 @@ public class HelloImpl extends UnicastRemoteObject implements Hello {
         String ip="10.8.0.4";
         int port=1099;
         Hello hello = new HelloImpl();
+        System.setProperty("java.rmi.server.hostname", ip);
         Registry registry = LocateRegistry.createRegistry(port);
         String connectPath = "rmi://" + ip + "/" + "hello";
         System.out.println(connectPath);
