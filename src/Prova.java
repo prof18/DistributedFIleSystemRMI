@@ -7,7 +7,9 @@ import java.rmi.registry.Registry;
 
 public class Prova {
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
-        Hello hello=(Hello)Naming.lookup("/localhost/hello");
+
+        Registry registry = LocateRegistry.getRegistry("10.8.0.4", 1099);
+        Hello hello = (Hello) registry.lookup("rmi://10.8.0.4:1099/hello");
         System.out.println(hello.sayHello());
     }
 }
