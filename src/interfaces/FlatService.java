@@ -11,7 +11,7 @@ public interface FlatService extends Remote, Serializable {
 
     void write(String fileID, int i, Object data);
 
-    void Create();
+    String Create();
 
     void Delete(String fileID);
 
