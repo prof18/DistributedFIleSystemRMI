@@ -11,9 +11,9 @@ Le modifiche sono propagate alla chiusura del file (no write through).
 Ogni singolo file creato viene replicato sin dall’inizio per garantire fault tolerance. La directory e’ distribuita e replicata (in parte o completamente) per essere resistente alla sparizione di un nodo.
 
 ### Struttura generale
-*Implementare la classe che raccoglie gli attributi dei file (File Handle, Name, Type, Location, Size, Protection, Time Date ad User identification)
-*Implementare le operazioni che implementa il filesystem
-*Implementare sincronizzazione per la gestione dei file
-*Implementare la cache per ogni node
-*Implementare autenticazione e sicurezza
-*Implementare interfaccia grafica per la gestione del FileSystem
+*Implementare la classe che raccoglie gli attributi dei file (File Handle, Name, Type, Location, Size, Protection, Time Date ad User identification) 
+*Implementare le operazioni che implementa il filesystem 
+*Implementare sincronizzazione per la gestione dei file 
+*Implementare la cache per ogni node 
+*Implementare autenticazione e sicurezza 
+*Implementare interfaccia grafica per la gestione del FileSystem 
