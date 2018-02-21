@@ -10,6 +10,7 @@ public class SettingsDialog extends JDialog {
 
     private String ip;
     private String FSName;
+    private String directory;
 
     public SettingsDialog(JFrame parent) {
 
@@ -57,17 +58,54 @@ public class SettingsDialog extends JDialog {
         panel.add(nameFSTextField, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
+        //folder chooser
+        JLabel folderChooserLabel = new JLabel("Working directory:");
+        cs.gridx = 0;
+        cs.gridy = 2;
+        cs.gridwidth = 1;
+        panel.add(folderChooserLabel, cs);
+
+        JTextField folderChooserTF = new JTextField(20);
+        cs.gridx = 1;
+        cs.gridy = 2;
+        cs.gridwidth = 2;
+        panel.add(folderChooserTF, cs);
+        panel.setBorder(new LineBorder(Color.GRAY));
+
+        JButton chooseFolderBtn = new JButton("Choose");
+        cs.gridx = 3;
+        cs.gridy = 2;
+        cs.gridwidth = 2;
+        panel.add(chooseFolderBtn, cs);
+        panel.setBorder(new LineBorder(Color.GRAY));
+        chooseFolderBtn.addActionListener((ActionListener) -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new java.io.File("."));
+            chooser.setDialogTitle("Select the working directory");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                //TODO: use this value
+                this.directory = chooser.getSelectedFile().toString();
+                System.out.println("Selected Directory : " + chooser.getSelectedFile());
+                folderChooserTF.setText(directory);
+            } else {
+                System.out.println("No Directory selected");
+            }
+        });
+
         //confirm button
         JButton confirmBtn = new JButton("Confirm");
         confirmBtn.addActionListener((ActionListener) -> {
             //TODO: use these values
             this.ip = ipTextField.getText();
             this.FSName = nameFSTextField.getText();
-            System.out.println("Selected ip = " + ip);
-            System.out.println("Selected FSName = " + FSName);
-            if (ip.equals("") || FSName.equals(""))
+            if (ip.equals("") || FSName.equals("") || directory.equals(""))
                 showErrorMessage();
             else {
+                System.out.println("Selected ip = " + ip);
+                System.out.println("Selected FSName = " + FSName);
+                System.out.println("Selected directory = " + directory);
                 //launch the login dialog
                 dispose();
                 LoginDialog loginDialog = new LoginDialog(parent);

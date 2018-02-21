@@ -64,8 +64,6 @@ public class LoginDialog extends JDialog {
             this.username = usernameTextField.getText();
             this.pwd = new String(pwdTextField.getPassword());
 
-            System.out.println("Select username = " + username);
-            System.out.println("Selected pwd = " + pwd);
 
             if (username.equals("") || pwd.equals("")) {
                 showErrorMessage("You have to insert your credentials to proceed");
@@ -75,6 +73,8 @@ public class LoginDialog extends JDialog {
                 pwdTextField.setText("");
             } else {
                 //all correct
+                System.out.println("Select username = " + username);
+                System.out.println("Selected pwd = " + pwd);
                 //TODO: use these values
                 //return to the main UI
                 dispose();
