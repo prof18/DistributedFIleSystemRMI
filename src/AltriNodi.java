@@ -23,13 +23,6 @@ public class AltriNodi {
         }
         System.out.println("sono il nodo : "+nodi.getOwnNode());
         System.out.println("cosa vuoi fare ...");
-        try{
-            node.bind("localhost",nodi.getOwnNode());
-        }catch (RemoteException e){
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        System.out.println("fatto il binding del nodo");
         try {
             System.out.println("provo a comunicare con i miei amici");
             node.sayHello(nodi.getOwnNode());

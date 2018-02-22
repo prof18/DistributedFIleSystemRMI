@@ -4,7 +4,7 @@ import java.rmi.RemoteException;
 
 public interface Node extends Remote, Serializable {
 
-    void bind(String ip, String nome) throws RemoteException;
+    void bind(String ip, String nome,int port) throws RemoteException;
 
     void create(String arg) throws RemoteException;
 
@@ -12,9 +12,11 @@ public interface Node extends Remote, Serializable {
 
     int getAndSetNum() throws RemoteException;
 
-    Wrap add(String ip) throws RemoteException;
+    Wrap add(String ip,int port) throws RemoteException;
 
     void sayHello(String ownHostName) throws RemoteException;
 
     String saluta() throws RemoteException;
+
+    int getFreePort(String ipNode) throws RemoteException;
 }
