@@ -1,16 +1,23 @@
 package ui;
 
+import utility.Constants;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.*;
+import java.util.Properties;
 
 public class SettingsDialog extends JDialog {
 
     private String ip;
     private String FSName;
     private String directory;
+
+    private File configFile = new File("config.properties");
+    Properties propsToLoad;
 
     public SettingsDialog(JFrame parent) {
 
@@ -97,19 +104,24 @@ public class SettingsDialog extends JDialog {
         //confirm button
         JButton confirmBtn = new JButton("Confirm");
         confirmBtn.addActionListener((ActionListener) -> {
-            //TODO: use these values
             this.ip = ipTextField.getText();
             this.FSName = nameFSTextField.getText();
+            this.directory = folderChooserTF.getText();
             if (ip.equals("") || FSName.equals("") || directory.equals(""))
                 showErrorMessage();
             else {
                 System.out.println("Selected ip = " + ip);
                 System.out.println("Selected FSName = " + FSName);
                 System.out.println("Selected directory = " + directory);
-                //launch the login dialog
+                try {
+                    //save the configurations
+                    saveConfig();
+                } catch (IOException e) {
+                    System.out.println("Unable to save properties file");
+                    e.printStackTrace();
+                }
+                //launch the main ui
                 dispose();
-                LoginDialog loginDialog = new LoginDialog(parent);
-                loginDialog.setVisible(true);
             }
 
         });
@@ -123,6 +135,17 @@ public class SettingsDialog extends JDialog {
         pack();
         setResizable(false);
         setLocationRelativeTo(parent);
+
+        //load config
+        try {
+            loadConfig();
+            ipTextField.setText(propsToLoad.getProperty(Constants.IP_CONFIG));
+            nameFSTextField.setText(propsToLoad.getProperty(Constants.DFS_NAME_CONFIG));
+            folderChooserTF.setText(propsToLoad.getProperty(Constants.WORKING_DIR_CONFIG));
+        } catch (IOException e) {
+            System.out.println("Properties doesn't exits.");
+            System.out.println("Loading settings dialog");
+        }
     }
 
     private void showErrorMessage() {
@@ -130,6 +153,24 @@ public class SettingsDialog extends JDialog {
                 "You have to provide some info to go forward",
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void saveConfig() throws IOException {
+        Properties propsToSave = new Properties();
+        propsToSave.setProperty(Constants.IP_CONFIG, this.ip);
+        propsToSave.setProperty(Constants.DFS_NAME_CONFIG, this.FSName);
+        propsToSave.setProperty(Constants.WORKING_DIR_CONFIG, this.directory);
+
+        OutputStream outputStream = new FileOutputStream(configFile);
+        propsToSave.store(outputStream, "DFS settings");
+        outputStream.close();
+    }
+
+    private void loadConfig() throws IOException {
+        propsToLoad = new Properties();
+        InputStream inputStream = new FileInputStream(configFile);
+        propsToLoad.load(inputStream);
+        inputStream.close();
     }
 
 }

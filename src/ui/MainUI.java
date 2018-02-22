@@ -5,19 +5,26 @@ import javax.swing.*;
 public class MainUI extends JFrame {
 
     public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            System.out.println("Loading config");
+            new MainUI();
+        });
+    }
 
+   public MainUI() {
+        super("");
         //Create and show the main UI block
-        MainUI ui = new MainUI();
-        ui.setTitle("LR18 File System");
-        ui.setLocationRelativeTo(null);
-        ui.setSize(1200, 800);
-        ui.setVisible(true);
+
+        setTitle("LR18 File System");
+        setLocationRelativeTo(null);
+        setSize(1200, 800);
+        setVisible(true);
         //TODO: enable this
         //ui.pack();
-        ui.setLocationRelativeTo(null);
-        ui.setVisible(true);
+        setLocationRelativeTo(null);
+        setVisible(true);
 
-        SettingsDialog settingsDialog = new SettingsDialog(ui);
+        SettingsDialog settingsDialog = new SettingsDialog(this);
         settingsDialog.setVisible(true);
     }
 
