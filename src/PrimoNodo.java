@@ -10,7 +10,8 @@ public class PrimoNodo {
             System.exit(-1);
         }
         try{
-            node.create("file");
+            //modificare questo ip
+            node.create("file","localhost");
         }
         catch (RemoteException e){
             e.printStackTrace();

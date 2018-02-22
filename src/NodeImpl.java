@@ -25,10 +25,8 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
     }
 
     //in caso di porta occupata viene creato il registro nella porta successiva
-    public void create(String args) {
+    public void create(String args,String ip) {
         System.setProperty("java.rmi.server.hostname", "localhost");
-
-        String ip = "localhost";
         int port = 1099;
         Node node = null;
         try {
