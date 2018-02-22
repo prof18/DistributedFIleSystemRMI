@@ -92,7 +92,6 @@ public class SettingsDialog extends JDialog {
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             chooser.setAcceptAllFileFilterUsed(false);
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                //TODO: use this value
                 this.directory = chooser.getSelectedFile().toString();
                 System.out.println("Selected Directory : " + chooser.getSelectedFile());
                 folderChooserTF.setText(directory);
@@ -164,6 +163,7 @@ public class SettingsDialog extends JDialog {
         OutputStream outputStream = new FileOutputStream(configFile);
         propsToSave.store(outputStream, "DFS settings");
         outputStream.close();
+        System.out.println("Configuration saved");
     }
 
     private void loadConfig() throws IOException {
