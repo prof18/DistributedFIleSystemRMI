@@ -16,7 +16,7 @@ public class AltriNodi {
         }
         try {
             //modificare qui ipMaster e ipNode
-            nodi=node.join("localhost","file","localhost");
+            nodi=node.join("10.8.0.4","file","localhost");
             System.out.println("mi sono aggiunto al filesystem");
             System.out.println("numero di nodi "+nodi.getNodes().size());
             Util.plot(nodi.getNodes());
