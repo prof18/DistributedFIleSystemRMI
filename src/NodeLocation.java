@@ -1,4 +1,6 @@
-public class NodeLocation {
+import java.io.Serializable;
+
+public class NodeLocation implements Serializable {
     private String ip;
     private int port;
 
@@ -13,5 +15,13 @@ public class NodeLocation {
 
     public int getPort() {
         return port;
+    }
+
+    @Override
+    public String toString() {
+        return "ip= " + ip + " " + "port= " + port;
+    }
+    public String toUrl(){
+        return "rmi://"+ip+":"+port+"/";
     }
 }

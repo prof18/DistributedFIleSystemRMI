@@ -1,4 +1,8 @@
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.Map;
 
 public class AltriNodi {
     public static void main(String[] args) {
@@ -13,22 +17,35 @@ public class AltriNodi {
         try {
             nodi=node.join("localhost","file","localhost");
             System.out.println("mi sono aggiunto al filesystem");
-            System.out.println("dimensione nodi "+nodi.getNodes().length);
-            for (String nodo:nodi.getNodes()){
-                System.out.println(nodo);
-            }
+            System.out.println("numero di nodi "+nodi.getNodes().size());
+            Util.plot(nodi.getNodes());
+            System.out.println();
+            System.out.println();
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);
         }
         System.out.println("sono il nodo : "+nodi.getOwnNode());
         System.out.println("cosa vuoi fare ...");
-        try {
-            System.out.println("provo a comunicare con i miei amici");
-            node.sayHello(nodi.getOwnNode());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            System.exit(-1);
+        for(Map.Entry<String,NodeLocation> entry:nodi.getNodes().entrySet()){
+            if(entry.getKey()!=nodi.getOwnNode()){
+                System.out.println("Comunicazione con : "+entry.getValue().toString());
+                Registry registry= null;
+                try {
+                    registry = LocateRegistry.getRegistry(entry.getValue().getIp(),entry.getValue().getPort());
+                    String path=entry.getValue().toUrl()+entry.getKey();
+                    System.out.println(path);
+                    node = (Node) registry.lookup(path);
+                    System.out.println(node.saluta());
+                } catch (RemoteException e) {
+                    System.out.println("problema strano");
+
+                } catch (NotBoundException e) {
+                    System.out.println("non trovato errore");
+
+                }
+
+            }
         }
 
     }

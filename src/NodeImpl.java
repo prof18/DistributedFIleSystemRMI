@@ -1,4 +1,7 @@
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.AlreadyBoundException;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -6,6 +9,8 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NodeImpl extends UnicastRemoteObject implements Node {
 
@@ -16,6 +21,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
     public NodeImpl() throws RemoteException {
         super();
         connectedNodes = new HashMap<>();
+        System.out.println(connectedNodes);
     }
 
     //in caso di porta occupata viene creato il registro nella porta successiva
@@ -47,7 +53,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         System.out.println(registry);
         try {
             String host = "host" + node.getAndSetNum();
-            connectedNodes.put(host, new NodeLocation(ip, port));
+            //connectedNodes.put(host, new NodeLocation(ip, port));
             System.out.println("created distributed fileSystem : " + args + " by host : " + host);
             System.out.println("with port : "+port+" and address "+ip);
             registry.rebind(connectPath, node);
@@ -56,6 +62,36 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             e.printStackTrace();
             System.exit(-1);
         }
+        firstJoin(ip,port,connectPath);
+    }
+
+    public void firstJoin(String ip,int port,String path){
+        Registry registry=null;
+        try {
+            registry=LocateRegistry.getRegistry(ip,port);
+        } catch (RemoteException e) {
+            System.out.println("[First Join] : there is not node in this position");
+            System.exit(-1);
+        }
+        try {
+            Node node=(Node)registry.lookup(path);
+            node.fistAdd(ip,port,"file");
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+
+
+    }
+
+    public void fistAdd(String ip,int port,String name){
+        connectedNodes.put(name,new NodeLocation(ip,port));
+        System.out.println("Fatto il primo Add");
+        Util.plot(connectedNodes);
     }
 
     public int getAndSetNum() {
@@ -66,41 +102,37 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
 
     @Override
     public Wrap join(String ipMaster, String name, String ipNode) throws RemoteException {
-        String path = "rmi://" + ipMaster + "/" + name;
+        String path = "rmi://" + ipMaster + ":"+1099+"/" + name;
         System.out.println(path);
         Registry registry = LocateRegistry.getRegistry(ipMaster);
         Node master = null;
         try {
             master = (Node) registry.lookup(path);
         } catch (NotBoundException e) {
-            e.printStackTrace();
+            System.out.println("there is not node at this address : "+ipMaster+" with this name : "+name);
             System.exit(-1);
         }
         int portNode = this.getFreePort(ipNode);
         Wrap ret = master.add(ipNode, portNode);
         this.bind(ipNode, ret.getOwnNode(), portNode);
+        System.out.println("ho fatto il binding al nodo: "+ipNode+" con nome : "+ret.getOwnNode()+" "+portNode);
         System.out.println("stampa dei nodi");
-        for (String riga : ret.getNodes()) {
-            String[] value = riga.split("     ");
-            System.out.println(value[0] + " " + value[1] + " " + value[2]);
-            connectedNodes.put(value[0], new NodeLocation(value[1], Integer.parseInt(value[2])));
-        }
+        System.out.println("[JOIN] -> plot connected nodes");
+        Util.plot(connectedNodes);
         System.out.println("connesso");
         return ret;
     }
 
     public Wrap add(String ip, int port) throws RemoteException {
+        System.out.println("[ADD]");
         String host = "host" + this.getAndSetNum();
-        connectedNodes.put(host, new NodeLocation(ip, port));
-        String[] ret = new String[connectedNodes.size()];
-        int i = 0;
-        for (Map.Entry<String, NodeLocation> entry : connectedNodes.entrySet()) {
-            ret[i] = entry.getKey() + "     " + entry.getValue().getIp() + "     " + entry.getValue().getPort();
-            System.out.println(ret[i]);
-            i++;
-        }
+        System.out.println(this.connectedNodes);
+        Util.plot(this.connectedNodes);
+        this.connectedNodes.put(host, new NodeLocation(ip, port));
+        System.out.println("[ADD] : plot connected nodes");
+        Util.plot(this.connectedNodes);
         System.out.println("ho aggiunto il nodo : " + ip + " con host : " + host);
-        return new Wrap(ret, host);
+        return new Wrap(this.connectedNodes, host);
     }
 
     public void bind(String ip, String nome, int port) {
@@ -116,7 +148,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
                 System.exit(-1);
             }
         }
-        String connectPath = "rmi://" + ip + "/" + nome;
+        String connectPath = "rmi://" + ip +":"+port+ "/" + nome;
         try {
             registry.bind(connectPath, this);
         } catch (RemoteException e) {
@@ -126,74 +158,48 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             e.printStackTrace();
             System.exit(-1);
         }
+        System.out.println("Bind: binding eseguito : "+connectPath);
 
     }
 
-    public void sayHello(String myName) {
-        System.out.println("numero di amici" + connectedNodes.size());
-        for (Map.Entry<String, NodeLocation> entry : connectedNodes.entrySet()) {
-            if (!entry.getKey().equals(myName)) {
-                String path = "rmi://" + entry.getValue() + "/" + entry.getKey();
-                System.out.println("amico : " + path);
-                System.out.println(path);
-                Registry registry = null;
-                try {
-                    registry = LocateRegistry.getRegistry(entry.getValue().getIp());
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
-                try {
-                    String[] list = registry.list();
-                    System.out.println("lista dei servizi");
-                    System.out.println("numero di servizi : " + list.length);
-                    for (String tmp : list) {
-                        System.out.println(tmp);
-                    }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
-                Node master = null;
-                try {
-                    master = (Node) registry.lookup(path);
-                } catch (NotBoundException e) {
-                    System.out.println("non ho trovato nessun oggetto : " + entry.getKey());
-                    System.out.println(registry.toString());
-                    e.printStackTrace();
-                    System.exit(-1);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
-                try {
-                    System.out.println(master.saluta());
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
 
-            }
-        }
-
-    }
 
     public String saluta() {
         return "ciao bello, noi possiamo comunicare";
     }
 
     public int getFreePort(String ipNode) {
+        int port = 1099;
         System.out.println("Stampa dei servizi all'indirizzo : " + ipNode);
-        try {
-            Registry registry = LocateRegistry.getRegistry(ipNode);
-            String[] lista = registry.list();
-            for (String riga : lista) {
-                System.out.println(riga);
+        boolean haveEnought = true;
+        while (haveEnought) {
+            try {
+                Registry registry = LocateRegistry.getRegistry(ipNode, port);
+                String[] lista = registry.list();
+                for (String riga : lista) {
+                    System.out.println(riga);
+                    String expr = "^(([^:/?#]+):)?(//([^:/?#]*):([\\d]*))?";
+                    Matcher matcher = Pattern.compile(expr)
+                            .matcher(riga);
+                    if (matcher.find()) {
+                        port = Integer.parseInt(matcher.group(5));
+                        System.out.println(port);
+                    }
+                }
+                if (lista.length == 0){
+                    haveEnought=false;
+                }
+                else {
+                    port++;
+                }
+
+            } catch (RemoteException e) {
+                haveEnought=false;
             }
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
+            System.out.println("la prima porta libera è : " + port);
+
         }
-        return 0;
+        return port;
     }
 }

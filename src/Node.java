@@ -14,7 +14,9 @@ public interface Node extends Remote, Serializable {
 
     Wrap add(String ip,int port) throws RemoteException;
 
-    void sayHello(String ownHostName) throws RemoteException;
+    void fistAdd(String ip,int port,String name) throws RemoteException;
+
+    void firstJoin(String ip,int port,String path) throws RemoteException;
 
     String saluta() throws RemoteException;
 
