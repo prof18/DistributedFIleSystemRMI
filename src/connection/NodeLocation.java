@@ -1,3 +1,5 @@
+package connection;
+
 import java.io.Serializable;
 
 public class NodeLocation implements Serializable {

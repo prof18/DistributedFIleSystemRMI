@@ -1,14 +1,15 @@
-import java.net.MalformedURLException;
-import java.net.URL;
+package connection;
+
+import objects.Node;
+
+
 import java.rmi.AlreadyBoundException;
-import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +52,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         System.out.println(registry);
         try {
             String host = "host" + node.getAndSetNum();
-            //connectedNodes.put(host, new NodeLocation(ip, port));
+            //connectedNodes.put(host, new connection.NodeLocation(ip, port));
             System.out.println("created distributed fileSystem : " + args + " by host : " + host);
             System.out.println("with port : "+port+" and address "+ip);
             registry.rebind(connectPath, node);

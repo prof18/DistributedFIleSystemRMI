@@ -1,10 +1,12 @@
-import connection.NodeImpl;
+package connection;
+
 import objects.Node;
 
 import java.rmi.RemoteException;
 
-public class PrimoNodo {
-    public static void main(String[] args) {
+public class Create {
+
+    public static void create(String ip, String name) {
         Node node = null;
         try {
             node = new NodeImpl();
@@ -14,10 +16,11 @@ public class PrimoNodo {
         }
         try {
             //modificare questo ip
-            node.create("file", "10.8.0.4");
+            node.create(name,ip);
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);
         }
     }
+
 }

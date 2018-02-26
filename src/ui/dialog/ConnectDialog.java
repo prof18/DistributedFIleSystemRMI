@@ -1,5 +1,6 @@
 package ui.dialog;
 
+import connection.Connect;
 import ui.MainUI;
 import utility.Constants;
 
@@ -13,8 +14,10 @@ import java.util.Properties;
 
 public class ConnectDialog extends JDialog{
 
-    private String ip;
+    private String ipFs;
     private String directory;
+    private String fSName;
+    private String ipHost;
 
     private File configFile = new File("config.properties");
     private Properties props;
@@ -36,7 +39,7 @@ public class ConnectDialog extends JDialog{
         cs.insets = new Insets(8, 15, 8, 15);
         cs.fill = GridBagConstraints.HORIZONTAL;
 
-        //ip
+        //ipFs
         JLabel ipLabel = new JLabel("FS IP: ");
         cs.gridx = 0;
         cs.gridy = 0;
@@ -48,6 +51,20 @@ public class ConnectDialog extends JDialog{
         cs.gridy = 0;
         cs.gridwidth = 2;
         panel.add(ipTextField, cs);
+
+        //file system name
+        JLabel nameFSLabel = new JLabel("File System Name: ");
+        cs.gridx = 0;
+        cs.gridy = 0;
+        cs.gridwidth = 1;
+        panel.add(nameFSLabel, cs);
+
+        JTextField nameFSTextField = new JTextField(20);
+        cs.gridx = 1;
+        cs.gridy = 0;
+        cs.gridwidth = 2;
+        panel.add(nameFSTextField, cs);
+        panel.setBorder(new LineBorder(Color.GRAY));
 
         //folder chooser
         JLabel folderChooserLabel = new JLabel("Working directory:");
@@ -87,12 +104,14 @@ public class ConnectDialog extends JDialog{
         //confirm button
         JButton confirmBtn = new JButton("Confirm");
         confirmBtn.addActionListener((ActionListener) -> {
-            this.ip = ipTextField.getText();
+            this.ipFs = ipTextField.getText();
+            this.fSName = nameFSTextField.getText();
             this.directory = folderChooserTF.getText();
-            if (ip.equals("") || directory.equals(""))
+            if (ipFs.equals("") || fSName.equals("") ||directory.equals(""))
                 showErrorMessage();
             else {
-                System.out.println("Selected ip = " + ip);
+                System.out.println("Selected ipFs = " + ipFs);
+                System.out.println("Selected fSName = " + fSName);
                 System.out.println("Selected directory = " + directory);
                 try {
                     //save the configurations
@@ -103,6 +122,9 @@ public class ConnectDialog extends JDialog{
                 }
                 //launch the main ui
                 dispose();
+
+                Connect.join(ipFs,fSName,ipHost);
+
                 new MainUI();
             }
 
@@ -121,7 +143,9 @@ public class ConnectDialog extends JDialog{
         //load config
         try {
             loadConfig();
+            ipHost = props.getProperty(Constants.IP_HOST_CONFIG);
             ipTextField.setText(props.getProperty(Constants.IP_FS_CONFIG));
+            nameFSTextField.setText(props.getProperty(Constants.DFS_NAME_CONFIG));
             folderChooserTF.setText(props.getProperty(Constants.WORKING_DIR_CONFIG));
         } catch (IOException e) {
             System.out.println("Properties doesn't exits.");
@@ -137,8 +161,8 @@ public class ConnectDialog extends JDialog{
     }
 
     private void saveConfig() throws IOException {
-        props.remove(Constants.DFS_NAME_CONFIG);
-        props.setProperty(Constants.IP_FS_CONFIG, this.ip);
+        props.setProperty(Constants.DFS_NAME_CONFIG, this.fSName);
+        props.setProperty(Constants.IP_FS_CONFIG, this.ipFs);
         props.setProperty(Constants.WORKING_DIR_CONFIG, this.directory);
         //props.setProperty(Constants.IP_HOST_CONFIG, this.ipHost);
         OutputStream outputStream = new FileOutputStream(configFile);

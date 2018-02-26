@@ -1,5 +1,6 @@
 package ui.dialog;
 
+import connection.Create;
 import ui.MainUI;
 import utility.Constants;
 
@@ -14,7 +15,7 @@ import java.util.Properties;
 public class CreateDialog extends JDialog {
 
     private String ip;
-    private String FSName;
+    private String fSName;
     private String directory;
 
     private File configFile = new File("config.properties");
@@ -38,8 +39,6 @@ public class CreateDialog extends JDialog {
         //padding
         cs.insets = new Insets(8, 15, 8, 15);
         cs.fill = GridBagConstraints.HORIZONTAL;
-
-
 
         //file system name
         JLabel nameFSLabel = new JLabel("File System Name: ");
@@ -93,13 +92,13 @@ public class CreateDialog extends JDialog {
         //confirm button
         JButton confirmBtn = new JButton("Confirm");
         confirmBtn.addActionListener((ActionListener) -> {
-            this.FSName = nameFSTextField.getText();
+            this.fSName = nameFSTextField.getText();
             this.directory = folderChooserTF.getText();
-            if (ip.equals("") || FSName.equals("") || directory.equals(""))
+            if (ip.equals("") || fSName.equals("") || directory.equals(""))
                 showErrorMessage();
             else {
                 System.out.println("Selected ip = " + ip);
-                System.out.println("Selected FSName = " + FSName);
+                System.out.println("Selected fSName = " + fSName);
                 System.out.println("Selected directory = " + directory);
                 try {
                     //save the configurations
@@ -110,6 +109,9 @@ public class CreateDialog extends JDialog {
                 }
                 //launch the main ui
                 dispose();
+
+                Create.create(ip, fSName);
+
                 new MainUI();
             }
 
@@ -148,7 +150,7 @@ public class CreateDialog extends JDialog {
 
     private void saveConfig() throws IOException {
         props.setProperty(Constants.IP_HOST_CONFIG, this.ip);
-        props.setProperty(Constants.DFS_NAME_CONFIG, this.FSName);
+        props.setProperty(Constants.DFS_NAME_CONFIG, this.fSName);
         props.setProperty(Constants.WORKING_DIR_CONFIG, this.directory);
         props.setProperty(Constants.IP_FS_CONFIG, this.ip);
         OutputStream outputStream = new FileOutputStream(configFile);

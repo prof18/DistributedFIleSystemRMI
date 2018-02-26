@@ -1,8 +1,12 @@
+package connection;
+
+import connection.NodeLocation;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class Util {
-    public static void plot(HashMap<String,NodeLocation> hashMap){
+    public static void plot(HashMap<String, NodeLocation> hashMap){
         String leftAlignFormat = "| %-10s | %-10s | %-8d | %n";
 
         System.out.format("+------------+------------+----------+%n");

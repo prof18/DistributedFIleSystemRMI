@@ -1,3 +1,7 @@
+package objects;
+
+import connection.Wrap;
+
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -12,7 +16,7 @@ public interface Node extends Remote, Serializable {
 
     int getAndSetNum() throws RemoteException;
 
-    Wrap add(String ip,int port) throws RemoteException;
+    Wrap add(String ip, int port) throws RemoteException;
 
     void fistAdd(String ip,int port,String name) throws RemoteException;
 
