@@ -109,16 +109,7 @@ public class MainUI extends JFrame {
 
         GridBagConstraints cs = new GridBagConstraints();
         cs.fill = GridBagConstraints.BOTH;
-
-
-        //TODO: Enable the settings pop-up
-
-
-
     }
-
-    public void drawUI() {}
-
 
     private JPanel createDetailsUI() {
 
