@@ -55,13 +55,13 @@ public class ConnectDialog extends JDialog{
         //file system name
         JLabel nameFSLabel = new JLabel("File System Name: ");
         cs.gridx = 0;
-        cs.gridy = 0;
+        cs.gridy = 1;
         cs.gridwidth = 1;
         panel.add(nameFSLabel, cs);
 
         JTextField nameFSTextField = new JTextField(20);
         cs.gridx = 1;
-        cs.gridy = 0;
+        cs.gridy = 1;
         cs.gridwidth = 2;
         panel.add(nameFSTextField, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
@@ -69,13 +69,13 @@ public class ConnectDialog extends JDialog{
         //folder chooser
         JLabel folderChooserLabel = new JLabel("Working directory:");
         cs.gridx = 0;
-        cs.gridy = 1;
+        cs.gridy = 2;
         cs.gridwidth = 1;
         panel.add(folderChooserLabel, cs);
 
         JTextField folderChooserTF = new JTextField(20);
         cs.gridx = 1;
-        cs.gridy = 1;
+        cs.gridy = 2;
         cs.gridwidth = 2;
         panel.add(folderChooserTF, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
