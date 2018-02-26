@@ -26,7 +26,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
     }
 
     //in caso di porta occupata viene creato il registro nella porta successiva
-    public void create(String args,String ip) {
+    public void create(String args,String ip, String fsName) {
         System.setProperty("java.rmi.server.hostname",ip);
         int port = 1099;
         Node node = null;
@@ -47,7 +47,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
                 port++;
             }
         }
-        String connectPath = "rmi://" + ip + ":" + port + "/" + "file";
+        String connectPath = "rmi://" + ip + ":" + port + "/" + fsName;
         System.out.println(connectPath);
         System.out.println(registry);
         try {
@@ -61,10 +61,10 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             e.printStackTrace();
             System.exit(-1);
         }
-        firstJoin(ip,port,connectPath);
+        firstJoin(ip,port,connectPath, fsName);
     }
 
-    public void firstJoin(String ip,int port,String path){
+    public void firstJoin(String ip,int port,String path, String fsName){
         Registry registry=null;
         try {
             registry=LocateRegistry.getRegistry(ip,port);
@@ -74,7 +74,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         }
         try {
             Node node=(Node)registry.lookup(path);
-            node.fistAdd(ip,port,"file");
+            node.fistAdd(ip,port,fsName);
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);

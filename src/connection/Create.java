@@ -16,7 +16,7 @@ public class Create {
         }
         try {
             //modificare questo ip
-            node.create(name,ip);
+            node.create(name,ip, name);
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);

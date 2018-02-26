@@ -82,7 +82,7 @@ public class ConnectDialog extends JDialog{
 
         JButton chooseFolderBtn = new JButton("Choose");
         cs.gridx = 3;
-        cs.gridy = 1;
+        cs.gridy = 2;
         cs.gridwidth = 2;
         panel.add(chooseFolderBtn, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
@@ -125,7 +125,7 @@ public class ConnectDialog extends JDialog{
 
                 Connect.join(ipFs,fSName,ipHost);
 
-                new MainUI();
+               // new MainUI();
             }
 
         });
