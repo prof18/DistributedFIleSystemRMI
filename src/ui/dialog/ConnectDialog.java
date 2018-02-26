@@ -1,5 +1,6 @@
-package ui;
+package ui.dialog;
 
+import ui.MainUI;
 import utility.Constants;
 
 import javax.swing.*;
@@ -10,18 +11,15 @@ import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.Properties;
 
-public class SettingsDialog extends JDialog {
+public class ConnectDialog extends JDialog{
 
     private String ip;
-    private String FSName;
     private String directory;
 
     private File configFile = new File("config.properties");
-    Properties propsToLoad;
+    private Properties props;
 
-    public SettingsDialog(JFrame parent) {
-
-        super(parent, "Settings", true);
+    public ConnectDialog() {
 
         //prevent closing the dialog
         this.addWindowListener(new WindowAdapter() {
@@ -39,7 +37,7 @@ public class SettingsDialog extends JDialog {
         cs.fill = GridBagConstraints.HORIZONTAL;
 
         //ip
-        JLabel ipLabel = new JLabel("IP: ");
+        JLabel ipLabel = new JLabel("FS IP: ");
         cs.gridx = 0;
         cs.gridy = 0;
         cs.gridwidth = 1;
@@ -51,37 +49,23 @@ public class SettingsDialog extends JDialog {
         cs.gridwidth = 2;
         panel.add(ipTextField, cs);
 
-        //file system name
-        JLabel nameFSLabel = new JLabel("File System Name: ");
-        cs.gridx = 0;
-        cs.gridy = 1;
-        cs.gridwidth = 1;
-        panel.add(nameFSLabel, cs);
-
-        JTextField nameFSTextField = new JTextField(20);
-        cs.gridx = 1;
-        cs.gridy = 1;
-        cs.gridwidth = 2;
-        panel.add(nameFSTextField, cs);
-        panel.setBorder(new LineBorder(Color.GRAY));
-
         //folder chooser
         JLabel folderChooserLabel = new JLabel("Working directory:");
         cs.gridx = 0;
-        cs.gridy = 2;
+        cs.gridy = 1;
         cs.gridwidth = 1;
         panel.add(folderChooserLabel, cs);
 
         JTextField folderChooserTF = new JTextField(20);
         cs.gridx = 1;
-        cs.gridy = 2;
+        cs.gridy = 1;
         cs.gridwidth = 2;
         panel.add(folderChooserTF, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
         JButton chooseFolderBtn = new JButton("Choose");
         cs.gridx = 3;
-        cs.gridy = 2;
+        cs.gridy = 1;
         cs.gridwidth = 2;
         panel.add(chooseFolderBtn, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
@@ -104,13 +88,11 @@ public class SettingsDialog extends JDialog {
         JButton confirmBtn = new JButton("Confirm");
         confirmBtn.addActionListener((ActionListener) -> {
             this.ip = ipTextField.getText();
-            this.FSName = nameFSTextField.getText();
             this.directory = folderChooserTF.getText();
-            if (ip.equals("") || FSName.equals("") || directory.equals(""))
+            if (ip.equals("") || directory.equals(""))
                 showErrorMessage();
             else {
                 System.out.println("Selected ip = " + ip);
-                System.out.println("Selected FSName = " + FSName);
                 System.out.println("Selected directory = " + directory);
                 try {
                     //save the configurations
@@ -121,6 +103,7 @@ public class SettingsDialog extends JDialog {
                 }
                 //launch the main ui
                 dispose();
+                new MainUI();
             }
 
         });
@@ -133,14 +116,13 @@ public class SettingsDialog extends JDialog {
 
         pack();
         setResizable(false);
-        setLocationRelativeTo(parent);
+        setLocationRelativeTo(null);
 
         //load config
         try {
             loadConfig();
-            ipTextField.setText(propsToLoad.getProperty(Constants.IP_CONFIG));
-            nameFSTextField.setText(propsToLoad.getProperty(Constants.DFS_NAME_CONFIG));
-            folderChooserTF.setText(propsToLoad.getProperty(Constants.WORKING_DIR_CONFIG));
+            ipTextField.setText(props.getProperty(Constants.IP_FS_CONFIG));
+            folderChooserTF.setText(props.getProperty(Constants.WORKING_DIR_CONFIG));
         } catch (IOException e) {
             System.out.println("Properties doesn't exits.");
             System.out.println("Loading settings dialog");
@@ -155,22 +137,21 @@ public class SettingsDialog extends JDialog {
     }
 
     private void saveConfig() throws IOException {
-        Properties propsToSave = new Properties();
-        propsToSave.setProperty(Constants.IP_CONFIG, this.ip);
-        propsToSave.setProperty(Constants.DFS_NAME_CONFIG, this.FSName);
-        propsToSave.setProperty(Constants.WORKING_DIR_CONFIG, this.directory);
-
+        props.remove(Constants.DFS_NAME_CONFIG);
+        props.setProperty(Constants.IP_FS_CONFIG, this.ip);
+        props.setProperty(Constants.WORKING_DIR_CONFIG, this.directory);
+        //props.setProperty(Constants.IP_HOST_CONFIG, this.ipHost);
         OutputStream outputStream = new FileOutputStream(configFile);
-        propsToSave.store(outputStream, "DFS settings");
+        props.store(outputStream, "DFS settings");
         outputStream.close();
         System.out.println("Configuration saved");
+
     }
 
     private void loadConfig() throws IOException {
-        propsToLoad = new Properties();
+        props = new Properties();
         InputStream inputStream = new FileInputStream(configFile);
-        propsToLoad.load(inputStream);
+        props.load(inputStream);
         inputStream.close();
     }
-
 }

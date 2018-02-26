@@ -1,13 +1,13 @@
 package ui;
 
+import ui.dialog.SettingsDialog;
+import ui.utils.FileViewTableModel;
+
 import javax.swing.*;
-import javax.swing.filechooser.FileSystemView;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.io.File;
 
 public class MainUI extends JFrame {
 
@@ -18,14 +18,17 @@ public class MainUI extends JFrame {
 
     String[] files = {"Folder1", "Folder2", "File1"};
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            MainUI mainUI = new MainUI();
-        });
-    }
-
     public MainUI() {
         super("LR18 File System");
+
+
+        //"Creare" cartella file system se non è presente
+        //Guardare se ci sono già le configurazioni nel file system
+
+        //Se non è presente nessuna configurazione, eseguire primo nodo
+
+        //Se è presente
+
         //Create and show the main UI block
         setLocationRelativeTo(null);
         setSize(1000, 700);
@@ -34,7 +37,7 @@ public class MainUI extends JFrame {
         setVisible(true);
         this.setJMenuBar(createMenuBar());
 
-        logUI = new LogUI(this);
+
         System.out.println("Loading config");
 
         JPanel rightWrapper = new JPanel(new GridBagLayout());
@@ -58,7 +61,7 @@ public class MainUI extends JFrame {
         JScrollPane treeScroll = new JScrollPane(tree);
 
         //Table UI
-        MyTableModel model = new MyTableModel();
+        FileViewTableModel model = new FileViewTableModel();
         final JTable table = new JTable();
         table.setFillsViewportHeight(true);
         table.setTableHeader(null);
@@ -109,11 +112,12 @@ public class MainUI extends JFrame {
 
 
         //TODO: Enable the settings pop-up
-/*
-        SettingsDialog settingsDialog = new SettingsDialog(this);
-        settingsDialog.setVisible(true);
-*/
+
+
+
     }
+
+    public void drawUI() {}
 
 
     private JPanel createDetailsUI() {
@@ -322,7 +326,7 @@ public class MainUI extends JFrame {
         //Settings
         menuItem = new JMenuItem("Settings");
         menuItem.addActionListener((ActionListener) -> {
-            SettingsDialog settingsDialog = new SettingsDialog(this);
+            SettingsDialog settingsDialog = new SettingsDialog();
             settingsDialog.setVisible(true);
 
         });
@@ -390,83 +394,6 @@ public class MainUI extends JFrame {
         menuBar.add(navigateUp);
 
         return menuBar;
-    }
-}
-
-class MyTableModel extends AbstractTableModel {
-    private String[] columnNames = {"Icon", "File"};
-
-
-    private String[] columnData;
-
-    public void setColumnData(String[] columnData) {
-        this.columnData = columnData;
-    }
-
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    public int getRowCount() {
-        return columnData.length;
-    }
-
-    public String getColumnName(int col) {
-        return columnNames[col];
-    }
-
-    public Object getValueAt(int row, int col) {
-        switch (col) {
-            case 0:
-
-                return FileSystemView.getFileSystemView().getSystemIcon(new File("/home/marco/img"));
-
-            case 1:
-                return columnData[row];
-
-            default:
-                return "";
-        }
-    }
-
-    /*
-     * JTable uses this method to determine the default renderer/
-     * editor for each cell.  If we didn't implement this method,
-     * then the last column would contain text ("true"/"false"),
-     * rather than a check box.
-     */
-    public Class getColumnClass(int c) {
-        return getValueAt(0, c).getClass();
-    }
-
-    /*
-     * Don't need to implement this method unless your table's
-     * editable.
-     */
-    public boolean isCellEditable(int row, int col) {
-        //Note that the data/cell address is constant,
-        return false;
-    }
-
-    /*
-     * Don't need to implement this method unless your table's
-     * data can change.
-     */
-    public void setValueAt(Object value, int row, int col) {
-
-      /*  System.out.println("Setting value at " + row + "," + col
-                + " to " + value
-                + " (an instance of "
-                + value.getClass() + ")");
-
-
-        data[row][col] = value;
-        fireTableCellUpdated(row, col);
-
-
-        System.out.println("New value of data:");
-        printDebugData();*/
-
     }
 }
 

@@ -1,4 +1,4 @@
-package utility;
+package ui.utils;
 
 import javax.swing.*;
 import java.io.OutputStream;
