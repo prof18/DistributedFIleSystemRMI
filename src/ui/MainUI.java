@@ -1,10 +1,13 @@
 package ui;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.io.File;
 
 public class MainUI extends JFrame {
 
@@ -12,6 +15,8 @@ public class MainUI extends JFrame {
 
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel,
             ownerVLabel, lastEditVLabel;
+
+    String[] files = {"Folder1", "Folder2", "File1"};
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -35,27 +40,39 @@ public class MainUI extends JFrame {
         JPanel rightWrapper = new JPanel(new GridBagLayout());
 
         //File UI
-        JPanel filesUI = new JPanel();
-        filesUI.setBackground(Color.BLUE);
+        JPanel filesUI = new JPanel(new GridLayout());
         //File Details
         JPanel filesDetail = createDetailsUI();
-        //filesDetail.setBackground(Color.YELLOW);
         setLayout(new GridBagLayout());
+
         //Tree View
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("The Java Series");
         createNodes(top);
         JTree tree = new JTree(top);
         //Only One Selection
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
         tree.addTreeSelectionListener((TreeSelectionListener) -> {
             System.out.println("Item Selected");
         });
-
         tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
         JScrollPane treeScroll = new JScrollPane(tree);
 
+        //Table UI
+        MyTableModel model = new MyTableModel();
+        final JTable table = new JTable();
+        table.setFillsViewportHeight(true);
+        table.setTableHeader(null);
+        table.setModel(model);
+        model.setColumnData(files);
+        //Set width of the first column
+        TableColumn tableColumn = table.getColumnModel().getColumn(0);
+        tableColumn.setPreferredWidth(25);
+        tableColumn.setMaxWidth(25);
+        tableColumn.setMinWidth(25);
+        JScrollPane tableScroll = new JScrollPane(table);
+        filesUI.add(tableScroll);
+
+        //Constraints for the main UI
         GridBagConstraints globalCS = new GridBagConstraints();
         GridBagConstraints rwCS = new GridBagConstraints();
 
@@ -87,12 +104,17 @@ public class MainUI extends JFrame {
         globalCS.fill = GridBagConstraints.BOTH;
         add(rightWrapper, globalCS);
 
+        GridBagConstraints cs = new GridBagConstraints();
+        cs.fill = GridBagConstraints.BOTH;
+
+
         //TODO: Enable the settings pop-up
 /*
         SettingsDialog settingsDialog = new SettingsDialog(this);
         settingsDialog.setVisible(true);
 */
     }
+
 
     private JPanel createDetailsUI() {
 
@@ -359,6 +381,92 @@ public class MainUI extends JFrame {
         menu.add(menuItem);
         menuBar.add(menu);
 
+        //Navigate Folder Up
+        menuBar.add(Box.createHorizontalGlue());
+        JButton navigateUp = new JButton("Navigate Up");
+        navigateUp.addActionListener((ActionListener) -> {
+            System.out.println("Clicked Action Up");
+        });
+        menuBar.add(navigateUp);
+
         return menuBar;
     }
 }
+
+class MyTableModel extends AbstractTableModel {
+    private String[] columnNames = {"Icon", "File"};
+
+
+    private String[] columnData;
+
+    public void setColumnData(String[] columnData) {
+        this.columnData = columnData;
+    }
+
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    public int getRowCount() {
+        return columnData.length;
+    }
+
+    public String getColumnName(int col) {
+        return columnNames[col];
+    }
+
+    public Object getValueAt(int row, int col) {
+        switch (col) {
+            case 0:
+
+                return FileSystemView.getFileSystemView().getSystemIcon(new File("/home/marco/img"));
+
+            case 1:
+                return columnData[row];
+
+            default:
+                return "";
+        }
+    }
+
+    /*
+     * JTable uses this method to determine the default renderer/
+     * editor for each cell.  If we didn't implement this method,
+     * then the last column would contain text ("true"/"false"),
+     * rather than a check box.
+     */
+    public Class getColumnClass(int c) {
+        return getValueAt(0, c).getClass();
+    }
+
+    /*
+     * Don't need to implement this method unless your table's
+     * editable.
+     */
+    public boolean isCellEditable(int row, int col) {
+        //Note that the data/cell address is constant,
+        return false;
+    }
+
+    /*
+     * Don't need to implement this method unless your table's
+     * data can change.
+     */
+    public void setValueAt(Object value, int row, int col) {
+
+      /*  System.out.println("Setting value at " + row + "," + col
+                + " to " + value
+                + " (an instance of "
+                + value.getClass() + ")");
+
+
+        data[row][col] = value;
+        fireTableCellUpdated(row, col);
+
+
+        System.out.println("New value of data:");
+        printDebugData();*/
+
+    }
+}
+
