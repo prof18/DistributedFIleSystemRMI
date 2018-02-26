@@ -1,4 +1,6 @@
-import objects.Node;
+package test;
+
+import net.objects.Node;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;

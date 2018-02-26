@@ -1,5 +1,7 @@
-import connection.NodeImpl;
-import objects.Node;
+package test;
+
+import net.objects.NodeImpl;
+import net.objects.Node;
 
 import java.rmi.RemoteException;
 

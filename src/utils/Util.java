@@ -1,6 +1,6 @@
-package connection;
+package utils;
 
-import connection.NodeLocation;
+import net.objects.NodeLocation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +12,6 @@ public class Util {
         System.out.format("+------------+------------+----------+%n");
         System.out.format("| NameHost   | Ip         | Port     |%n");
         System.out.format("+------------+------------+----------+%n");
-        for (int i = 0; i < 5; i++) {
-
-        }
 
         for(Map.Entry<String,NodeLocation> entry:hashMap.entrySet()){
             System.out.format(leftAlignFormat,entry.getKey(),entry.getValue().getIp(),entry.getValue().getPort());

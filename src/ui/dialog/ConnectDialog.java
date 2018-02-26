@@ -1,8 +1,7 @@
 package ui.dialog;
 
-import connection.Connect;
-import ui.MainUI;
-import utility.Constants;
+import net.actions.Connect;
+import utils.Constants;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

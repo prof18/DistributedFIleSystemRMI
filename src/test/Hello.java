@@ -1,4 +1,4 @@
-package interfaces;
+package test;
 
 import java.io.Serializable;
 import java.rmi.Remote;

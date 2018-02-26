@@ -1,4 +1,4 @@
-import interfaces.Hello;
+package test;
 
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;

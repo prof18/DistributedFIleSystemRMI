@@ -1,6 +1,6 @@
-package connection;
+package net.objects;
 
-import objects.Node;
+import utils.Util;
 
 
 import java.rmi.AlreadyBoundException;
@@ -52,7 +52,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         System.out.println(registry);
         try {
             String host = "host" + node.getAndSetNum();
-            //connectedNodes.put(host, new connection.NodeLocation(ip, port));
+            //connectedNodes.put(host, new net.objects.NodeLocation(ip, port));
             System.out.println("created distributed fileSystem : " + args + " by host : " + host);
             System.out.println("with port : "+port+" and address "+ip);
             registry.rebind(connectPath, node);

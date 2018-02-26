@@ -1,6 +1,6 @@
-package interfaces;
+package fs.objects;
 
-import objects.FileAttribute;
+import fs.objects.FileAttribute;
 
 import java.io.Serializable;
 import java.rmi.Remote;

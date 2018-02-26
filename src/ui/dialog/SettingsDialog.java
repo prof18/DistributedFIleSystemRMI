@@ -1,6 +1,6 @@
 package ui.dialog;
 
-import utility.Constants;
+import utils.Constants;
 
 import javax.swing.*;
 import java.awt.*;

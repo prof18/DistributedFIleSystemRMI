@@ -1,4 +1,4 @@
-package objects;
+package fs.objects;
 
 import java.util.Date;
 

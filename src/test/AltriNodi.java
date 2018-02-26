@@ -1,6 +1,10 @@
-package connection;
+package test;
 
-import objects.Node;
+import net.objects.NodeImpl;
+import net.objects.NodeLocation;
+import utils.Util;
+import net.objects.Node;
+import net.objects.Wrap;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -8,9 +12,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Map;
 
-public class Connect {
-
-    public static void join(String ipMaster, String name, String ipHost) {
+public class AltriNodi {
+    public static void main(String[] args) {
         Node node = null;
         Wrap nodi=null;
         try {
@@ -21,7 +24,7 @@ public class Connect {
         }
         try {
             //modificare qui ipMaster e ipNode
-            nodi=node.join(ipMaster,name,ipHost);
+            nodi=node.join("10.8.0.4","file","localhost");
             System.out.println("mi sono aggiunto al filesystem");
             System.out.println("numero di nodi "+nodi.getNodes().size());
             Util.plot(nodi.getNodes());
@@ -53,5 +56,6 @@ public class Connect {
 
             }
         }
+
     }
 }

@@ -1,4 +1,4 @@
-package interfaces;
+package fs.objects;
 
 import java.io.Serializable;
 import java.rmi.Remote;

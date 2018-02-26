@@ -1,4 +1,4 @@
-package connection;
+package net.objects;
 
 import java.io.Serializable;
 import java.util.HashMap;

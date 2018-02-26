@@ -1,6 +1,4 @@
-package objects;
-
-import connection.Wrap;
+package net.objects;
 
 import java.io.Serializable;
 import java.rmi.Remote;
