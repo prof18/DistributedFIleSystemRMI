@@ -3,6 +3,7 @@ package ui.dialog;
 import net.actions.Create;
 import ui.MainUI;
 import utils.Constants;
+import utils.PropertiesHelper;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -17,11 +18,6 @@ public class CreateDialog extends JDialog {
     private String ip;
     private String fSName;
     private String directory;
-
-    private File configFile = new File("config.properties");
-    private Properties props;
-   // private String ipHost;
-
 
     public CreateDialog() {
 
@@ -100,13 +96,12 @@ public class CreateDialog extends JDialog {
                 System.out.println("Selected ip = " + ip);
                 System.out.println("Selected fSName = " + fSName);
                 System.out.println("Selected directory = " + directory);
-                try {
-                    //save the configurations
-                    saveConfig();
-                } catch (IOException e) {
-                    System.out.println("Unable to save properties file");
-                    e.printStackTrace();
-                }
+
+                PropertiesHelper.getInstance().writeConfig(Constants.IP_HOST_CONFIG, this.ip);
+                PropertiesHelper.getInstance().writeConfig(Constants.DFS_NAME_CONFIG, this.fSName);
+                PropertiesHelper.getInstance().writeConfig(Constants.WORKING_DIR_CONFIG, this.directory);
+                PropertiesHelper.getInstance().writeConfig(Constants.IP_FS_CONFIG, this.ip);
+
                 //launch the main ui
                 dispose();
 
@@ -127,18 +122,10 @@ public class CreateDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(null);
 
-        //load config
-        try {
-            loadConfig();
+        ip = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
+        nameFSTextField.setText(PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG));
+        folderChooserTF.setText(PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG));
 
-            ip = props.getProperty(Constants.IP_HOST_CONFIG);
-            nameFSTextField.setText(props.getProperty(Constants.DFS_NAME_CONFIG));
-            folderChooserTF.setText(props.getProperty(Constants.WORKING_DIR_CONFIG));
-
-        } catch (IOException e) {
-            System.out.println("Properties doesn't exits.");
-            System.out.println("Loading settings dialog");
-        }
     }
 
     private void showErrorMessage() {
@@ -147,24 +134,4 @@ public class CreateDialog extends JDialog {
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
     }
-
-    private void saveConfig() throws IOException {
-        props.setProperty(Constants.IP_HOST_CONFIG, this.ip);
-        props.setProperty(Constants.DFS_NAME_CONFIG, this.fSName);
-        props.setProperty(Constants.WORKING_DIR_CONFIG, this.directory);
-        props.setProperty(Constants.IP_FS_CONFIG, this.ip);
-        OutputStream outputStream = new FileOutputStream(configFile);
-        props.store(outputStream, "DFS settings");
-        outputStream.close();
-        System.out.println("Configuration saved");
-
-    }
-
-    private void loadConfig() throws IOException {
-        props = new Properties();
-        InputStream inputStream = new FileInputStream(configFile);
-        props.load(inputStream);
-        inputStream.close();
-    }
-
 }

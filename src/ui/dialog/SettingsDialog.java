@@ -1,6 +1,7 @@
 package ui.dialog;
 
 import utils.Constants;
+import utils.PropertiesHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,9 +13,6 @@ import java.util.Properties;
 public class SettingsDialog extends JDialog {
 
     private String ip;
-
-    private File configFile = new File("config.properties");
-    private Properties props;
 
     public SettingsDialog() {
 
@@ -50,23 +48,16 @@ public class SettingsDialog extends JDialog {
         JButton connectBtn = new JButton("Connect to FS");
         connectBtn.addActionListener((ActionListener) -> {
             this.ip = ipTextField.getText();
-             if (ip.equals(""))
+            if (ip.equals(""))
                 showErrorMessage();
             else {
                 System.out.println("Selected ip = " + ip);
-                  try {
-                    //save the configurations
-                    saveConfig();
-                } catch (IOException e) {
-                    System.out.println("Unable to save properties file");
-                    e.printStackTrace();
-                }
+                PropertiesHelper.getInstance().writeConfig(Constants.IP_HOST_CONFIG, ip);
                 //load connect dialog
-                 dispose();
-                 ConnectDialog connectDialog = new ConnectDialog();
-                 connectDialog.setVisible(true);
+                dispose();
+                ConnectDialog connectDialog = new ConnectDialog();
+                connectDialog.setVisible(true);
             }
-
         });
 
         //create button
@@ -77,21 +68,13 @@ public class SettingsDialog extends JDialog {
                 showErrorMessage();
             else {
                 System.out.println("Selected ip = " + ip);
-                try {
-                    //save the configurations
-                    saveConfig();
-                } catch (IOException e) {
-                    System.out.println("Unable to save properties file");
-                    e.printStackTrace();
-                }
+                PropertiesHelper.getInstance().writeConfig(Constants.IP_HOST_CONFIG, ip);
                 //load create dialog
                 dispose();
                 CreateDialog createDialog = new CreateDialog();
                 createDialog.setVisible(true);
             }
-
         });
-
 
         JPanel bp = new JPanel();
         bp.add(connectBtn);
@@ -104,14 +87,7 @@ public class SettingsDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(null);
 
-        //load config
-        try {
-            loadConfig();
-            ipTextField.setText(props.getProperty(Constants.IP_HOST_CONFIG));
-            } catch (IOException e) {
-            System.out.println("Properties doesn't exits.");
-            System.out.println("Loading settings dialog");
-        }
+        ipTextField.setText(PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG));
     }
 
     private void showErrorMessage() {
@@ -120,22 +96,4 @@ public class SettingsDialog extends JDialog {
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
     }
-
-    private void saveConfig() throws IOException {
-
-        props.setProperty(Constants.IP_HOST_CONFIG, this.ip);
-        OutputStream outputStream = new FileOutputStream(configFile);
-        props.store(outputStream, "DFS settings");
-        outputStream.close();
-        System.out.println("Configuration saved");
-
-    }
-
-    private void loadConfig() throws IOException {
-        props = new Properties();
-        InputStream inputStream = new FileInputStream(configFile);
-        props.load(inputStream);
-        inputStream.close();
-    }
-
 }

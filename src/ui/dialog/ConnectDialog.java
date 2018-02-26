@@ -2,6 +2,7 @@ package ui.dialog;
 
 import net.actions.Connect;
 import utils.Constants;
+import utils.PropertiesHelper;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -11,15 +12,12 @@ import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.Properties;
 
-public class ConnectDialog extends JDialog{
+public class ConnectDialog extends JDialog {
 
     private String ipFs;
     private String directory;
     private String fSName;
     private String ipHost;
-
-    private File configFile = new File("config.properties");
-    private Properties props;
 
     public ConnectDialog() {
 
@@ -106,25 +104,23 @@ public class ConnectDialog extends JDialog{
             this.ipFs = ipTextField.getText();
             this.fSName = nameFSTextField.getText();
             this.directory = folderChooserTF.getText();
-            if (ipFs.equals("") || fSName.equals("") ||directory.equals(""))
+            if (ipFs.equals("") || fSName.equals("") || directory.equals(""))
                 showErrorMessage();
             else {
                 System.out.println("Selected ipFs = " + ipFs);
                 System.out.println("Selected fSName = " + fSName);
                 System.out.println("Selected directory = " + directory);
-                try {
-                    //save the configurations
-                    saveConfig();
-                } catch (IOException e) {
-                    System.out.println("Unable to save properties file");
-                    e.printStackTrace();
-                }
+
+                PropertiesHelper.getInstance().writeConfig(Constants.DFS_NAME_CONFIG, this.fSName);
+                PropertiesHelper.getInstance().writeConfig(Constants.IP_FS_CONFIG, this.ipFs);
+                PropertiesHelper.getInstance().writeConfig(Constants.WORKING_DIR_CONFIG, this.directory);
+
                 //launch the main ui
                 dispose();
 
-                Connect.join(ipFs,fSName,ipHost);
+                Connect.join(ipFs, fSName, ipHost);
 
-               // new MainUI();
+                // new MainUI();
             }
 
         });
@@ -139,17 +135,14 @@ public class ConnectDialog extends JDialog{
         setResizable(false);
         setLocationRelativeTo(null);
 
+
         //load config
-        try {
-            loadConfig();
-            ipHost = props.getProperty(Constants.IP_HOST_CONFIG);
-            ipTextField.setText(props.getProperty(Constants.IP_FS_CONFIG));
-            nameFSTextField.setText(props.getProperty(Constants.DFS_NAME_CONFIG));
-            folderChooserTF.setText(props.getProperty(Constants.WORKING_DIR_CONFIG));
-        } catch (IOException e) {
-            System.out.println("Properties doesn't exits.");
-            System.out.println("Loading settings dialog");
-        }
+
+        ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
+        ipTextField.setText(PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG));
+        nameFSTextField.setText(PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG));
+        folderChooserTF.setText(PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG));
+
     }
 
     private void showErrorMessage() {
@@ -157,24 +150,5 @@ public class ConnectDialog extends JDialog{
                 "You have to provide some info to go forward",
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
-    }
-
-    private void saveConfig() throws IOException {
-        props.setProperty(Constants.DFS_NAME_CONFIG, this.fSName);
-        props.setProperty(Constants.IP_FS_CONFIG, this.ipFs);
-        props.setProperty(Constants.WORKING_DIR_CONFIG, this.directory);
-        //props.setProperty(Constants.IP_HOST_CONFIG, this.ipHost);
-        OutputStream outputStream = new FileOutputStream(configFile);
-        props.store(outputStream, "DFS settings");
-        outputStream.close();
-        System.out.println("Configuration saved");
-
-    }
-
-    private void loadConfig() throws IOException {
-        props = new Properties();
-        InputStream inputStream = new FileInputStream(configFile);
-        props.load(inputStream);
-        inputStream.close();
     }
 }
