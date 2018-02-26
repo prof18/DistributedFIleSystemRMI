@@ -34,7 +34,6 @@ public class PropertiesHelper {
             InputStream inputStream = new FileInputStream(propFile);
             props.load(inputStream);
             inputStream.close();
-            System.out.println(props.getProperty(key));
             return props.getProperty(key);
         } catch (IOException e) {
             System.out.println("Config not found");

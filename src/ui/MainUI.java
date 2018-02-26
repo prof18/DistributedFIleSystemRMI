@@ -4,6 +4,9 @@ import ui.dialog.SettingsDialog;
 import ui.utils.FileViewTableModel;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.plaf.BorderUIResource;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
@@ -66,8 +69,10 @@ public class MainUI extends JFrame {
         table.setFillsViewportHeight(true);
         table.setTableHeader(null);
         table.setModel(model);
+        table.setRowHeight(table.getRowHeight() + 8);
         model.setColumnData(files);
-        //Set width of the first column
+        table.setShowGrid(false);
+         //Set width of the first column
         TableColumn tableColumn = table.getColumnModel().getColumn(0);
         tableColumn.setPreferredWidth(25);
         tableColumn.setMaxWidth(25);
@@ -386,5 +391,7 @@ public class MainUI extends JFrame {
 
         return menuBar;
     }
+
+
 }
 
