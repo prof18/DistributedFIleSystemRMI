@@ -1,10 +1,10 @@
 package test;
 
+import net.objects.Node;
 import net.objects.NodeImpl;
 import net.objects.NodeLocation;
-import utils.Util;
-import net.objects.Node;
 import net.objects.Wrap;
+import utils.Util;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -24,7 +24,7 @@ public class AltriNodi {
         }
         try {
             //modificare qui ipMaster e ipNode
-            nodi=node.join("10.8.0.4","file","localhost");
+            nodi = node.join("localhost", "prova", "localhost");
             System.out.println("mi sono aggiunto al filesystem");
             System.out.println("numero di nodi "+nodi.getNodes().size());
             Util.plot(nodi.getNodes());
