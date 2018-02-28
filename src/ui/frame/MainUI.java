@@ -1,12 +1,10 @@
-package ui;
+package ui.frame;
 
 import ui.dialog.SettingsDialog;
+import ui.frame.LogUI;
 import ui.utils.FileViewTableModel;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.plaf.BorderUIResource;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
@@ -24,27 +22,14 @@ public class MainUI extends JFrame {
     public MainUI() {
         super("LR18 File System");
 
-
-        //"Creare" cartella file system se non è presente
-        //Guardare se ci sono già le configurazioni nel file system
-
-        //Se non è presente nessuna configurazione, eseguire primo nodo
-
-        //Se è presente
-
         //Create and show the main UI block
-        setLocationRelativeTo(null);
         setSize(1000, 700);
-        setVisible(true);
         setLocationRelativeTo(null);
         setVisible(true);
+
         this.setJMenuBar(createMenuBar());
 
-
-        System.out.println("Loading config");
-
         JPanel rightWrapper = new JPanel(new GridBagLayout());
-
         //File UI
         JPanel filesUI = new JPanel(new GridLayout());
         //File Details
@@ -304,6 +289,7 @@ public class MainUI extends JFrame {
         JMenuItem menuItem = new JMenuItem("Open");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked Open");
+            EditFileUI editFileUI = new EditFileUI(this);
         });
         menu.add(menuItem);
         //New File

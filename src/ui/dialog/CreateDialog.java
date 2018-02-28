@@ -1,7 +1,6 @@
 package ui.dialog;
 
-import net.actions.Create;
-import ui.MainUI;
+import ui.frame.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
 
@@ -10,8 +9,6 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.*;
-import java.util.Properties;
 
 public class CreateDialog extends JDialog {
 

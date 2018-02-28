@@ -1,4 +1,4 @@
-import ui.LogUI;
+import ui.frame.LogUI;
 import ui.dialog.SettingsDialog;
 
 import javax.swing.*;
