@@ -8,8 +8,10 @@ public class ExecuteAll {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
+
             if (Constants.OUT_TO_UI)
                 new LogUI();
+
             SettingsDialog settingsDialog = new SettingsDialog();
             settingsDialog.setVisible(true);
         });
