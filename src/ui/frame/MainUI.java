@@ -292,12 +292,22 @@ public class MainUI extends JFrame {
             EditFileUI editFileUI = new EditFileUI(this);
         });
         menu.add(menuItem);
-        //New File
-        menuItem = new JMenuItem("New File");
+        //New File Submenu
+        JMenu submenu = new JMenu("New File");
+        //New
+        menuItem = new JMenuItem("New");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New File");
+            System.out.println("Clicked New");
         });
-        menu.add(menuItem);
+        submenu.add(menuItem);
+       //Load
+        menuItem = new JMenuItem("Load");
+        menuItem.addActionListener((ActionListener) -> {
+            System.out.println("Clicked Load");
+        });
+        submenu.add(menuItem);
+        menu.add(submenu);
+
         //New Folder
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
