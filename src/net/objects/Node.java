@@ -3,6 +3,7 @@ package net.objects;
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 
 public interface Node extends Remote, Serializable {
 
@@ -23,4 +24,10 @@ public interface Node extends Remote, Serializable {
     String saluta() throws RemoteException;
 
     int getFreePort(String ipNode) throws RemoteException;
+
+    String getHostName()throws RemoteException;
+
+    HashMap<String, NodeLocation> getHashMap()throws RemoteException;
+
+    void updateCoNodes(HashMap<String, NodeLocation> coNodes)throws RemoteException;
 }

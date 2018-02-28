@@ -2,7 +2,6 @@ package net.objects;
 
 import utils.Util;
 
-
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -10,12 +9,16 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NodeImpl extends UnicastRemoteObject implements Node {
 
     private int num = 0;
+
+    private String hostName = " --num host not update --";
+
     //<host,ip>
     private HashMap<String, NodeLocation> connectedNodes;
 
@@ -26,8 +29,8 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
     }
 
     //in caso di porta occupata viene creato il registro nella porta successiva
-    public void create(String args,String ip, String fsName) {
-        System.setProperty("java.rmi.server.hostname",ip);
+    public void create(String args, String ip, String fsName) {
+        System.setProperty("java.rmi.server.hostname", ip);
         int port = 1099;
         Node node = null;
         try {
@@ -37,13 +40,13 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             System.exit(-1);
         }
         Registry registry = null;
-        boolean portNotFound=true;
-        while(portNotFound){
+        boolean portNotFound = true;
+        while (portNotFound) {
             try {
                 registry = LocateRegistry.createRegistry(port);
-                portNotFound=false;
+                portNotFound = false;
             } catch (RemoteException e) {
-                System.out.println(port+" porta occupata");
+                System.out.println(port + " porta occupata");
                 port++;
             }
         }
@@ -54,27 +57,27 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             String host = "host" + node.getAndSetNum();
             //connectedNodes.put(host, new net.objects.NodeLocation(ip, port));
             System.out.println("created distributed fileSystem : " + args + " by host : " + host);
-            System.out.println("with port : "+port+" and address "+ip);
+            System.out.println("with port : " + port + " and address " + ip);
             registry.rebind(connectPath, node);
 
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);
         }
-        firstJoin(ip,port,connectPath, fsName);
+        firstJoin(ip, port, connectPath, fsName);
     }
 
-    public void firstJoin(String ip,int port,String path, String fsName){
-        Registry registry=null;
+    public void firstJoin(String ip, int port, String path, String fsName) {
+        Registry registry = null;
         try {
-            registry=LocateRegistry.getRegistry(ip,port);
+            registry = LocateRegistry.getRegistry(ip, port);
         } catch (RemoteException e) {
             System.out.println("[First Join] : there is not node in this position");
             System.exit(-1);
         }
         try {
-            Node node=(Node)registry.lookup(path);
-            node.fistAdd(ip,port,fsName);
+            Node node = (Node) registry.lookup(path);
+            node.fistAdd(ip, port, fsName);
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -84,11 +87,10 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         }
 
 
-
     }
 
-    public void fistAdd(String ip,int port,String name){
-        connectedNodes.put(name,new NodeLocation(ip,port));
+    public void fistAdd(String ip, int port, String name) {
+        connectedNodes.put(name, new NodeLocation(ip, port));
         System.out.println("Fatto il primo Add");
         Util.plot(connectedNodes);
     }
@@ -99,22 +101,32 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         return temp;
     }
 
+
     @Override
     public Wrap join(String ipMaster, String name, String ipNode) throws RemoteException {
-        String path = "rmi://" + ipMaster + ":"+1099+"/" + name;
+        // TODO: modificare la porta
+
+        String path = "rmi://" + ipMaster + ":" + 1099 + "/" + name;
         System.out.println(path);
+
+        // TODO: getregistry aggiungere porta
         Registry registry = LocateRegistry.getRegistry(ipMaster);
         Node master = null;
         try {
             master = (Node) registry.lookup(path);
         } catch (NotBoundException e) {
-            System.out.println("there is not node at this address : "+ipMaster+" with this name : "+name);
+            System.out.println("there is not node at this address : " + ipMaster + " with this name : " + name);
             System.exit(-1);
         }
         int portNode = this.getFreePort(ipNode);
         Wrap ret = master.add(ipNode, portNode);
+
+        // aggiorna hostName?
+
+        this.hostName = ret.getOwnNode();
+
         this.bind(ipNode, ret.getOwnNode(), portNode);
-        System.out.println("ho fatto il binding al nodo: "+ipNode+" con nome : "+ret.getOwnNode()+" "+portNode);
+        System.out.println("ho fatto il binding al nodo: " + ipNode + " con nome : " + ret.getOwnNode() + " " + portNode);
         System.out.println("stampa dei nodi");
         System.out.println("[JOIN] -> plot connected nodes");
         Util.plot(connectedNodes);
@@ -147,7 +159,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
                 System.exit(-1);
             }
         }
-        String connectPath = "rmi://" + ip +":"+port+ "/" + nome;
+        String connectPath = "rmi://" + ip + ":" + port + "/" + nome;
         try {
             registry.bind(connectPath, this);
         } catch (RemoteException e) {
@@ -157,14 +169,61 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             e.printStackTrace();
             System.exit(-1);
         }
-        System.out.println("Bind: binding eseguito : "+connectPath);
+        System.out.println("Bind: binding eseguito : " + connectPath);
 
     }
 
 
-
     public String saluta() {
+        System.out.println("ho salutato");
         return "ciao bello, noi possiamo comunicare";
+    }
+
+    public HashMap<String, NodeLocation> getHashMap() {
+        return connectedNodes;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+
+    public void updateCoNodes(HashMap<String, NodeLocation> coNodes) {
+
+        for (Map.Entry<String, NodeLocation> entry : coNodes.entrySet()) {
+
+            for (Map.Entry<String, NodeLocation> entry2 : connectedNodes.entrySet()) {
+
+                if (!entry.getKey().equals(entry2.getKey())) {
+
+                    System.out.println("Aggiungo il nodo : " + entry.getKey().toString() + "ai connectedNodes di : " + hostName);
+
+                    connectedNodes.put(entry.getKey(), entry.getValue());
+
+                    System.out.println("Comunicazione con : " + entry.getValue().toString());
+                    Registry registry = null;
+                    try {
+                        registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
+                        String path = entry.getValue().toUrl() + entry.getKey();
+                        System.out.println(path);
+                        Node nodeTemp = (Node) registry.lookup(path);
+                        System.out.println(hostName + " saluta : " + nodeTemp.getHostName() + "--" + nodeTemp.saluta());
+                    } catch (RemoteException e) {
+                        System.out.println("problema strano");
+
+                    } catch (NotBoundException e) {
+                        System.out.println("non trovato errore");
+
+                    }
+
+                }
+
+
+            }
+
+        }
+
+
     }
 
     public int getFreePort(String ipNode) {
@@ -185,15 +244,14 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
                         System.out.println(port);
                     }
                 }
-                if (lista.length == 0){
-                    haveEnought=false;
-                }
-                else {
+                if (lista.length == 0) {
+                    haveEnought = false;
+                } else {
                     port++;
                 }
 
             } catch (RemoteException e) {
-                haveEnought=false;
+                haveEnought = false;
             }
 
             System.out.println("la prima porta libera è : " + port);

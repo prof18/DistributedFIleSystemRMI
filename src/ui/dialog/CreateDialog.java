@@ -102,7 +102,7 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
-              //  Create.create(ip, fSName);
+                Create.create(ip, fSName);
 
                 new MainUI();
             }

@@ -16,7 +16,7 @@ public class Connect {
 
     public static void join(String ipMaster, String name, String ipHost) {
         Node node = null;
-        Wrap nodi=null;
+        Wrap nodi = null;
         try {
             node = new NodeImpl();
         } catch (RemoteException e) {
@@ -25,9 +25,9 @@ public class Connect {
         }
         try {
             //modificare qui ipMaster e ipNode
-            nodi=node.join(ipMaster,name,ipHost);
+            nodi = node.join(ipMaster, name, ipHost);
             System.out.println("mi sono aggiunto al filesystem");
-            System.out.println("numero di nodi "+nodi.getNodes().size());
+            System.out.println("numero di nodi " + nodi.getNodes().size());
             Util.plot(nodi.getNodes());
             System.out.println();
             System.out.println();
@@ -35,18 +35,22 @@ public class Connect {
             e.printStackTrace();
             System.exit(-1);
         }
-        System.out.println("sono il nodo : "+nodi.getOwnNode());
+        System.out.println("sono il nodo : " + nodi.getOwnNode());
         System.out.println("cosa vuoi fare ...");
-        for(Map.Entry<String, NodeLocation> entry:nodi.getNodes().entrySet()){
-            if(entry.getKey()!=nodi.getOwnNode()){
-                System.out.println("Comunicazione con : "+entry.getValue().toString());
-                Registry registry= null;
+        for (Map.Entry<String, NodeLocation> entry : nodi.getNodes().entrySet()) {
+            if (!entry.getKey().equals(nodi.getOwnNode())) {
+                System.out.println("Comunicazione con : " + entry.getValue().toString());
+                Registry registry = null;
                 try {
-                    registry = LocateRegistry.getRegistry(entry.getValue().getIp(),entry.getValue().getPort());
-                    String path=entry.getValue().toUrl()+entry.getKey();
+                    registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
+                    String path = entry.getValue().toUrl() + entry.getKey();
                     System.out.println(path);
-                    node = (Node) registry.lookup(path);
-                    System.out.println(node.saluta());
+                    Node nodeTemp = (Node) registry.lookup(path);
+                    System.out.println(nodeTemp.saluta());
+
+                    System.out.println("Aggiorno i connectedNodes del nodeTemp");
+                    nodeTemp.updateCoNodes(node.getHashMap());
+
                 } catch (RemoteException e) {
                     System.out.println("problema strano");
 
