@@ -175,6 +175,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
 
 
     public String saluta() {
+        System.out.println("ho salutato");
         return "ciao bello, noi possiamo comunicare";
     }
 
