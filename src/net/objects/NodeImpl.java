@@ -104,6 +104,8 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
 
     @Override
     public Wrap join(String ipMaster, String name, String ipNode) throws RemoteException {
+
+        System.setProperty("java.rmi.server.hostname", ipNode);
         // TODO: modificare la porta
 
         String path = "rmi://" + ipMaster + ":" + 1099 + "/" + name;
