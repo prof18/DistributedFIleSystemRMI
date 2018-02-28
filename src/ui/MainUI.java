@@ -22,7 +22,7 @@ public class MainUI extends JFrame {
     String[] files = {"Folder1", "Folder2", "File1"};
 
     public MainUI() {
-        super("LR18 File System");
+        super("LR18 FileA System");
 
 
         //"Creare" cartella file system se non è presente
@@ -45,9 +45,9 @@ public class MainUI extends JFrame {
 
         JPanel rightWrapper = new JPanel(new GridBagLayout());
 
-        //File UI
+        //FileA UI
         JPanel filesUI = new JPanel(new GridLayout());
-        //File Details
+        //FileA Details
         JPanel filesDetail = createDetailsUI();
         setLayout(new GridBagLayout());
 
@@ -122,8 +122,8 @@ public class MainUI extends JFrame {
         GridBagConstraints cs = new GridBagConstraints();
         cs.insets = new Insets(5, 10, 5, 70);
 
-        //File Name
-        JLabel fileNameLabel = new JLabel("File Name: ");
+        //FileA Name
+        JLabel fileNameLabel = new JLabel("FileA Name: ");
         fileNameLabel.setOpaque(true);
         cs.gridx = 0;
         cs.gridy = 0;
@@ -154,8 +154,8 @@ public class MainUI extends JFrame {
         cs.gridy = 2;
         filesDetail.add(pathVLabel, cs);
 
-        //File Size
-        JLabel fileSizeLabel = new JLabel("File Size: ");
+        //FileA Size
+        JLabel fileSizeLabel = new JLabel("FileA Size: ");
         cs.gridx = 0;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel, cs);
@@ -186,8 +186,8 @@ public class MainUI extends JFrame {
 
         //Second Column
 
-        //File Name
-        JLabel fileNameLabel1 = new JLabel("File Name: ");
+        //FileA Name
+        JLabel fileNameLabel1 = new JLabel("FileA Name: ");
         cs.gridx = 2;
         cs.gridy = 0;
         filesDetail.add(fileNameLabel1, cs);
@@ -216,8 +216,8 @@ public class MainUI extends JFrame {
         cs.gridy = 2;
         filesDetail.add(pathVLabel, cs);
 
-        //File Size
-        JLabel fileSizeLabel1 = new JLabel("File Size: ");
+        //FileA Size
+        JLabel fileSizeLabel1 = new JLabel("FileA Size: ");
         cs.gridx = 2;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel1, cs);
@@ -298,18 +298,18 @@ public class MainUI extends JFrame {
         //Create the menu bar.
         JMenuBar menuBar = new JMenuBar();
 
-        //File Menu.
-        JMenu menu = new JMenu("File");
+        //FileA Menu.
+        JMenu menu = new JMenu("FileA");
         //Open
         JMenuItem menuItem = new JMenuItem("Open");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked Open");
         });
         menu.add(menuItem);
-        //New File
-        menuItem = new JMenuItem("New File");
+        //New FileA
+        menuItem = new JMenuItem("New FileA");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New File");
+            System.out.println("Clicked New FileA");
         });
         menu.add(menuItem);
         //New Folder

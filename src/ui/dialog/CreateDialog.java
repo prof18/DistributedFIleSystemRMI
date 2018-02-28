@@ -37,7 +37,7 @@ public class CreateDialog extends JDialog {
         cs.fill = GridBagConstraints.HORIZONTAL;
 
         //file system name
-        JLabel nameFSLabel = new JLabel("File System Name: ");
+        JLabel nameFSLabel = new JLabel("FileA System Name: ");
         cs.gridx = 0;
         cs.gridy = 0;
         cs.gridwidth = 1;

@@ -1,19 +1,20 @@
 package fs.objects;
 
-import fs.objects.FileAttribute;
-
+import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.Remote;
 
 public interface FlatService extends Remote, Serializable {
 
-    Object read(String fileID, int i, int n);
+    byte[] read(String fileID, int i, int n);
 
-    void write(String fileID, int i, Object data);
+    byte[] read(String fileId, int offset);
 
-    String Create();
+    void write(String fileID, int i, int count, byte[] data);
 
-    void Delete(String fileID);
+    String create(String dir, String name, FileAttribute attribute);
+
+    void delete(String fileID);
 
     FileAttribute getAttributes(String fileID);
 
