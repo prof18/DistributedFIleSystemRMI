@@ -210,11 +210,11 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
                         System.out.println(hostName + " saluta : " + nodeTemp.getHostName() + "--" + nodeTemp.saluta());
                     } catch (RemoteException e) {
                         e.printStackTrace();
-                        System.out.println("problema strano");
+                        System.out.println("problema strano2");
 
                     } catch (NotBoundException e) {
                         e.printStackTrace();
-                        System.out.println("non trovato errore");
+                        System.out.println("non trovato errore2");
 
                     }
 

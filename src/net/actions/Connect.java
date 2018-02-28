@@ -52,10 +52,12 @@ public class Connect {
                     nodeTemp.updateCoNodes(node.getHashMap());
 
                 } catch (RemoteException e) {
-                    System.out.println("problema strano");
+                    System.out.println("problema strano1");
+                    e.printStackTrace();
 
                 } catch (NotBoundException e) {
-                    System.out.println("non trovato errore");
+                    System.out.println("non trovato errore1");
+                    e.printStackTrace();
 
                 }
 
