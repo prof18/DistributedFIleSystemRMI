@@ -71,6 +71,7 @@ public class ConnectDialog extends JDialog {
         panel.add(folderChooserLabel, cs);
 
         JTextField folderChooserTF = new JTextField(20);
+        folderChooserTF.setEditable(false);
         cs.gridx = 1;
         cs.gridy = 2;
         cs.gridwidth = 2;

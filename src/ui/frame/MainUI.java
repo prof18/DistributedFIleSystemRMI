@@ -1,5 +1,6 @@
 package ui.frame;
 
+import ui.dialog.LoadFileDialog;
 import ui.dialog.SettingsDialog;
 import ui.frame.LogUI;
 import ui.utils.FileViewTableModel;
@@ -57,7 +58,7 @@ public class MainUI extends JFrame {
         table.setRowHeight(table.getRowHeight() + 8);
         model.setColumnData(files);
         table.setShowGrid(false);
-         //Set width of the first column
+        //Set width of the first column
         TableColumn tableColumn = table.getColumnModel().getColumn(0);
         tableColumn.setPreferredWidth(25);
         tableColumn.setMaxWidth(25);
@@ -297,13 +298,16 @@ public class MainUI extends JFrame {
         //New
         menuItem = new JMenuItem("New");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New");
+            String fileName = JOptionPane.showInputDialog("File Name:");
+            System.out.println("File: " + fileName + " created");
+
         });
         submenu.add(menuItem);
-       //Load
+        //Load
         menuItem = new JMenuItem("Load");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked Load");
+            new LoadFileDialog();
         });
         submenu.add(menuItem);
         menu.add(submenu);
@@ -311,14 +315,14 @@ public class MainUI extends JFrame {
         //New Folder
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New Folder");
+            String folderName = JOptionPane.showInputDialog("Folder Name:");
         });
         menu.add(menuItem);
         menu.addSeparator();
         //Settings
         menuItem = new JMenuItem("Settings");
         menuItem.addActionListener((ActionListener) -> {
-            SettingsDialog settingsDialog = new SettingsDialog();
+            SettingsDialog settingsDialog = new SettingsDialog(false);
             settingsDialog.setVisible(true);
 
         });

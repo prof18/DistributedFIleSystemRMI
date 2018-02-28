@@ -12,7 +12,7 @@ public class ExecuteAll {
             if (Constants.OUT_TO_UI)
                 new LogUI();
 
-            SettingsDialog settingsDialog = new SettingsDialog();
+            SettingsDialog settingsDialog = new SettingsDialog(true);
             settingsDialog.setVisible(true);
         });
     }

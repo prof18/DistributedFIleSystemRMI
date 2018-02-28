@@ -1,5 +1,6 @@
 package ui.dialog;
 
+import net.actions.Create;
 import ui.frame.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -55,6 +56,7 @@ public class CreateDialog extends JDialog {
         panel.add(folderChooserLabel, cs);
 
         JTextField folderChooserTF = new JTextField(20);
+        folderChooserTF.setEditable(false);
         cs.gridx = 1;
         cs.gridy = 1;
         cs.gridwidth = 2;
@@ -102,7 +104,7 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
-                Create.create(ip, fSName);
+                //Create.create(ip, fSName);
 
                 new MainUI();
             }
