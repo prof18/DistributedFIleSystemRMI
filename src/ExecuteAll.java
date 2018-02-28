@@ -7,7 +7,7 @@ public class ExecuteAll {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new LogUI();
+            //new LogUI();
             SettingsDialog settingsDialog = new SettingsDialog();
             settingsDialog.setVisible(true);
         });

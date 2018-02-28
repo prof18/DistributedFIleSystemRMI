@@ -25,9 +25,9 @@ public interface Node extends Remote, Serializable {
 
     int getFreePort(String ipNode) throws RemoteException;
 
-    String getHostName();
+    String getHostName()throws RemoteException;
 
-    HashMap<String, NodeLocation> getHashMap();
+    HashMap<String, NodeLocation> getHashMap()throws RemoteException;
 
-    void updateCoNodes(HashMap<String, NodeLocation> coNodes);
+    void updateCoNodes(HashMap<String, NodeLocation> coNodes)throws RemoteException;
 }
