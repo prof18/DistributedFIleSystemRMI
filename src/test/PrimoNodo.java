@@ -1,7 +1,7 @@
 package test;
 
-import net.objects.NodeImpl;
 import net.objects.Node;
+import net.objects.NodeImpl;
 
 import java.rmi.RemoteException;
 
@@ -16,7 +16,7 @@ public class PrimoNodo {
         }
         try {
             //modificare questo ip
-            node.create("file", "10.8.0.4","");
+            node.create("file", "10.8.0.4", "LR18");
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);

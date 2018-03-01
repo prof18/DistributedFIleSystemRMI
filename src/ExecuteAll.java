@@ -1,5 +1,6 @@
 import ui.LogUI;
 import ui.dialog.SettingsDialog;
+import utils.Constants;
 
 import javax.swing.*;
 
@@ -7,7 +8,10 @@ public class ExecuteAll {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new LogUI();
+
+            if (Constants.OUT_TO_UI)
+                new LogUI();
+
             SettingsDialog settingsDialog = new SettingsDialog();
             settingsDialog.setVisible(true);
         });
