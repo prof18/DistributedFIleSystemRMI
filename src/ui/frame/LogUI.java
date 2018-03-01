@@ -1,6 +1,6 @@
 package ui.frame;
 
-import ui.utils.CustomOutputStream;
+import ui.utility.CustomOutputStream;
 
 import javax.swing.*;
 import java.awt.*;

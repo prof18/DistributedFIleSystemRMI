@@ -50,7 +50,7 @@ public class ConnectDialog extends JDialog {
         panel.add(ipTextField, cs);
 
         //file system name
-        JLabel nameFSLabel = new JLabel("File System Name: ");
+        JLabel nameFSLabel = new JLabel("FileWrapper System Name: ");
         cs.gridx = 0;
         cs.gridy = 1;
         cs.gridwidth = 1;

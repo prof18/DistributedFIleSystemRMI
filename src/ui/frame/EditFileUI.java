@@ -1,5 +1,7 @@
 package ui.frame;
 
+import ui.MainUI;
+
 import javax.swing.*;
 import java.awt.*;
 

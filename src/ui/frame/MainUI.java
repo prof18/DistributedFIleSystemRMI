@@ -1,9 +1,7 @@
-package ui.frame;
+package ui;
 
-import ui.dialog.LoadFileDialog;
 import ui.dialog.SettingsDialog;
-import ui.frame.LogUI;
-import ui.utils.FileViewTableModel;
+import ui.utility.FileViewTableModel;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -21,19 +19,32 @@ public class MainUI extends JFrame {
     String[] files = {"Folder1", "Folder2", "File1"};
 
     public MainUI() {
-        super("LR18 File System");
+        super("LR18 FileWrapper System");
+
+
+        //"Creare" cartella file system se non è presente
+        //Guardare se ci sono già le configurazioni nel file system
+
+        //Se non è presente nessuna configurazione, eseguire primo nodo
+
+        //Se è presente
 
         //Create and show the main UI block
-        setSize(1000, 700);
+        setLocationRelativeTo(null);
+        setSize(1050, 700);
+        setVisible(true);
         setLocationRelativeTo(null);
         setVisible(true);
-
         this.setJMenuBar(createMenuBar());
 
+
+        System.out.println("Loading config");
+
         JPanel rightWrapper = new JPanel(new GridBagLayout());
-        //File UI
+
+        //FileWrapper UI
         JPanel filesUI = new JPanel(new GridLayout());
-        //File Details
+        //FileWrapper Details
         JPanel filesDetail = createDetailsUI();
         setLayout(new GridBagLayout());
 
@@ -58,7 +69,7 @@ public class MainUI extends JFrame {
         table.setRowHeight(table.getRowHeight() + 8);
         model.setColumnData(files);
         table.setShowGrid(false);
-        //Set width of the first column
+         //Set width of the first column
         TableColumn tableColumn = table.getColumnModel().getColumn(0);
         tableColumn.setPreferredWidth(25);
         tableColumn.setMaxWidth(25);
@@ -108,8 +119,8 @@ public class MainUI extends JFrame {
         GridBagConstraints cs = new GridBagConstraints();
         cs.insets = new Insets(5, 10, 5, 70);
 
-        //File Name
-        JLabel fileNameLabel = new JLabel("File Name: ");
+        //FileWrapper Name
+        JLabel fileNameLabel = new JLabel("Name: ");
         fileNameLabel.setOpaque(true);
         cs.gridx = 0;
         cs.gridy = 0;
@@ -140,8 +151,8 @@ public class MainUI extends JFrame {
         cs.gridy = 2;
         filesDetail.add(pathVLabel, cs);
 
-        //File Size
-        JLabel fileSizeLabel = new JLabel("File Size: ");
+        //FileWrapper Size
+        JLabel fileSizeLabel = new JLabel("Size: ");
         cs.gridx = 0;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel, cs);
@@ -172,8 +183,8 @@ public class MainUI extends JFrame {
 
         //Second Column
 
-        //File Name
-        JLabel fileNameLabel1 = new JLabel("File Name: ");
+        //FileWrapper Name
+        JLabel fileNameLabel1 = new JLabel("Name: ");
         cs.gridx = 2;
         cs.gridy = 0;
         filesDetail.add(fileNameLabel1, cs);
@@ -202,8 +213,8 @@ public class MainUI extends JFrame {
         cs.gridy = 2;
         filesDetail.add(pathVLabel, cs);
 
-        //File Size
-        JLabel fileSizeLabel1 = new JLabel("File Size: ");
+        //FileWrapper Size
+        JLabel fileSizeLabel1 = new JLabel("Size: ");
         cs.gridx = 2;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel1, cs);
@@ -284,45 +295,31 @@ public class MainUI extends JFrame {
         //Create the menu bar.
         JMenuBar menuBar = new JMenuBar();
 
-        //File Menu.
-        JMenu menu = new JMenu("File");
+        //FileWrapper Menu.
+        JMenu menu = new JMenu("FileWrapper");
         //Open
         JMenuItem menuItem = new JMenuItem("Open");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked Open");
-            EditFileUI editFileUI = new EditFileUI(this);
         });
         menu.add(menuItem);
-        //New File Submenu
-        JMenu submenu = new JMenu("New File");
-        //New
-        menuItem = new JMenuItem("New");
+        //New FileWrapper
+        menuItem = new JMenuItem("New FileWrapper");
         menuItem.addActionListener((ActionListener) -> {
-            String fileName = JOptionPane.showInputDialog("File Name:");
-            System.out.println("File: " + fileName + " created");
-
+            System.out.println("Clicked New FileWrapper");
         });
-        submenu.add(menuItem);
-        //Load
-        menuItem = new JMenuItem("Load");
+        menu.add(menuItem);
+        //New JsonFolder
+        menuItem = new JMenuItem("New JsonFolder");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Load");
-            new LoadFileDialog();
-        });
-        submenu.add(menuItem);
-        menu.add(submenu);
-
-        //New Folder
-        menuItem = new JMenuItem("New Folder");
-        menuItem.addActionListener((ActionListener) -> {
-            String folderName = JOptionPane.showInputDialog("Folder Name:");
+            System.out.println("Clicked New JsonFolder");
         });
         menu.add(menuItem);
         menu.addSeparator();
         //Settings
         menuItem = new JMenuItem("Settings");
         menuItem.addActionListener((ActionListener) -> {
-            SettingsDialog settingsDialog = new SettingsDialog(false);
+            SettingsDialog settingsDialog = new SettingsDialog();
             settingsDialog.setVisible(true);
 
         });
@@ -381,7 +378,7 @@ public class MainUI extends JFrame {
         menu.add(menuItem);
         menuBar.add(menu);
 
-        //Navigate Folder Up
+        //Navigate JsonFolder Up
         menuBar.add(Box.createHorizontalGlue());
         JButton navigateUp = new JButton("Navigate Up");
         navigateUp.addActionListener((ActionListener) -> {

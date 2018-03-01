@@ -1,12 +1,10 @@
-package ui.utils;
+package ui.utility;
 
-import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.AbstractTableModel;
-import java.io.File;
 
 public class FileViewTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Icon", "File"};
+    private String[] columnNames = {"Icon", "FileWrapper"};
 
 
     private String[] columnData;
@@ -29,9 +27,10 @@ public class FileViewTableModel extends AbstractTableModel {
 
     public Object getValueAt(int row, int col) {
         switch (col) {
+/*
             case 0:
-
                 return FileSystemView.getFileSystemView().getSystemIcon(new File("/home/marco/img"));
+*/
 
             case 1:
                 return columnData[row];
