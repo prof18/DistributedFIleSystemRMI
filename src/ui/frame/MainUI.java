@@ -22,7 +22,7 @@ public class MainUI extends JFrame {
     String[] files = {"Folder1", "Folder2", "File1"};
 
     public MainUI() {
-        super("LR18 FileA System");
+        super("LR18 FileWrapper System");
 
 
         //"Creare" cartella file system se non è presente
@@ -45,9 +45,9 @@ public class MainUI extends JFrame {
 
         JPanel rightWrapper = new JPanel(new GridBagLayout());
 
-        //FileA UI
+        //FileWrapper UI
         JPanel filesUI = new JPanel(new GridLayout());
-        //FileA Details
+        //FileWrapper Details
         JPanel filesDetail = createDetailsUI();
         setLayout(new GridBagLayout());
 
@@ -122,8 +122,8 @@ public class MainUI extends JFrame {
         GridBagConstraints cs = new GridBagConstraints();
         cs.insets = new Insets(5, 10, 5, 70);
 
-        //FileA Name
-        JLabel fileNameLabel = new JLabel("FileA Name: ");
+        //FileWrapper Name
+        JLabel fileNameLabel = new JLabel("FileWrapper Name: ");
         fileNameLabel.setOpaque(true);
         cs.gridx = 0;
         cs.gridy = 0;
@@ -154,8 +154,8 @@ public class MainUI extends JFrame {
         cs.gridy = 2;
         filesDetail.add(pathVLabel, cs);
 
-        //FileA Size
-        JLabel fileSizeLabel = new JLabel("FileA Size: ");
+        //FileWrapper Size
+        JLabel fileSizeLabel = new JLabel("FileWrapper Size: ");
         cs.gridx = 0;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel, cs);
@@ -186,8 +186,8 @@ public class MainUI extends JFrame {
 
         //Second Column
 
-        //FileA Name
-        JLabel fileNameLabel1 = new JLabel("FileA Name: ");
+        //FileWrapper Name
+        JLabel fileNameLabel1 = new JLabel("FileWrapper Name: ");
         cs.gridx = 2;
         cs.gridy = 0;
         filesDetail.add(fileNameLabel1, cs);
@@ -216,8 +216,8 @@ public class MainUI extends JFrame {
         cs.gridy = 2;
         filesDetail.add(pathVLabel, cs);
 
-        //FileA Size
-        JLabel fileSizeLabel1 = new JLabel("FileA Size: ");
+        //FileWrapper Size
+        JLabel fileSizeLabel1 = new JLabel("FileWrapper Size: ");
         cs.gridx = 2;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel1, cs);
@@ -298,18 +298,18 @@ public class MainUI extends JFrame {
         //Create the menu bar.
         JMenuBar menuBar = new JMenuBar();
 
-        //FileA Menu.
-        JMenu menu = new JMenu("FileA");
+        //FileWrapper Menu.
+        JMenu menu = new JMenu("FileWrapper");
         //Open
         JMenuItem menuItem = new JMenuItem("Open");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked Open");
         });
         menu.add(menuItem);
-        //New FileA
-        menuItem = new JMenuItem("New FileA");
+        //New FileWrapper
+        menuItem = new JMenuItem("New FileWrapper");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New FileA");
+            System.out.println("Clicked New FileWrapper");
         });
         menu.add(menuItem);
         //New Folder

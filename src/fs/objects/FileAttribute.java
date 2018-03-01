@@ -1,78 +1,87 @@
 package fs.objects;
 
-import java.io.Serializable;
-import java.nio.file.attribute.FileTime;
+import java.util.Date;
 
-public class FileAttribute implements Serializable {
+public class FileAttribute {
 
-    private long fileLength;
-    private FileTime creationTime;
-    private FileTime lastModifiedTime;
+    private int fileLength;
+    private Date creationTime;
+    private Date writeTime;
+    private Date attributeTime;
     private int referenceCount;
     private String Owner;
     private String type;
     private Object acl;
 
-    public FileAttribute(long fileLength, FileTime creationTime, FileTime lastModifiedTime, int referenceCount) {
+    public FileAttribute(int fileLength, Date creationTime, Date writeTime, Date attributeTime, int referenceCount){
         this.fileLength = fileLength;
         this.creationTime = creationTime;
-        this.lastModifiedTime = lastModifiedTime;
+        this.writeTime = writeTime;
+        this.attributeTime = attributeTime;
         this.referenceCount = referenceCount;
-    }
-
-    public long getFileLength() {
-        return fileLength;
     }
 
     public void setFileLength(int fileLength) {
         this.fileLength = fileLength;
     }
 
-    public FileTime getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(FileTime creationTime) {
+    public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
-    public FileTime getLastModifiedTime() {
-        return lastModifiedTime;
+    public void setWriteTime(Date writeTime) {
+        this.writeTime = writeTime;
     }
 
-    public void setLastModifiedTime(FileTime lastModifiedTime) {
-        this.lastModifiedTime = lastModifiedTime;
-    }
-
-    public int getReferenceCount() {
-        return referenceCount;
+    public void setAttributeTime(Date attributeTime) {
+        this.attributeTime = attributeTime;
     }
 
     public void setReferenceCount(int referenceCount) {
         this.referenceCount = referenceCount;
     }
 
-    public String getOwner() {
-        return Owner;
-    }
-
     public void setOwner(String owner) {
         Owner = owner;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public void setType(String type) {
         this.type = type;
     }
 
-    public Object getAcl() {
-        return acl;
-    }
-
     public void setAcl(Object acl) {
         this.acl = acl;
+    }
+
+    public int getFileLength() {
+        return fileLength;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public Date getWriteTime() {
+        return writeTime;
+    }
+
+    public Date getAttributeTime() {
+        return attributeTime;
+    }
+
+    public int getReferenceCount() {
+        return referenceCount;
+    }
+
+    public String getOwner() {
+        return Owner;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Object getAcl() {
+        return acl;
     }
 }
