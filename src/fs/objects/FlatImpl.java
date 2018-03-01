@@ -29,7 +29,6 @@ public class FlatImpl implements FlatService {
         //ho dei problemi in questo punto
         impl.write("ciao", 0, bb.length, bb);
         System.out.println(new String(impl.read("ciao", 0)));
-        System.out.println("creazione di un file vuoto");
 
 
     }
