@@ -34,7 +34,7 @@ public class AltriNodi {
             e.printStackTrace();
             System.exit(-1);
         }
-        System.out.println("java.rmi.server.hostname: " + System.getProperty("java.rmi.server.hostname"));
+
         System.out.println("sono il nodo : "+nodi.getOwnNode());
         System.out.println("cosa vuoi fare ...");
         for(Map.Entry<String, NodeLocation> entry:nodi.getNodes().entrySet()){
@@ -42,6 +42,8 @@ public class AltriNodi {
                 System.out.println("Comunicazione con : "+entry.getValue().toString());
                 Registry registry= null;
                 try {
+                    System.setProperty("java.rmi.server.hostname", entry.getValue().getIp());
+                    System.out.println("java.rmi.server.hostname: " + System.getProperty("java.rmi.server.hostname"));
                     registry = LocateRegistry.getRegistry(entry.getValue().getIp(),entry.getValue().getPort());
                     String path=entry.getValue().toUrl()+entry.getKey();
                     System.out.println(path);
