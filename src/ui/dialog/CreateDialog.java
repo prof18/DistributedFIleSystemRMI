@@ -115,7 +115,9 @@ public class CreateDialog extends JDialog {
                 JsonFolder root = new JsonFolder();
                 root.setUFID(UUID.randomUUID().toString());
                 root.setRoot(true);
-                root.setFolderName("");
+                root.setFolderName("root");
+
+
 
 
               //  Create.create(ip, fSName);

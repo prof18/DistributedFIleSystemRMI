@@ -9,7 +9,7 @@ public class JsonFolder {
    private String folderName;
    private String parentUFID;
    private ArrayList<String> childrens;
-   private ArrayList<JsonFile>  files;
+   private ArrayList<JsonFile> files;
 
    public JsonFolder() {
    }
