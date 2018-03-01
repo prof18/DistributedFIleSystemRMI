@@ -70,4 +70,16 @@ public class JsonFolder {
    public void setFiles(ArrayList<JsonFile> files) {
       this.files = files;
    }
+
+   @Override
+   public String toString() {
+      return "JsonFolder{" +
+              "UFID='" + UFID + '\'' +
+              ", isRoot=" + isRoot +
+              ", folderName='" + folderName + '\'' +
+              ", parentUFID='" + parentUFID + '\'' +
+              ", childrens=" + childrens +
+              ", files=" + files +
+              '}';
+   }
 }

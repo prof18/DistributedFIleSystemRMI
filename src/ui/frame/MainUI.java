@@ -34,7 +34,7 @@ public class MainUI extends JFrame {
 
         //Create and show the main UI block
         setLocationRelativeTo(null);
-        setSize(1000, 700);
+        setSize(1050, 700);
         setVisible(true);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -123,7 +123,7 @@ public class MainUI extends JFrame {
         cs.insets = new Insets(5, 10, 5, 70);
 
         //FileWrapper Name
-        JLabel fileNameLabel = new JLabel("FileWrapper Name: ");
+        JLabel fileNameLabel = new JLabel("Name: ");
         fileNameLabel.setOpaque(true);
         cs.gridx = 0;
         cs.gridy = 0;
@@ -155,7 +155,7 @@ public class MainUI extends JFrame {
         filesDetail.add(pathVLabel, cs);
 
         //FileWrapper Size
-        JLabel fileSizeLabel = new JLabel("FileWrapper Size: ");
+        JLabel fileSizeLabel = new JLabel("Size: ");
         cs.gridx = 0;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel, cs);
@@ -187,7 +187,7 @@ public class MainUI extends JFrame {
         //Second Column
 
         //FileWrapper Name
-        JLabel fileNameLabel1 = new JLabel("FileWrapper Name: ");
+        JLabel fileNameLabel1 = new JLabel("Name: ");
         cs.gridx = 2;
         cs.gridy = 0;
         filesDetail.add(fileNameLabel1, cs);
@@ -217,7 +217,7 @@ public class MainUI extends JFrame {
         filesDetail.add(pathVLabel, cs);
 
         //FileWrapper Size
-        JLabel fileSizeLabel1 = new JLabel("FileWrapper Size: ");
+        JLabel fileSizeLabel1 = new JLabel("Size: ");
         cs.gridx = 2;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel1, cs);

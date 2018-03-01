@@ -1,16 +1,18 @@
 package utils;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import fileSystem.json.JsonFolder;
 
-import java.util.ArrayList;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 
 public class GSONHelper {
 
     private static GSONHelper INSTANCE = null;
     private Gson gson;
 
-    public GSONHelper getInstance(){
+    public static GSONHelper getInstance(){
         if (INSTANCE == null)
             INSTANCE = new GSONHelper();
         return INSTANCE;
@@ -20,8 +22,14 @@ public class GSONHelper {
         gson = new Gson();
     }
 
-    public String folderToJson(ArrayList<JsonFolder> folders) {
+    public String foldersToJson(HashMap<String, JsonFolder> folders) {
         return gson.toJson(folders);
     }
+
+    public HashMap<String, JsonFolder> jsonToFolders(String json) {
+        Type folderMapType = new TypeToken<HashMap<String, JsonFolder>>(){}.getType();
+        return gson.fromJson(json, folderMapType);
+    }
+
 
 }

@@ -2,18 +2,19 @@ package ui.dialog;
 
 import fileSystem.json.JsonFile;
 import fileSystem.json.JsonFolder;
+import fs.objects.FileAttribute;
 import ui.MainUI;
 import utils.Constants;
+import utils.GSONHelper;
 import utils.PropertiesHelper;
+import utils.Util;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.rmi.server.UID;
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.*;
 
 public class CreateDialog extends JDialog {
 
@@ -107,16 +108,8 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
-                ArrayList<JsonFile> folders = new ArrayList<>();
-
-                //Creating fake objects
-
-                //Root
-                JsonFolder root = new JsonFolder();
-                root.setUFID(UUID.randomUUID().toString());
-                root.setRoot(true);
-                root.setFolderName("root");
-
+                //TODO: enable this only if you want to generate some fake data of the fileSystem
+                Util.saveFSExample();
 
 
 
@@ -188,4 +181,6 @@ public class CreateDialog extends JDialog {
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
     }
+
+
 }

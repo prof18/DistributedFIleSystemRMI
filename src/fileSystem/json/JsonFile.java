@@ -40,4 +40,13 @@ public class JsonFile {
     public void setAttribute(FileAttribute attribute) {
         this.attribute = attribute;
     }
+
+    @Override
+    public String toString() {
+        return "JsonFile{" +
+                "fileName='" + fileName + '\'' +
+                ", UFID='" + UFID + '\'' +
+                ", attribute=" + attribute +
+                '}';
+    }
 }
