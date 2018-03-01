@@ -1,14 +1,16 @@
 package fileSystem;
 
+import fileSystem.json.JsonFolder;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class FolderWrapper {
-    public List<Folder> folderList = new ArrayList<>();
+    public List<JsonFolder> jsonFIleList = new ArrayList<>();
 
     @Override
     public String toString(){
-        return "FolderWrapper: " + folderList;
+        return "FolderWrapper: " + jsonFIleList;
     }
 
 }

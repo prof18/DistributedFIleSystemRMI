@@ -4,12 +4,14 @@ import net.actions.Create;
 import ui.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
+import utils.Util;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 
 public class CreateDialog extends JDialog {
 
@@ -103,6 +105,10 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
+                //TODO: enable this only if you want to generate some fake data of the fileSystem
+                Util.saveFSExample();
+
+
                 //  Create.create(ip, fSName);
                 /*String[] dirName = Constants.WORKING_DIR_CONFIG.split("/");
                 DirectoryTree<File> directoryRoot = new DirectoryTree<File>(UUID.randomUUID().toString(), dirName[dirName.length-1], null);
@@ -140,7 +146,7 @@ public class CreateDialog extends JDialog {
                     System.exit(-1);
                 }
 
-                for (Folder fowEl: fow.folderList){
+                for (JsonFolder fowEl: fow.jsonFIleList){
                     fowEl.createDir(fsOp);
 */
                 Create.create(ip, fSName);
