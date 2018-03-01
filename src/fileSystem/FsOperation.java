@@ -1,21 +1,20 @@
 package fileSystem;
 
-import com.google.gson.Gson;
+import fs.objects.FileWrapper;
 import utils.Constants;
 import utils.PropertiesHelper;
 
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.UUID;
 
 
 public class FsOperation {
 
     private String rootPath;
-    private DirectoryTree root = null;
-    private File dirFile = null;
+    private TreeNode root = null; //directory root
+    private File dirFile = null; // json file
+    private TreeNode currentDir = root; //current UI directory
 
     private static FsOperation INSTANCE = null;
 
@@ -29,7 +28,7 @@ public class FsOperation {
         rootPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
     }
 
-    public void setRoot(DirectoryTree rootDir){
+    public void setRoot(TreeNode rootDir){
         if (dirFile != null){
             root = rootDir;
         }
@@ -39,12 +38,12 @@ public class FsOperation {
         this.dirFile = dirFile;
     }
 
-    public void createDirectory(DirectoryTree currentDir, String dirName){
-        DirectoryTree newDir = new DirectoryTree(UUID.randomUUID().toString(), dirName, null);
-        newDir.setParent(currentDir);
+    public void createDirectory(String dirName){
+        TreeNode newDir = new TreeNode(UUID.randomUUID().toString(), dirName, null, null, null);
         currentDir.addChild(newDir);
+        newDir.setParent(currentDir);
 
-        BufferedReader br;
+        /*BufferedReader br;
         FileWriter fw;
 
         try{
@@ -64,14 +63,18 @@ public class FsOperation {
             e.printStackTrace();
             System.out.println("Problema metodo setRoot classe FsOperation");
             System.exit(-1);
-        }
+        }*/
 
     }
 
-    public void deleteDirectory(DirectoryTree currDir, String dirName){
-        DirectoryTree remDir = currDir.getChild(dirName);
+    public void addFile(FileWrapper file){
+        currentDir.addFile(file);
+    }
+
+    public void deleteDirectory(String dirName){
+        TreeNode remDir = currentDir.getChild(dirName);
         remDir.removeParent();
-        updateFsFile();
+        //updateFsFile();
     }
 
     /*public void mv(String nodeName, String path){
@@ -82,14 +85,17 @@ public class FsOperation {
             currentDir = currentDir.getChild(pathA[i]);
         }
         file.setParent(currentDir);
-    }
-
-    public void removeFile(){
-       currentDir.setFile(null);
     }*/
 
-    public DirectoryTree cd(String path){
-        DirectoryTree currentDir = root;
+    public void removeAllFile(TreeNode currentDir){
+       currentDir.setFile(null);
+    }
+
+    public void removeFile(FileWrapper file){
+        currentDir.removeOneFile(file.getFileName());
+    }
+
+    public TreeNode cd(String path){
         String cmd = path.substring(0, 1);
         String dirName = "";
         if(path.length() > 3){
@@ -97,11 +103,13 @@ public class FsOperation {
         }
 
         switch (cmd){
-            case "..": return currentDir;
+            case "..": currentDir = root;
 
             case "cd": {
                 if (currentDir.hasChild(currentDir) && currentDir.hasChild(dirName)){
                     currentDir = currentDir.getChild(dirName);
+                }else{
+                    System.out.println("Directory not found");
                 }
             }
 
@@ -111,15 +119,8 @@ public class FsOperation {
         return currentDir;
     }
 
-    /*private DirectoryTree getRootFromHere(){
-        if(currentDir.isRoot()) {
-            return currentDir;
-        }
-        return currentDir.getRoot();
-    }*/
-
-    private void updateFsFile(){
-       /* if (dirFile != null){
+    /*private void updateFsFile(){
+        if (dirFile != null){
             BufferedReader br;
             FileWriter fw;
 
@@ -142,6 +143,6 @@ public class FsOperation {
                 System.exit(-1);
             }
 
-        }*/
-    }
+        }
+    }*/
 }
