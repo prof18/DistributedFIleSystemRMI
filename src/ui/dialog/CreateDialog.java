@@ -1,5 +1,6 @@
 package ui.dialog;
 
+import net.actions.Create;
 import ui.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -102,7 +103,7 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
-              //  Create.create(ip, fSName);
+                //  Create.create(ip, fSName);
                 /*String[] dirName = Constants.WORKING_DIR_CONFIG.split("/");
                 DirectoryTree<File> directoryRoot = new DirectoryTree<File>(UUID.randomUUID().toString(), dirName[dirName.length-1], null);
                 FsOperation fsOp = FsOperation.getInstance();
@@ -141,7 +142,9 @@ public class CreateDialog extends JDialog {
 
                 for (Folder fowEl: fow.folderList){
                     fowEl.createDir(fsOp);
-                }*/
+*/
+                Create.create(ip, fSName);
+
 
                 new MainUI();
             }

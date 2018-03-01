@@ -1,10 +1,10 @@
 package test;
 
+import net.objects.Node;
 import net.objects.NodeImpl;
 import net.objects.NodeLocation;
-import utils.Util;
-import net.objects.Node;
 import net.objects.Wrap;
+import utils.Util;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -24,7 +24,7 @@ public class AltriNodi {
         }
         try {
             //modificare qui ipMaster e ipNode
-            nodi=node.join("10.8.0.4","file","localhost");
+            nodi = node.join("10.8.0.4", "LR18", "10.8.0.4");
             System.out.println("mi sono aggiunto al filesystem");
             System.out.println("numero di nodi "+nodi.getNodes().size());
             Util.plot(nodi.getNodes());
@@ -34,6 +34,7 @@ public class AltriNodi {
             e.printStackTrace();
             System.exit(-1);
         }
+
         System.out.println("sono il nodo : "+nodi.getOwnNode());
         System.out.println("cosa vuoi fare ...");
         for(Map.Entry<String, NodeLocation> entry:nodi.getNodes().entrySet()){
@@ -41,6 +42,8 @@ public class AltriNodi {
                 System.out.println("Comunicazione con : "+entry.getValue().toString());
                 Registry registry= null;
                 try {
+                    System.setProperty("java.rmi.server.hostname", entry.getValue().getIp());
+                    System.out.println("java.rmi.server.hostname: " + System.getProperty("java.rmi.server.hostname"));
                     registry = LocateRegistry.getRegistry(entry.getValue().getIp(),entry.getValue().getPort());
                     String path=entry.getValue().toUrl()+entry.getKey();
                     System.out.println(path);
