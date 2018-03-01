@@ -1,5 +1,7 @@
 package ui.dialog;
 
+import fileSystem.json.JsonFile;
+import fileSystem.json.JsonFolder;
 import ui.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -9,6 +11,9 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.rmi.server.UID;
+import java.util.ArrayList;
+import java.util.UUID;
 
 public class CreateDialog extends JDialog {
 
@@ -102,6 +107,17 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
+                ArrayList<JsonFile> folders = new ArrayList<>();
+
+                //Creating fake objects
+
+                //Root
+                JsonFolder root = new JsonFolder();
+                root.setUFID(UUID.randomUUID().toString());
+                root.setRoot(true);
+                root.setFolderName("");
+
+
               //  Create.create(ip, fSName);
                 /*String[] dirName = Constants.WORKING_DIR_CONFIG.split("/");
                 DirectoryTree<File> directoryRoot = new DirectoryTree<File>(UUID.randomUUID().toString(), dirName[dirName.length-1], null);
@@ -139,7 +155,7 @@ public class CreateDialog extends JDialog {
                     System.exit(-1);
                 }
 
-                for (Folder fowEl: fow.folderList){
+                for (JsonFolder fowEl: fow.jsonFIleList){
                     fowEl.createDir(fsOp);
                 }*/
 

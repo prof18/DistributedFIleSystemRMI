@@ -312,10 +312,10 @@ public class MainUI extends JFrame {
             System.out.println("Clicked New FileWrapper");
         });
         menu.add(menuItem);
-        //New Folder
-        menuItem = new JMenuItem("New Folder");
+        //New JsonFolder
+        menuItem = new JMenuItem("New JsonFolder");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New Folder");
+            System.out.println("Clicked New JsonFolder");
         });
         menu.add(menuItem);
         menu.addSeparator();
@@ -381,7 +381,7 @@ public class MainUI extends JFrame {
         menu.add(menuItem);
         menuBar.add(menu);
 
-        //Navigate Folder Up
+        //Navigate JsonFolder Up
         menuBar.add(Box.createHorizontalGlue());
         JButton navigateUp = new JButton("Navigate Up");
         navigateUp.addActionListener((ActionListener) -> {
