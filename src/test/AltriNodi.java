@@ -34,6 +34,7 @@ public class AltriNodi {
             e.printStackTrace();
             System.exit(-1);
         }
+        System.out.println("java.rmi.server.hostname: " + System.getProperty("java.rmi.server.hostname"));
         System.out.println("sono il nodo : "+nodi.getOwnNode());
         System.out.println("cosa vuoi fare ...");
         for(Map.Entry<String, NodeLocation> entry:nodi.getNodes().entrySet()){
