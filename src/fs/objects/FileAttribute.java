@@ -1,87 +1,78 @@
 package fs.objects;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.nio.file.attribute.FileTime;
 
-public class FileAttribute {
+public class FileAttribute implements Serializable {
 
-    private int fileLength;
-    private Date creationTime;
-    private Date writeTime;
-    private Date attributeTime;
+    private long fileLength;
+    private FileTime creationTime;
+    private FileTime lastModifiedTime;
     private int referenceCount;
     private String Owner;
     private String type;
     private Object acl;
 
-    public FileAttribute(int fileLength, Date creationTime, Date writeTime, Date attributeTime, int referenceCount){
+    public FileAttribute(long fileLength, FileTime creationTime, FileTime lastModifiedTime, int referenceCount) {
         this.fileLength = fileLength;
         this.creationTime = creationTime;
-        this.writeTime = writeTime;
-        this.attributeTime = attributeTime;
+        this.lastModifiedTime = lastModifiedTime;
         this.referenceCount = referenceCount;
+    }
+
+    public long getFileLength() {
+        return fileLength;
     }
 
     public void setFileLength(int fileLength) {
         this.fileLength = fileLength;
     }
 
-    public void setCreationTime(Date creationTime) {
-        this.creationTime = creationTime;
-    }
-
-    public void setWriteTime(Date writeTime) {
-        this.writeTime = writeTime;
-    }
-
-    public void setAttributeTime(Date attributeTime) {
-        this.attributeTime = attributeTime;
-    }
-
-    public void setReferenceCount(int referenceCount) {
-        this.referenceCount = referenceCount;
-    }
-
-    public void setOwner(String owner) {
-        Owner = owner;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setAcl(Object acl) {
-        this.acl = acl;
-    }
-
-    public int getFileLength() {
-        return fileLength;
-    }
-
-    public Date getCreationTime() {
+    public FileTime getCreationTime() {
         return creationTime;
     }
 
-    public Date getWriteTime() {
-        return writeTime;
+    public void setCreationTime(FileTime creationTime) {
+        this.creationTime = creationTime;
     }
 
-    public Date getAttributeTime() {
-        return attributeTime;
+    public FileTime getLastModifiedTime() {
+        return lastModifiedTime;
+    }
+
+    public void setLastModifiedTime(FileTime lastModifiedTime) {
+        this.lastModifiedTime = lastModifiedTime;
     }
 
     public int getReferenceCount() {
         return referenceCount;
     }
 
+    public void setReferenceCount(int referenceCount) {
+        this.referenceCount = referenceCount;
+    }
+
     public String getOwner() {
         return Owner;
+    }
+
+    public void setOwner(String owner) {
+        Owner = owner;
     }
 
     public String getType() {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public Object getAcl() {
         return acl;
+    }
+
+    public void setAcl(Object acl) {
+        this.acl = acl;
     }
 }
