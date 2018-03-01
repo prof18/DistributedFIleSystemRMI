@@ -32,6 +32,9 @@ public class Connect {
             System.out.println("mi sono aggiunto al filesystem");
             System.out.println("numero di nodi " + nodi.getNodes().size());
             Util.plot(nodi.getNodes());
+
+            node.updateHashMap(nodi.getNodes());
+
             System.out.println();
             System.out.println();
         } catch (RemoteException e) {
@@ -58,7 +61,11 @@ public class Connect {
                     Node nodeTemp = (Node) registry.lookup(path);
                     System.out.println(nodeTemp.saluta());
 
-                    System.out.println("Aggiorno i connectedNodes del nodeTemp");
+                    System.out.println(node.getHashMap().toString());
+                    System.out.println(nodi.getNodes().toString());
+                    System.out.println(nodeTemp.getHashMap().toString());
+
+                    System.out.println("UpdateCoNodes");
                     nodeTemp.updateCoNodes(node.getHashMap());
 
                 } catch (RemoteException e) {
