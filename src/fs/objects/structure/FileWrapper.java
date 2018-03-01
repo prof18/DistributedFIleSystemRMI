@@ -1,4 +1,4 @@
-package fs.objects;
+package fs.objects.structure;
 
 public class FileWrapper {
 

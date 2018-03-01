@@ -1,4 +1,4 @@
-package fs.objects;
+package fs.objects.structure;
 
 import java.io.Serializable;
 import java.util.Date;

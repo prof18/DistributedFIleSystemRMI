@@ -1,6 +1,7 @@
-package fileSystem;
+package fs.actions;
 
-import fs.objects.FileWrapper;
+import fs.objects.structure.TreeNode;
+import fs.objects.structure.FileWrapper;
 import utils.Constants;
 import utils.PropertiesHelper;
 

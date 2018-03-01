@@ -1,6 +1,8 @@
-package fs.objects;
+package fs.actions;
 
-public class DirectoryImpl implements DirectoryServiceInterface {
+import fs.actions.interfaces.DirectoryService;
+
+public class DirectoryServiceImpl implements DirectoryService {
     //agiungere il ritorno anche degli attributi
     @Override
     public String lookup(String dir, String name) {

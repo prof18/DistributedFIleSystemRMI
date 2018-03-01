@@ -1,8 +1,5 @@
-package fileSystem;
+package fs.objects.structure;
 
-import fs.objects.FileWrapper;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;

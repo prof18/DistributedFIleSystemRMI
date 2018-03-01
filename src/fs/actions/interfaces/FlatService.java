@@ -1,4 +1,6 @@
-package fs.objects;
+package fs.actions.interfaces;
+
+import fs.objects.structure.FileAttribute;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;

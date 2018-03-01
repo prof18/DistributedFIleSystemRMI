@@ -1,12 +1,9 @@
 package ui;
 
 import ui.dialog.SettingsDialog;
-import ui.utils.FileViewTableModel;
+import ui.utility.FileViewTableModel;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.plaf.BorderUIResource;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;

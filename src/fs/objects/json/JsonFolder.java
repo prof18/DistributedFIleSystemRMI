@@ -1,4 +1,4 @@
-package fileSystem.json;
+package fs.objects.json;
 
 import java.util.ArrayList;
 

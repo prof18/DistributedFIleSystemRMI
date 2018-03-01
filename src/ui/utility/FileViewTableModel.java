@@ -1,8 +1,6 @@
-package ui.utils;
+package ui.utility;
 
-import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.AbstractTableModel;
-import java.io.File;
 
 public class FileViewTableModel extends AbstractTableModel {
 

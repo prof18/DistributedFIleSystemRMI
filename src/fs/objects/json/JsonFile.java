@@ -1,6 +1,6 @@
-package fileSystem.json;
+package fs.objects.json;
 
-import fs.objects.FileAttribute;
+import fs.objects.structure.FileAttribute;
 
 public class JsonFile {
 

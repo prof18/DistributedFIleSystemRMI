@@ -2,11 +2,11 @@ package net.objects;
 
 import java.io.Serializable;
 
-public class NodeLocation implements Serializable {
+public class NetNodeLocation implements Serializable {
     private String ip;
     private int port;
 
-    public NodeLocation(String ip, int port) {
+    public NetNodeLocation(String ip, int port) {
         this.ip = ip;
         this.port = port;
     }

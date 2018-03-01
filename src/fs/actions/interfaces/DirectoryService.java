@@ -1,9 +1,9 @@
-package fs.objects;
+package fs.actions.interfaces;
 
 import java.io.Serializable;
 import java.rmi.Remote;
 
-public interface DirectoryServiceInterface extends Remote, Serializable {
+public interface DirectoryService extends Remote, Serializable {
 
     String lookup(String dir, String name);
 

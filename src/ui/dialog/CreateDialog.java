@@ -105,7 +105,7 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
-                //TODO: enable this only if you want to generate some fake data of the fileSystem
+                //TODO: enable this only if you want to generate some fake data of the fs
                 Util.saveFSExample();
 
 

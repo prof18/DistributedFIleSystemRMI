@@ -1,6 +1,6 @@
 package ui;
 
-import ui.utils.CustomOutputStream;
+import ui.utility.CustomOutputStream;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,23 +1,23 @@
 package net.actions;
 
-import net.objects.Node;
-import net.objects.NodeImpl;
+import net.objects.NetNodeImpl;
+import net.objects.interfaces.NetNode;
 
 import java.rmi.RemoteException;
 
 public class Create {
 
     public static void create(String ip, String name) {
-        Node node = null;
+        NetNode netNode = null;
         try {
-            node = new NodeImpl();
+            netNode = new NetNodeImpl();
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);
         }
         try {
             //modificare questo ip
-            node.create(name,ip, name);
+            netNode.create(name,ip, name);
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);

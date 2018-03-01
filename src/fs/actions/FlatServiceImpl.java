@@ -1,16 +1,19 @@
-package fs.objects;
+package fs.actions;
 
+
+import fs.actions.interfaces.FlatService;
+import fs.objects.structure.FileAttribute;
 
 import java.io.*;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 
-public class FlatImpl implements FlatService {
+public class FlatServiceImpl implements FlatService {
 
     private String path;
 
-    public FlatImpl(String path) {
+    public FlatServiceImpl(String path) {
         this.path = path;
 
 
@@ -18,7 +21,7 @@ public class FlatImpl implements FlatService {
 
     //sistemare se count è maggiore della lunghezza
     public static void main(String[] args) throws Exception {
-        FlatImpl impl = new FlatImpl("/home/zigio/Scrivania/prova/");
+        FlatServiceImpl impl = new FlatServiceImpl("/home/zigio/Scrivania/prova/");
         impl.create("ciao");
         String a = "andrea";
         String b = "la bella vita che si fa in questo posto è incredibile";

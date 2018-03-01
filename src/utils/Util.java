@@ -1,21 +1,21 @@
 package utils;
 
-import fileSystem.json.JsonFile;
-import fileSystem.json.JsonFolder;
-import fs.objects.FileAttribute;
-import net.objects.NodeLocation;
+import fs.objects.json.JsonFile;
+import fs.objects.json.JsonFolder;
+import fs.objects.structure.FileAttribute;
+import net.objects.NetNodeLocation;
 
 import java.util.*;
 
 public class Util {
-    public static void plot(HashMap<String, NodeLocation> hashMap){
+    public static void plot(HashMap<String, NetNodeLocation> hashMap){
         String leftAlignFormat = "| %-10s | %-10s | %-8d | %n";
 
         System.out.format("+------------+------------+----------+%n");
         System.out.format("| NameHost   | Ip         | Port     |%n");
         System.out.format("+------------+------------+----------+%n");
 
-        for(Map.Entry<String,NodeLocation> entry:hashMap.entrySet()){
+        for(Map.Entry<String,NetNodeLocation> entry:hashMap.entrySet()){
             System.out.format(leftAlignFormat,entry.getKey(),entry.getValue().getIp(),entry.getValue().getPort());
             System.out.format("+------------+------------+----------+%n");
         }
