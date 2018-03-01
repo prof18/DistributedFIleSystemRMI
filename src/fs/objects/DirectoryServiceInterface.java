@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.rmi.Remote;
 
 public interface DirectoryServiceInterface extends Remote, Serializable {
+
     String lookup(String dir, String name);
 
     void addName(String dir, String name, String fileID);
