@@ -13,6 +13,10 @@ public class FileAttribute implements Serializable {
     private String type;
     private Object acl;
 
+    public FileAttribute() {
+
+    }
+
     public FileAttribute(long fileLength, Date creationTime, Date lastModifiedTime, int referenceCount) {
         this.fileLength = fileLength;
         this.creationTime = creationTime;
@@ -24,7 +28,7 @@ public class FileAttribute implements Serializable {
         return fileLength;
     }
 
-    public void setFileLength(int fileLength) {
+    public void setFileLength(long fileLength) {
         this.fileLength = fileLength;
     }
 
