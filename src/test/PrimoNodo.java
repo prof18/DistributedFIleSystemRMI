@@ -16,7 +16,7 @@ public class PrimoNodo {
         }
         try {
             //modificare questo ip
-            node.create("file", "localhost", "prova");
+            node.create("file", "10.8.0.4", "LR18");
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);

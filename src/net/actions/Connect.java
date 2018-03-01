@@ -15,6 +15,9 @@ import java.util.Map;
 public class Connect {
 
     public static void join(String ipMaster, String name, String ipHost) {
+        System.out.println("ipMaster = " + ipMaster);
+        System.out.println("ipHost = " + ipHost);
+        System.out.println("name = " + name);
         Node node = null;
         Wrap nodi = null;
         try {
@@ -42,9 +45,16 @@ public class Connect {
                 System.out.println("Comunicazione con : " + entry.getValue().toString());
                 Registry registry = null;
                 try {
+                    System.setProperty("java.rmi.server.hostname", ipHost);
                     registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
                     String path = entry.getValue().toUrl() + entry.getKey();
                     System.out.println(path);
+                    System.out.println(registry.toString());
+                    String[] lista = registry.list();
+                    for (String tmp : lista) {
+                        System.out.println(tmp);
+                    }
+                    System.out.println("path problema :" + path);
                     Node nodeTemp = (Node) registry.lookup(path);
                     System.out.println(nodeTemp.saluta());
 
