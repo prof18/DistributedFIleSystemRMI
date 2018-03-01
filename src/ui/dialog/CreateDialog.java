@@ -1,5 +1,10 @@
 package ui.dialog;
 
+import com.google.gson.Gson;
+import fileSystem.DirectoryTree;
+import fileSystem.Folder;
+import fileSystem.FolderWrapper;
+import fileSystem.FsOperation;
 import net.actions.Create;
 import ui.MainUI;
 import utils.Constants;
@@ -12,6 +17,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.Properties;
+import java.util.UUID;
 
 public class CreateDialog extends JDialog {
 
@@ -106,6 +112,45 @@ public class CreateDialog extends JDialog {
                 dispose();
 
               //  Create.create(ip, fSName);
+                /*String[] dirName = Constants.WORKING_DIR_CONFIG.split("/");
+                DirectoryTree<File> directoryRoot = new DirectoryTree<File>(UUID.randomUUID().toString(), dirName[dirName.length-1], null);
+                FsOperation fsOp = FsOperation.getInstance();
+                File dirFile = new File(Constants.WORKING_DIR_CONFIG + "fs.config");
+                fsOp.setDirFile(dirFile);
+                fsOp.setRoot(directoryRoot);
+
+                BufferedReader br;
+                FileWriter fw;
+                FileReader fr;
+                FolderWrapper fow = null;
+
+                try{
+                    br = new BufferedReader(new FileReader(dirFile));
+                    if (br.readLine() == null) {
+                        System.out.println("No errors, and directory file is empty");
+                        fw = new FileWriter(dirFile, true);
+                        Gson gson = new Gson();
+                        gson.toJson(directoryRoot, fw);
+
+                        fw.close();
+                    } else {
+                        System.out.println("directory file is not empty");
+                        fr = new FileReader(dirFile);
+                        Gson gson = new Gson();
+                        fow = gson.fromJson(fr, FolderWrapper.class);
+
+                        fr.close();
+                    }
+
+                }catch(java.io.IOException e){
+                    e.printStackTrace();
+                    System.out.println("Problema metodo setRoot classe FsOperation");
+                    System.exit(-1);
+                }
+
+                for (Folder fowEl: fow.folderList){
+                    fowEl.createDir(fsOp);
+                }*/
 
                 new MainUI();
             }

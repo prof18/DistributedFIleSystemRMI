@@ -1,5 +1,6 @@
 package fs.objects;
 
+import java.time.Instant;
 import java.util.Date;
 
 public class FileAttribute {
@@ -19,6 +20,10 @@ public class FileAttribute {
         this.writeTime = writeTime;
         this.attributeTime = attributeTime;
         this.referenceCount = referenceCount;
+    }
+
+    public FileAttribute(){
+        new FileAttribute(0, Date.from(Instant.EPOCH), Date.from(Instant.EPOCH), Date.from(Instant.EPOCH), 0);
     }
 
     public void setFileLength(int fileLength) {
