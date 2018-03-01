@@ -1,7 +1,7 @@
 package ui.dialog;
 
 import net.actions.Create;
-import ui.MainUI;
+import ui.frame.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
 import utils.Util;
@@ -149,7 +149,7 @@ public class CreateDialog extends JDialog {
                 for (JsonFolder fowEl: fow.jsonFIleList){
                     fowEl.createDir(fsOp);
 */
-                Create.create(ip, fSName);
+               // Create.create(ip, fSName);
 
 
                 new MainUI();

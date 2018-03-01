@@ -1,6 +1,6 @@
 package ui.frame;
 
-import ui.MainUI;
+import ui.frame.MainUI;
 
 import javax.swing.*;
 import java.awt.*;
