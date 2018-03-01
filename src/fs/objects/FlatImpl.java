@@ -2,9 +2,9 @@ package fs.objects;
 
 
 import java.io.*;
-import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 
 public class FlatImpl implements FlatService {
 
@@ -111,8 +111,8 @@ public class FlatImpl implements FlatService {
 
     @Override
     public String create(String name) throws Exception {
-        FileTime fileTime = FileTime.from(Instant.now());
-        FileAttribute attribute = new FileAttribute(0, fileTime, fileTime, 1);
+        Date date = Date.from(Instant.now());
+        FileAttribute attribute = new FileAttribute(0, date, date, 1);
         create(path + name, attribute);
         return path + name;
     }

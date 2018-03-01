@@ -1,19 +1,19 @@
 package fs.objects;
 
 import java.io.Serializable;
-import java.nio.file.attribute.FileTime;
+import java.util.Date;
 
 public class FileAttribute implements Serializable {
 
     private long fileLength;
-    private FileTime creationTime;
-    private FileTime lastModifiedTime;
+    private Date creationTime;
+    private Date lastModifiedTime;
     private int referenceCount;
     private String Owner;
     private String type;
     private Object acl;
 
-    public FileAttribute(long fileLength, FileTime creationTime, FileTime lastModifiedTime, int referenceCount) {
+    public FileAttribute(long fileLength, Date creationTime, Date lastModifiedTime, int referenceCount) {
         this.fileLength = fileLength;
         this.creationTime = creationTime;
         this.lastModifiedTime = lastModifiedTime;
@@ -28,19 +28,19 @@ public class FileAttribute implements Serializable {
         this.fileLength = fileLength;
     }
 
-    public FileTime getCreationTime() {
+    public Date getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(FileTime creationTime) {
+    public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
-    public FileTime getLastModifiedTime() {
+    public Date getLastModifiedTime() {
         return lastModifiedTime;
     }
 
-    public void setLastModifiedTime(FileTime lastModifiedTime) {
+    public void setLastModifiedTime(Date lastModifiedTime) {
         this.lastModifiedTime = lastModifiedTime;
     }
 
