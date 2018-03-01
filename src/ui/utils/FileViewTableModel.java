@@ -29,9 +29,11 @@ public class FileViewTableModel extends AbstractTableModel {
 
     public Object getValueAt(int row, int col) {
         switch (col) {
+/*
             case 0:
 
                 return FileSystemView.getFileSystemView().getSystemIcon(new File("/home/marco/img"));
+*/
 
             case 1:
                 return columnData[row];
