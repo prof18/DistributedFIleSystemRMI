@@ -1,6 +1,6 @@
 package fs.objects;
 
-public class FlatImpl implements FlatService {
+public class FlatImpl {
 
     public Object read(String fileID, int i, int n){
         Object readFile = new Object();
