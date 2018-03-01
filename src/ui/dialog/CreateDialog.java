@@ -1,11 +1,5 @@
 package ui.dialog;
 
-import com.google.gson.Gson;
-import fileSystem.DirectoryTree;
-import fileSystem.Folder;
-import fileSystem.FolderWrapper;
-import fileSystem.FsOperation;
-import net.actions.Create;
 import ui.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -15,9 +9,6 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.*;
-import java.util.Properties;
-import java.util.UUID;
 
 public class CreateDialog extends JDialog {
 
@@ -43,7 +34,7 @@ public class CreateDialog extends JDialog {
         cs.fill = GridBagConstraints.HORIZONTAL;
 
         //file system name
-        JLabel nameFSLabel = new JLabel("FileA System Name: ");
+        JLabel nameFSLabel = new JLabel("FileWrapper System Name: ");
         cs.gridx = 0;
         cs.gridy = 0;
         cs.gridwidth = 1;

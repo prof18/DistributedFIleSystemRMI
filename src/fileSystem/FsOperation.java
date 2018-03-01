@@ -85,15 +85,15 @@ public class FsOperation {
     }
 
     public void removeFile(){
-       currentDir.setData(null);
+       currentDir.setFile(null);
     }*/
 
-    public DirectoryTree cd(String s){
+    public DirectoryTree cd(String path){
         DirectoryTree currentDir = root;
-        String cmd = s.substring(0, 1);
+        String cmd = path.substring(0, 1);
         String dirName = "";
-        if(s.length() > 3){
-            dirName = s.substring(3, s.length());
+        if(path.length() > 3){
+            dirName = path.substring(3, path.length()-1);
         }
 
         switch (cmd){

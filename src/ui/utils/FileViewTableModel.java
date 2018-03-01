@@ -6,7 +6,7 @@ import java.io.File;
 
 public class FileViewTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Icon", "FileA"};
+    private String[] columnNames = {"Icon", "FileWrapper"};
 
 
     private String[] columnData;

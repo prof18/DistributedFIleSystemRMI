@@ -1,14 +1,13 @@
 package fileSystem;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class DirectoryTree<T> {
     private String UUID;
     private String nameNode = "";
     private ArrayList<DirectoryTree<T>> children;// = new ArrayList<DirectoryTree<T>>();
     private DirectoryTree<T> parent = null;
-    private T data = null;
+    private T data;
 
     public DirectoryTree(String UUID, String nameNode, T data){
         this.UUID = UUID;

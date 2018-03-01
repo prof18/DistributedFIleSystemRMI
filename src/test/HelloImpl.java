@@ -14,8 +14,8 @@ public class HelloImpl extends UnicastRemoteObject implements Hello {
     }
 
     public static void main(String[] args) throws RemoteException, AlreadyBoundException, MalformedURLException {
-        System.setProperty("java.rmi.server.hostname", "10.8.0.4");
-        String ip="10.8.0.4";
+        System.setProperty("java.rmi.server.hostname", "10.8.0.3");
+        String ip="10.8.0.3";
         int port=1099;
         Hello hello = new HelloImpl();
         Registry registry = LocateRegistry.createRegistry(port);
