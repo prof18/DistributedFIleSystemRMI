@@ -1,9 +1,9 @@
 package net.actions;
 
-import net.objects.interfaces.NetNode;
-import net.objects.NetNodeImpl;
-import net.objects.NetNodeLocation;
-import net.objects.NetNodeWrap;
+import net.objects.Node;
+import net.objects.NodeImpl;
+import net.objects.NodeLocation;
+import net.objects.Wrap;
 import utils.Util;
 
 import java.rmi.NotBoundException;
@@ -18,20 +18,23 @@ public class Connect {
         System.out.println("ipMaster = " + ipMaster);
         System.out.println("ipHost = " + ipHost);
         System.out.println("name = " + name);
-        NetNode netNode = null;
-        NetNodeWrap nodi = null;
+        Node node = null;
+        Wrap nodi = null;
         try {
-            netNode = new NetNodeImpl();
+            node = new NodeImpl();
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);
         }
         try {
             //modificare qui ipMaster e ipNode
-            nodi = netNode.join(ipMaster, name, ipHost);
+            nodi = node.join(ipMaster, name, ipHost);
             System.out.println("mi sono aggiunto al filesystem");
             System.out.println("numero di nodi " + nodi.getNodes().size());
             Util.plot(nodi.getNodes());
+
+            node.updateHashMap(nodi.getNodes());
+
             System.out.println();
             System.out.println();
         } catch (RemoteException e) {
@@ -40,7 +43,7 @@ public class Connect {
         }
         System.out.println("sono il nodo : " + nodi.getOwnNode());
         System.out.println("cosa vuoi fare ...");
-        for (Map.Entry<String, NetNodeLocation> entry : nodi.getNodes().entrySet()) {
+        for (Map.Entry<String, NodeLocation> entry : nodi.getNodes().entrySet()) {
             if (!entry.getKey().equals(nodi.getOwnNode())) {
                 System.out.println("Comunicazione con : " + entry.getValue().toString());
                 Registry registry = null;
@@ -55,11 +58,15 @@ public class Connect {
                         System.out.println(tmp);
                     }
                     System.out.println("path problema :" + path);
-                    NetNode netNodeTemp = (NetNode) registry.lookup(path);
-                    System.out.println(netNodeTemp.saluta());
+                    Node nodeTemp = (Node) registry.lookup(path);
+                    System.out.println(nodeTemp.saluta());
 
-                    System.out.println("Aggiorno i connectedNodes del netNodeTemp");
-                    netNodeTemp.updateCoNodes(netNode.getHashMap());
+                    System.out.println(node.getHashMap().toString());
+                    System.out.println(nodi.getNodes().toString());
+                    System.out.println(nodeTemp.getHashMap().toString());
+
+                    System.out.println("UpdateCoNodes");
+                    nodeTemp.updateCoNodes(node.getHashMap());
 
                 } catch (RemoteException e) {
                     System.out.println("problema strano1");
