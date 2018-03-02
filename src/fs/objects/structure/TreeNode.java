@@ -1,5 +1,6 @@
 package fs.objects.structure;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -68,7 +69,7 @@ public class TreeNode {
         this.file.add(file);
     }
 
-    public FileWrapper findFile(String fileName){
+   /* public FileWrapper findFile(String fileName){
         FileWrapper file = null;
         for(FileWrapper fw: this.file){
             if(fw.getFileName().compareTo(fileName) == 0){
@@ -78,7 +79,7 @@ public class TreeNode {
         }
 
         return file;
-    }
+    }*/
 
     private int findFilePos(String fileName){
         int pos = 0;
@@ -93,16 +94,20 @@ public class TreeNode {
     }
 
     public void removeOneFile(String fileName){
-        int pos = findFilePos(fileName);
-        file.remove(pos);
+        if (file != null){
+            int pos = findFilePos(fileName);
+            file.remove(pos);
+        }
     }
 
     public void removeParent(){
-        this.parent = null;
+        if (!isRoot()){
+            parent = null;
+        }
     }
 
     public boolean isRoot(){
-        return (this.parent == null);
+        return (parent == null);
     }
 
     public boolean hasChild(){
@@ -140,6 +145,30 @@ public class TreeNode {
         }
 
         return findNode;
+    }
+
+    public boolean hasFile(String fileName){
+        if(file.size() != 0){
+            for(FileWrapper fw : file){
+                if(fw.getFileName().compareTo(fileName) == 0){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public FileWrapper getFile(String fileName){
+        FileWrapper fileFound = null;
+        if(hasFile(fileName)){
+            for(FileWrapper fw : file){
+                if (fw.getFileName().compareTo(fileName) == 0){
+                    fileFound = fw;
+                }
+            }
+        }
+        return fileFound;
     }
 
     public String getPath(){
@@ -181,18 +210,18 @@ public class TreeNode {
 
     public ArrayList<String> T_BFS(TreeNode root){
         ArrayList<String> tree = new ArrayList<>();
-        Queue<TreeNode> tQueue = new LinkedList<>();
+        Queue<TreeNode> nodeQueue = new LinkedList<>();
         if (root == null){
             tree = null;
         } else {
-            tQueue.add(root);
-            while(!tQueue.isEmpty()){
-                TreeNode node = tQueue.remove();
+            nodeQueue.add(root);
+            while(!nodeQueue.isEmpty()){
+                TreeNode node = nodeQueue.remove();
                 tree.add(node.getNameNode());
 
                 if(node.hasChild()){
                     for(TreeNode n: node.getChildrens()){
-                        tQueue.add(n);
+                        nodeQueue.add(n);
                     }
                 }
             }

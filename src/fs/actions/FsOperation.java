@@ -74,7 +74,9 @@ public class FsOperation {
 
     public void deleteDirectory(String dirName){
         TreeNode remDir = currentDir.getChild(dirName);
-        remDir.removeParent();
+        if(remDir != null) {
+            remDir.removeParent();
+        }
         //updateFsFile();
     }
 
@@ -88,12 +90,24 @@ public class FsOperation {
         file.setParent(currentDir);
     }*/
 
-    public void removeAllFile(TreeNode currentDir){
+    public void deleteAllFile(TreeNode currentDir){
        currentDir.setFile(null);
     }
 
-    public void removeFile(FileWrapper file){
+    public void deleteFile(FileWrapper file){
         currentDir.removeOneFile(file.getFileName());
+    }
+
+    public void renameDirectory(String name, String newName){
+        if(currentDir.getChild(name) != null){
+            currentDir.getChild(name).setNameNode(newName);
+        }
+    }
+
+    public void renameFile(String name, String newName){
+        if(currentDir.getFile(name) != null){
+            currentDir.getFile(name).setFileName(newName);
+        }
     }
 
     public TreeNode cd(String path){
