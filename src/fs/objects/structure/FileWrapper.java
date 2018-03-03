@@ -8,6 +8,8 @@ public class FileWrapper {
     private byte[] content; //fare checksum per verificare correttezza messaggio
 
     public FileWrapper() {
+    }
+
     public FileWrapper(String UFID, String fileName){
         this.UFID = UFID;
         this.fileName = fileName;

@@ -1,16 +1,18 @@
 package net.actions;
 
-import net.objects.Node;
-import net.objects.NodeImpl;
+
+
+import net.objects.NetNodeImpl;
+import net.objects.interfaces.NetNode;
 
 import java.rmi.RemoteException;
 
 public class Create {
 
     public static void create(String ip, String name) {
-        Node node = null;
+        NetNode node = null;
         try {
-            node = new NodeImpl();
+            node = new NetNodeImpl();
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);

@@ -90,9 +90,9 @@ public class FsOperation {
         file.setParent(currentDir);
     }*/
 
-    public void deleteAllFile(TreeNode currentDir){
-       currentDir.setFile(null);
-
+    public void deleteAllFile(TreeNode currentDir) {
+        currentDir.setFiles(null);
+    }
 
     public void deleteFile(FileWrapper file){
         currentDir.removeOneFile(file.getFileName());

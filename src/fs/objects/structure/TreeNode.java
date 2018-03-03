@@ -98,10 +98,7 @@ public class TreeNode {
     }
 
     public void removeOneFile(String fileName){
-        if (file != null){
-            int pos = findFilePos(fileName);
-            file.remove(pos);
-        }
+
         int pos = findFilePos(fileName);
         files.remove(pos);
     }
@@ -154,13 +151,14 @@ public class TreeNode {
     }
 
     public boolean hasFile(String fileName){
-        if(file.size() != 0){
-            for(FileWrapper fw : file){
+
+
+            for(FileWrapper fw : files){
                 if(fw.getFileName().compareTo(fileName) == 0){
                     return true;
                 }
             }
-        }
+
 
         return false;
     }
@@ -168,7 +166,7 @@ public class TreeNode {
     public FileWrapper getFile(String fileName){
         FileWrapper fileFound = null;
         if(hasFile(fileName)){
-            for(FileWrapper fw : file){
+            for(FileWrapper fw : files){
                 if (fw.getFileName().compareTo(fileName) == 0){
                     fileFound = fw;
                 }
