@@ -72,13 +72,13 @@ public class Util {
         //set root children
         ArrayList<String> childrenRoot = new ArrayList<>();
         childrenRoot.add(folder1UFID);
-        root.setChildrens(childrenRoot);
+        root.setChildren(childrenRoot);
 
         //set folder 1 children
         ArrayList<String> folder1Children = new ArrayList<>();
         folder1Children.add(folder2UFID);
         folder1Children.add(folder3UFID);
-        folder1.setChildrens(folder1Children);
+        folder1.setChildren(folder1Children);
 
         //generate files
         JsonFile file1 = new JsonFile();

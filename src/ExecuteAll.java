@@ -1,4 +1,4 @@
-import ui.LogUI;
+import ui.frame.LogUI;
 import ui.dialog.SettingsDialog;
 import utils.Constants;
 
@@ -12,7 +12,7 @@ public class ExecuteAll {
             if (Constants.OUT_TO_UI)
                 new LogUI();
 
-            SettingsDialog settingsDialog = new SettingsDialog();
+            SettingsDialog settingsDialog = new SettingsDialog(true);
             settingsDialog.setVisible(true);
         });
     }

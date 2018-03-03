@@ -1,4 +1,4 @@
-package ui;
+package ui.frame;
 
 import ui.utility.CustomOutputStream;
 
@@ -16,13 +16,18 @@ public class LogUI extends JFrame {
         setVisible(true);
         setLocationRelativeTo(null);
 
+        //Set the location of the window to the up right
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice defaultScreen = ge.getDefaultScreenDevice();
         Rectangle rect = defaultScreen.getDefaultConfiguration().getBounds();
         int x = (int) rect.getMaxX() - getWidth();
         int y = 0;
         setLocation(x, y);
+
         JTextArea textArea = new JTextArea();
+
+        textArea.setEditable(false);
+        //Redirect the output and error stream to the window
         PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
         System.setOut(printStream);
         System.setErr(printStream);

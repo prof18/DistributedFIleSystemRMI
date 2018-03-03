@@ -1,5 +1,7 @@
-package ui;
+package ui.frame;
 
+import fs.actions.FSStructure;
+import fs.objects.json.JsonFolder;
 import ui.dialog.SettingsDialog;
 import ui.utility.FileViewTableModel;
 
@@ -8,6 +10,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.util.HashMap;
 
 public class MainUI extends JFrame {
 
@@ -18,16 +21,12 @@ public class MainUI extends JFrame {
 
     String[] files = {"Folder1", "Folder2", "File1"};
 
+    HashMap<String, JsonFolder> foldersMap;
+    private FSStructure fsStructure;
+    private fs.objects.structure.TreeNode directoryTree;
+
     public MainUI() {
-        super("LR18 FileWrapper System");
-
-
-        //"Creare" cartella file system se non è presente
-        //Guardare se ci sono già le configurazioni nel file system
-
-        //Se non è presente nessuna configurazione, eseguire primo nodo
-
-        //Se è presente
+        super("LR18 File System");
 
         //Create and show the main UI block
         setLocationRelativeTo(null);
@@ -38,7 +37,15 @@ public class MainUI extends JFrame {
         this.setJMenuBar(createMenuBar());
 
 
-        System.out.println("Loading config");
+        System.out.println("Loading structure");
+        fsStructure = FSStructure.getInstance();
+
+        fsStructure.generateTreeStructure();
+
+        fs.objects.structure.TreeNode directoryTree = fsStructure.getTree();
+
+        System.out.println(directoryTree.printTree());
+
 
         JPanel rightWrapper = new JPanel(new GridBagLayout());
 
@@ -296,7 +303,7 @@ public class MainUI extends JFrame {
         JMenuBar menuBar = new JMenuBar();
 
         //FileWrapper Menu.
-        JMenu menu = new JMenu("FileWrapper");
+        JMenu menu = new JMenu("File");
         //Open
         JMenuItem menuItem = new JMenuItem("Open");
         menuItem.addActionListener((ActionListener) -> {
@@ -304,13 +311,13 @@ public class MainUI extends JFrame {
         });
         menu.add(menuItem);
         //New FileWrapper
-        menuItem = new JMenuItem("New FileWrapper");
+        menuItem = new JMenuItem("New File");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New FileWrapper");
         });
         menu.add(menuItem);
         //New JsonFolder
-        menuItem = new JMenuItem("New JsonFolder");
+        menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New JsonFolder");
         });
@@ -319,7 +326,7 @@ public class MainUI extends JFrame {
         //Settings
         menuItem = new JMenuItem("Settings");
         menuItem.addActionListener((ActionListener) -> {
-            SettingsDialog settingsDialog = new SettingsDialog();
+            SettingsDialog settingsDialog = new SettingsDialog(false);
             settingsDialog.setVisible(true);
 
         });
