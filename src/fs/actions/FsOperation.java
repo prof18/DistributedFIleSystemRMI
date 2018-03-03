@@ -89,7 +89,7 @@ public class FsOperation {
     }*/
 
     public void removeAllFile(TreeNode currentDir){
-       currentDir.setFile(null);
+       currentDir.setFiles(null);
     }
 
     public void removeFile(FileWrapper file){

@@ -1,7 +1,8 @@
 package ui.frame;
 
+import fs.actions.FSStructure;
+import fs.objects.json.JsonFolder;
 import ui.dialog.SettingsDialog;
-import ui.frame.LogUI;
 import ui.utility.FileViewTableModel;
 
 import javax.swing.*;
@@ -9,6 +10,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.util.HashMap;
 
 public class MainUI extends JFrame {
 
@@ -19,16 +21,12 @@ public class MainUI extends JFrame {
 
     String[] files = {"Folder1", "Folder2", "File1"};
 
+    HashMap<String, JsonFolder> foldersMap;
+    private FSStructure fsStructure;
+    private fs.objects.structure.TreeNode directoryTree;
+
     public MainUI() {
         super("LR18 File System");
-
-
-        //"Creare" cartella file system se non è presente
-        //Guardare se ci sono già le configurazioni nel file system
-
-        //Se non è presente nessuna configurazione, eseguire primo nodo
-
-        //Se è presente
 
         //Create and show the main UI block
         setLocationRelativeTo(null);
@@ -39,7 +37,15 @@ public class MainUI extends JFrame {
         this.setJMenuBar(createMenuBar());
 
 
-        System.out.println("Loading config");
+        System.out.println("Loading structure");
+        fsStructure = FSStructure.getInstance();
+
+        fsStructure.generateTreeStructure();
+
+        fs.objects.structure.TreeNode directoryTree = fsStructure.getTree();
+
+        System.out.println(directoryTree.printTree());
+
 
         JPanel rightWrapper = new JPanel(new GridBagLayout());
 

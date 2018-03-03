@@ -6,18 +6,23 @@ import java.util.Queue;
 
 public class TreeNode {
 
+
     private String UFID;
     private String nameNode;
     private ArrayList<TreeNode> childrens;
     private TreeNode parent;
-    private ArrayList<FileWrapper> file;
+    private ArrayList<FileWrapper> files;
 
-    public TreeNode(String UFID, String nameNode, ArrayList<TreeNode> childrens, TreeNode parent, ArrayList<FileWrapper> file) {
+    public TreeNode(String UFID, String nameNode, ArrayList<TreeNode> childrens, TreeNode parent, ArrayList<FileWrapper> files) {
         this.UFID = UFID;
         this.nameNode = nameNode;
         this.childrens = childrens;
         this.parent = parent;
-        this.file = file;
+        this.files = files;
+    }
+
+    public TreeNode() {
+
     }
 
     public String getUFID() {
@@ -36,8 +41,8 @@ public class TreeNode {
         return parent;
     }
 
-    public ArrayList<FileWrapper> getFile() {
-        return file;
+    public ArrayList<FileWrapper> getFiles() {
+        return files;
     }
 
     public void setUFID(String UFID) {
@@ -56,8 +61,8 @@ public class TreeNode {
         this.parent = parent;
     }
 
-    public void setFile(ArrayList<FileWrapper> file) {
-        this.file = file;
+    public void setFiles(ArrayList<FileWrapper> files) {
+        this.files = files;
     }
 
     public void addChild(TreeNode child){
@@ -65,12 +70,12 @@ public class TreeNode {
     }
 
     public void addFile(FileWrapper file){
-        this.file.add(file);
+        this.files.add(file);
     }
 
     public FileWrapper findFile(String fileName){
         FileWrapper file = null;
-        for(FileWrapper fw: this.file){
+        for(FileWrapper fw: this.files){
             if(fw.getFileName().compareTo(fileName) == 0){
                 file = fw;
                 break;
@@ -82,7 +87,7 @@ public class TreeNode {
 
     private int findFilePos(String fileName){
         int pos = 0;
-        for(FileWrapper fw: this.file){
+        for(FileWrapper fw: this.files){
             if(!(fw.getFileName().compareTo(fileName) == 0)) {
                 pos++;
                 break;
@@ -94,7 +99,7 @@ public class TreeNode {
 
     public void removeOneFile(String fileName){
         int pos = findFilePos(fileName);
-        file.remove(pos);
+        files.remove(pos);
     }
 
     public void removeParent(){
@@ -201,4 +206,44 @@ public class TreeNode {
         return tree;
     }
 
+    public String printTree() {
+
+        StringBuilder sb = new StringBuilder();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(this);
+
+        while(!queue.isEmpty()) {
+
+            TreeNode node = queue.remove();
+            if (node.getParent() == null) {
+                //the node is the root
+                sb.append("##### Root:\n\tParent: none\n\t");
+
+            } else {
+                //the node is not the root
+                sb.append("##### ").append(node.getNameNode()).append(":\n\tParent: ").append(node.getParent().getNameNode()).append("\n\t");
+            }
+            sb.append("UFID: ").append(node.getUFID());
+
+            if (node.getChildrens() != null || !node.getFiles().isEmpty()) {
+
+                sb.append("\n\tChildren: ");
+                for (TreeNode child : node.getChildrens()) {
+                    sb.append("\n\t\t***").append(child.getNameNode())
+                            .append("\n\t\tUFID: ").append(node.getUFID());
+                    queue.add(child);
+                }
+            }
+
+            if (node.getFiles() != null || !node.getFiles().isEmpty()) {
+                sb.append("\n\tFiles:");
+                for (FileWrapper file: node.getFiles()) {
+                    sb.append("\n\t\t***").append(file.getFileName())
+                            .append("\n\t\tUFID: ").append(file.getUFID());
+                }
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }

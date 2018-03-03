@@ -8,18 +8,18 @@ public class JsonFolder {
    private boolean isRoot;
    private String folderName;
    private String parentUFID;
-   private ArrayList<String> childrens;
+   private ArrayList<String> children;
    private ArrayList<JsonFile> files;
 
    public JsonFolder() {
    }
 
-   public JsonFolder(String UFID, boolean isRoot, String folderName, String parentUFID, ArrayList<String> childrens, ArrayList<JsonFile> files) {
+   public JsonFolder(String UFID, boolean isRoot, String folderName, String parentUFID, ArrayList<String> children, ArrayList<JsonFile> files) {
       this.UFID = UFID;
       this.isRoot = isRoot;
       this.folderName = folderName;
       this.parentUFID = parentUFID;
-      this.childrens = childrens;
+      this.children = children;
       this.files = files;
    }
 
@@ -55,12 +55,12 @@ public class JsonFolder {
       this.parentUFID = parentUFID;
    }
 
-   public ArrayList<String> getChildrens() {
-      return childrens;
+   public ArrayList<String> getChildren() {
+      return children;
    }
 
-   public void setChildrens(ArrayList<String> childrens) {
-      this.childrens = childrens;
+   public void setChildren(ArrayList<String> children) {
+      this.children = children;
    }
 
    public ArrayList<JsonFile> getFiles() {
@@ -78,7 +78,7 @@ public class JsonFolder {
               ", isRoot=" + isRoot +
               ", folderName='" + folderName + '\'' +
               ", parentUFID='" + parentUFID + '\'' +
-              ", childrens=" + childrens +
+              ", children=" + children +
               ", files=" + files +
               '}';
    }

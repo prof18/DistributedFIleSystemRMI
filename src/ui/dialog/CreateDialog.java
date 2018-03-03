@@ -106,7 +106,7 @@ public class CreateDialog extends JDialog {
                 dispose();
 
                 //TODO: enable this only if you want to generate some fake data of the fs
-                Util.saveFSExample();
+               // Util.saveFSExample();
 
 
                 //  Create.create(ip, fSName);
