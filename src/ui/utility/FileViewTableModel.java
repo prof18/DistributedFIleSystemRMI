@@ -1,39 +1,89 @@
 package ui.utility;
 
+import fs.objects.structure.FSTreeNode;
+import fs.objects.structure.FileWrapper;
+
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.util.ArrayList;
 
 public class FileViewTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Icon", "FileWrapper"};
+    private String[] columnNames = {"Icon", "Name"};
+
+    private FSTreeNode currentTreeNode;
+    private ArrayList<TableItem> items = new ArrayList<>();
+
+    //private String[] columnData;
 
 
-    private String[] columnData;
-
-    public void setColumnData(String[] columnData) {
-        this.columnData = columnData;
+    public ArrayList<TableItem> getItems() {
+        return items;
     }
 
+    public FSTreeNode getCurrentTreeNode() {
+        return currentTreeNode;
+    }
+
+    public void setNode(FSTreeNode node) {
+        items = new ArrayList<>();
+        this.currentTreeNode = node;
+        //add children
+        if (node.getChildrens() != null && !node.getChildrens().isEmpty()) {
+            for (FSTreeNode child : node.getChildrens()) {
+                TableItem tableItem = new TableItem();
+                tableItem.setTreeNode(child);
+                tableItem.setFile(false);
+                items.add(tableItem);
+            }
+        }
+        //add files
+        if (node.getFiles() != null && !node.getFiles().isEmpty()) {
+            for (FileWrapper file : node.getFiles()) {
+                TableItem tableItem = new TableItem();
+                tableItem.setFileWrapper(file);
+                tableItem.setFile(true);
+                items.add(tableItem);
+            }
+        }
+        fireTableDataChanged();
+    }
+
+
+    @Override
     public int getColumnCount() {
         return columnNames.length;
     }
 
+    @Override
     public int getRowCount() {
-        return columnData.length;
+        return items.size();
     }
 
+    @Override
     public String getColumnName(int col) {
         return columnNames[col];
     }
 
+    @Override
     public Object getValueAt(int row, int col) {
+        TableItem item = items.get(row);
+
         switch (col) {
-/*
             case 0:
-                return FileSystemView.getFileSystemView().getSystemIcon(new File("/home/marco/img"));
-*/
+                if (item.isFile())
+                    return new ImageIcon("img/file.png");
+                else
+                    return new ImageIcon("img/folder.png");
 
             case 1:
-                return columnData[row];
+                if (item.isFile()) {
+                    FileWrapper fileWrapper = item.getFileWrapper();
+                    return fileWrapper.getFileName();
+                } else {
+                    FSTreeNode treeNode = item.getTreeNode();
+                    return treeNode.getNameNode();
+                }
 
             default:
                 return "";
@@ -54,10 +104,10 @@ public class FileViewTableModel extends AbstractTableModel {
      * Don't need to implement this method unless your table's
      * editable.
      */
-    public boolean isCellEditable(int row, int col) {
+/*    public boolean isCellEditable(int row, int col) {
         //Note that the data/cell address is constant,
         return false;
-    }
+    }*/
 
     /*
      * Don't need to implement this method unless your table's
@@ -79,5 +129,7 @@ public class FileViewTableModel extends AbstractTableModel {
         printDebugData();*/
 
     }
+
+
 }
 

@@ -1,6 +1,6 @@
 package fs.actions;
 
-import fs.objects.structure.TreeNode;
+import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -13,9 +13,9 @@ import java.util.UUID;
 public class FsOperation {
 
     private String rootPath;
-    private TreeNode root = null; //directory root
+    private FSTreeNode root = null; //directory root
     private File dirFile = null; // json file
-    private TreeNode currentDir = root; //current UI directory
+    private FSTreeNode currentDir = root; //current UI directory
 
     private static FsOperation INSTANCE = null;
 
@@ -29,7 +29,7 @@ public class FsOperation {
         rootPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
     }
 
-    public void setRoot(TreeNode rootDir){
+    public void setRoot(FSTreeNode rootDir){
         if (dirFile != null){
             root = rootDir;
         }
@@ -40,7 +40,7 @@ public class FsOperation {
     }
 
     public void createDirectory(String dirName){
-        TreeNode newDir = new TreeNode(UUID.randomUUID().toString(), dirName, null, null, null);
+        FSTreeNode newDir = new FSTreeNode(UUID.randomUUID().toString(), dirName, null, null, null);
         currentDir.addChild(newDir);
         newDir.setParent(currentDir);
 
@@ -73,7 +73,7 @@ public class FsOperation {
     }
 
     public void deleteDirectory(String dirName){
-        TreeNode remDir = currentDir.getChild(dirName);
+        FSTreeNode remDir = currentDir.getChild(dirName);
         if(remDir != null) {
             remDir.removeParent();
         }
@@ -90,7 +90,7 @@ public class FsOperation {
         file.setParent(currentDir);
     }*/
 
-    public void deleteAllFile(TreeNode currentDir) {
+    public void deleteAllFile(FSTreeNode currentDir) {
         currentDir.setFiles(null);
     }
 
@@ -110,7 +110,7 @@ public class FsOperation {
         }
     }
 
-    public TreeNode cd(String path){
+    public FSTreeNode cd(String path){
         String cmd = path.substring(0, 1);
         String dirName = "";
         if(path.length() > 3){

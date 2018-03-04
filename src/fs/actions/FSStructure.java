@@ -3,7 +3,7 @@ package fs.actions;
 import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
 import fs.objects.structure.FileWrapper;
-import fs.objects.structure.TreeNode;
+import fs.objects.structure.FSTreeNode;
 import utils.Constants;
 import utils.GSONHelper;
 import utils.PropertiesHelper;
@@ -13,7 +13,7 @@ import java.util.*;
 public class FSStructure {
 
     private static FSStructure INSTANCE = null;
-    private static TreeNode tree;
+    private static FSTreeNode tree;
 
     public static FSStructure getInstance() {
         if (INSTANCE == null)
@@ -29,7 +29,7 @@ public class FSStructure {
     //e rimane sempre istanziata cosi' quando serve e' pronta
 
 
-    public TreeNode getTree() {
+    public FSTreeNode getTree() {
         return tree;
     }
 
@@ -56,24 +56,24 @@ public class FSStructure {
 
             if (jsonFolderRoot != null) {
 
-                Queue<TreeNode> queue = new LinkedList<>();
+                Queue<FSTreeNode> queue = new LinkedList<>();
 
                 //build the tree, starting from the root
-                tree = new TreeNode();
+                tree = new FSTreeNode();
                 tree.setParent(null);
                 tree.setUFID(jsonFolderRoot.getUFID());
                 tree.setNameNode(jsonFolderRoot.getFolderName());
                 queue.add(tree);
                 while (!queue.isEmpty()) {
-                    TreeNode node = queue.remove();
+                    FSTreeNode node = queue.remove();
                     //we need to set the children and the file
                     //Children
                     JsonFolder folder = folderMap.get(node.getUFID());
-                    ArrayList<TreeNode> nodeChildren = new ArrayList<>();
+                    ArrayList<FSTreeNode> nodeChildren = new ArrayList<>();
                     if (folder.getChildren() != null) {
                         for (String childUFID : folder.getChildren()) {
                             JsonFolder childFolder = folderMap.get(childUFID);
-                            TreeNode child = new TreeNode();
+                            FSTreeNode child = new FSTreeNode();
                             child.setUFID(childFolder.getUFID());
                             child.setNameNode(childFolder.getFolderName());
                             child.setParent(node);
@@ -103,7 +103,7 @@ public class FSStructure {
 
         } else {
             //generate the tree with only the root
-            tree = new TreeNode();
+            tree = new FSTreeNode();
             tree.setParent(null);
             tree.setUFID(UUID.randomUUID().toString());
             tree.setNameNode("root");
