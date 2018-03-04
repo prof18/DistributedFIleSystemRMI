@@ -90,6 +90,7 @@ public class Util {
         attribute1.setOwner("marco");
         attribute1.setType("txt");
         attribute1.setCreationTime(new Date(1519167600000L));
+        attribute1.setLastModifiedTime(new Date(1519167600000L));
         file1.setAttribute(attribute1);
 
         JsonFile file2 = new JsonFile();
@@ -101,6 +102,7 @@ public class Util {
         attribute2.setOwner("lr");
         attribute2.setType("pdf");
         attribute2.setCreationTime(new Date(System.currentTimeMillis()));
+        attribute2.setLastModifiedTime(new Date(System.currentTimeMillis()));
         file2.setAttribute(attribute2);
 
         JsonFile file3 = new JsonFile();
@@ -112,6 +114,7 @@ public class Util {
         attribute3.setOwner("zigio");
         attribute3.setType("img");
         attribute3.setCreationTime(new Date(1519167600000L));
+        attribute3.setLastModifiedTime(new Date(1519167600000L));
         file3.setAttribute(attribute3);
 
         //set root files

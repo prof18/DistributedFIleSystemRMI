@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
 public class MainUI extends JFrame {
@@ -26,16 +27,10 @@ public class MainUI extends JFrame {
 
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
     private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
-
-    String[] files = {"Folder1", "Folder2", "File1"};
-
-    HashMap<String, JsonFolder> foldersMap;
     private FSStructure fsStructure;
-    private FSTreeNode directoryTree;
-
     private JButton navigateUpBtn;
-
     private JTable table;
+    private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
 
     public MainUI() {
         super("LR18 File System");
@@ -110,16 +105,20 @@ public class MainUI extends JFrame {
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && row != -1) {
-                    // your valueChanged overridden method
-                    System.out.println("double click");
                     changeTableView(false);
                 }
             }
         });
         table.getSelectionModel().addListSelectionListener((ListSelectionListener) -> {
-            System.out.println("Selected item");
             int row = table.getSelectedRow();
-            TableItem item = model.getItems().get(row);
+            if (row != -1) {
+                TableItem item = model.getItems().get(row);
+                if (item.isFile()) {
+                    setFileInfo(item.getFileWrapper());
+                } else {
+                    setFolderInfo(item.getTreeNode());
+                }
+            }
         });
 
         //Constraints for the main UI
@@ -158,8 +157,46 @@ public class MainUI extends JFrame {
         cs.fill = GridBagConstraints.BOTH;
     }
 
+    private void setFileInfo(FileWrapper fileWrapper) {
+        if (fileWrapper != null) {
+            fileNameVLabel.setText(fileWrapper.getFileName());
+            typeVLabel.setText(fileWrapper.getAttribute().getType());
+            pathVLabel.setText("<to compute>");
+            fileSizeVLabel.setText(String.valueOf(fileWrapper.getAttribute().getFileLength()));
+            ownerVLabel.setText(fileWrapper.getAttribute().getOwner());
+            if (fileWrapper.getAttribute().getLastModifiedTime() != null)
+                lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
+        }
+    }
+
+    private void setFolderInfo(FSTreeNode node) {
+        if (node != null) {
+            fileNameVLabel.setText(node.getNameNode());
+            typeVLabel.setText("folder");
+            pathVLabel.setText("<to compute>");
+            fileSizeVLabel.setText("<to compute>");
+            lastEditVLabel.setText("<to compute>");
+        }
+    }
+
+    private void clearInfo() {
+        fileNameVLabel.setText("-");
+        typeVLabel.setText("-");
+        fileSizeVLabel.setText("-");
+        pathVLabel.setText("-");
+        ownerVLabel.setText("-");
+        lastEditVLabel.setText("-");
+
+        info1VLabel.setText("-");
+        info2VLabel.setText("-");
+        info3VLabel.setText("-");
+        info4VLabel.setText("-");
+        info5VLabel.setText("-");
+        info6VLabel.setText("-");
+    }
+
     private void changeTableView(boolean goingUp) {
-        System.out.println("Enter clicked");
+        clearInfo();
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         if (!goingUp) {
             int row = table.getSelectedRow();
@@ -183,7 +220,7 @@ public class MainUI extends JFrame {
     }
 
     private void openFile(FileWrapper fileWrapper) {
-
+        System.out.println("Opening file");
     }
 
     private void createNodes(DefaultMutableTreeNode top) {
@@ -380,13 +417,13 @@ public class MainUI extends JFrame {
         //New FileWrapper
         menuItem = new JMenuItem("New File");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New FileWrapper");
+            System.out.println("Clicked New File");
         });
         menu.add(menuItem);
         //New JsonFolder
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New JsonFolder");
+            System.out.println("Clicked New Folder");
         });
         menu.add(menuItem);
         menu.addSeparator();
