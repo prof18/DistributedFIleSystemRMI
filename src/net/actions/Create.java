@@ -10,7 +10,8 @@ import java.rmi.RemoteException;
 public class Create {
 
     public static void create(String ip, String name) {
-        NetNode node = null;
+        //TODO: da sistemare una volta finito
+        /*NetNode node = null;
         try {
             node = new NetNodeImpl();
         } catch (RemoteException e) {
@@ -23,7 +24,7 @@ public class Create {
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(-1);
-        }
+        }*/
     }
 
 }
