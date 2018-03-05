@@ -27,6 +27,8 @@ public interface Node extends Remote, Serializable {
 
     String getHostName() throws RemoteException;
 
+    //int getPortNode();
+
     HashMap<String, NodeLocation> getHashMap() throws RemoteException;
 
     void updateHashMap(HashMap<String, NodeLocation> nodes) throws RemoteException;

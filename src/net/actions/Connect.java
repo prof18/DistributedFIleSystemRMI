@@ -10,6 +10,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Connect {
@@ -80,5 +81,23 @@ public class Connect {
 
             }
         }
+
+        System.out.println("Avvio Thread verifica nodi connessi");
+        verifyThread v;
+        try {
+
+            HashMap<String, NodeLocation> connectedNodes = node.getHashMap();
+            NodeLocation tmp = connectedNodes.get(node.getHostName());
+            int port = tmp.getPort();
+
+            v = new verifyThread(ipHost, node.getHostName(), port);
+            Thread t = new Thread(v);
+            t.start();
+
+        } catch (RemoteException e) {
+            System.out.println("Avvio Thread Remote Exc");
+        }
+
+
     }
 }

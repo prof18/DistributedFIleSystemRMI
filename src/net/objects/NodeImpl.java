@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class NodeImpl extends UnicastRemoteObject implements Node {
 
     private int num = 0;
-
+    private int portNode = 1099;
     private String hostName = " --num host not update --";
 
     //<host,ip>
@@ -30,19 +30,11 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
     }
 
 
-    public void updateHashMap(HashMap<String, NodeLocation> nodes) {
 
-        for (Map.Entry<String, NodeLocation> entry : nodes.entrySet()) {
-            if (!this.connectedNodes.containsKey(entry.getKey())) {
-                this.connectedNodes.put(entry.getKey(), entry.getValue());
-            }
-        }
-    }
 
-    //in caso di porta occupata viene creato il registro nella porta successiva
     public void create(String args, String ip, String fsName) {
         System.setProperty("java.rmi.server.hostname", ip);
-        //int port = 1099;
+
         Node node = null;
         try {
             node = new NodeImpl();
@@ -56,7 +48,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         try {
             registry = LocateRegistry.createRegistry(port);
         } catch (RemoteException e) {
-            System.out.println(port + " porta occupata");
+            System.out.println("Porta "+ port + " occupata");
         }
 
         String connectPath = "rmi://" + ip + ":" + port + "/" + fsName;
@@ -64,7 +56,6 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         System.out.println(registry);
         try {
             String host = "host" + node.getAndSetNum();
-            //connectedNodes.put(host, new net.objects.NodeLocation(ip, port));
             System.out.println("created distributed fileSystem : " + args + " by host : " + host);
             System.out.println("with port : " + port + " and address " + ip);
             registry.rebind(connectPath, node);
@@ -95,27 +86,15 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             System.exit(-1);
         }
 
-
     }
 
-    public void fistAdd(String ip, int port, String name) {
-        connectedNodes.put(name, new NodeLocation(ip, port));
-        System.out.println("Fatto il primo Add");
-        Util.plot(connectedNodes);
-    }
 
-    public int getAndSetNum() {
-        int temp = num;
-        num++;
-        return temp;
-    }
 
 
     @Override
     public Wrap join(String ipMaster, String name, String ipNode) throws RemoteException {
 
         // TODO: modificare la porta
-
         String path = "rmi://" + ipMaster + ":" + 1099 + "/" + name;
         System.out.println(path);
 
@@ -128,7 +107,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             System.out.println("there is not node at this address : " + ipMaster + " with this name : " + name);
             System.exit(-1);
         }
-        int portNode = this.getFreePort(ipNode);
+        portNode = this.getFreePort(ipNode);
         Wrap ret = master.add(ipNode, portNode);
 
         this.hostName = ret.getOwnNode();
@@ -140,10 +119,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         Util.plot(connectedNodes);
         System.out.println("connesso");
 
-        System.out.println("Avvio Thread verifica nodi connessi");
-        verifyThread v = new verifyThread(ipNode, hostName, portNode);
-        Thread t = new Thread(v);
-        t.start();
+
 
         return ret;
     }
@@ -304,7 +280,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
             }
         }
 
-        for (Map.Entry<String, NodeLocation> entry : this.connectedNodes.entrySet()) {
+        for (Map.Entry<String, NodeLocation> entry : downNodes.entrySet()) {
             if(connectedNodes.containsKey(entry.getKey())){
                 System.out.println("Rimosso un nodo dai connectedNodes");
                 connectedNodes.remove(entry.getKey());
@@ -313,4 +289,29 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
 
 
     }
+
+    public synchronized void updateHashMap(HashMap<String, NodeLocation> nodes) {
+
+        for (Map.Entry<String, NodeLocation> entry : nodes.entrySet()) {
+            if (!this.connectedNodes.containsKey(entry.getKey())) {
+                this.connectedNodes.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    public void fistAdd(String ip, int port, String name) {
+        connectedNodes.put(name, new NodeLocation(ip, port));
+        System.out.println("Fatto il primo Add -fistAdd-");
+        Util.plot(connectedNodes);
+    }
+
+    public int getAndSetNum() {
+        int temp = num;
+        num++;
+        return temp;
+    }
+
+//    public int getPortNode(){
+//        return portNode;
+//    }
 }
