@@ -35,6 +35,10 @@ public class verifyThread extends UnicastRemoteObject implements Runnable
                 registry = LocateRegistry.getRegistry(ipNode);
                 path = "rmi://" + ipNode + ":" + portNode + "/" + hostname;
                 //System.out.println(path);
+                String[] service=registry.list();
+                for (String tmp:service){
+                    System.out.println(tmp);
+                }
                 Node node = (Node) registry.lookup(path);
 
                 node.checkNodes();
