@@ -15,7 +15,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     private int num = 0;
 
-    private String hostName = " --num host not update --";
+    private String hostName = "host";
 
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
@@ -50,54 +50,23 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return null;
     }
 
+    @Override
+    public String getHostName() throws RemoteException {
+        return hostName;
+    }
+
 
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
     }
 
-    public String getHostName() {
-        return hostName;
+    public void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
+        this.connectedNodes = connectedNodes;
     }
 
-
-    public void updateCoNodes(HashMap<Integer, NetNodeLocation> coNodes) {
-
-        for (Map.Entry<Integer, NetNodeLocation> entry : coNodes.entrySet()) {
-
-            for (Map.Entry<Integer, NetNodeLocation> entry2 : connectedNodes.entrySet()) {
-
-                if (!entry.getKey().equals(entry2.getKey())) {
-
-                    System.out.println("Aggiungo il nodo : " + entry.getKey().toString() + "ai connectedNodes di : " + hostName);
-
-                    connectedNodes.put((entry.getValue().getIp() + entry.getValue().getIp()).hashCode(), entry.getValue());
-
-                    System.out.println("Comunicazione con : " + entry.getValue().toString());
-                    Registry registry = null;
-                    try {
-                        registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
-                        String path = entry.getValue().toUrl() + entry.getKey();
-                        System.out.println(path);
-                        NetNode netNodeTemp = (NetNode) registry.lookup(path);
-                        //System.out.println(hostName + " saluta : " + netNodeTemp.getHostName() + "--" + netNodeTemp.saluta());
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                        System.out.println("problema strano2");
-
-                    } catch (NotBoundException e) {
-                        e.printStackTrace();
-                        System.out.println("non trovato errore2");
-
-                    }
-
-                }
-
-
-            }
-
-        }
-
-
+    @Override
+    public String verify() throws RemoteException {
+        return " collegamento verificato";
     }
 
 

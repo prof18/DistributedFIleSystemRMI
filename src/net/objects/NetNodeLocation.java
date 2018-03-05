@@ -32,6 +32,6 @@ public class NetNodeLocation implements Serializable {
     }
 
     public String toUrl() {
-        return "rmi://" + ip + ":" + port + "/";
+        return "rmi://" + ip + ":" + port + "/"+name;
     }
 }

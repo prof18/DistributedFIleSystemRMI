@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public interface NetNode extends Remote, Serializable {
 
-    HashMap<Integer,NetNodeLocation> join(String ipNode, int port, String name) throws RemoteException;
+    HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) throws RemoteException;
 
     int getAndSetNum() throws RemoteException;
 
@@ -18,7 +18,9 @@ public interface NetNode extends Remote, Serializable {
 
     String getHostName() throws RemoteException;
 
+    void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) throws RemoteException;
+
     HashMap<Integer, NetNodeLocation> getHashMap() throws RemoteException;
 
-    void updateCoNodes(HashMap<Integer, NetNodeLocation> coNodes) throws RemoteException;
+    String verify() throws RemoteException;
 }
