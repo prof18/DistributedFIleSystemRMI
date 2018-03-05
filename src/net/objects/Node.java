@@ -32,4 +32,6 @@ public interface Node extends Remote, Serializable {
     void updateHashMap(HashMap<String, NodeLocation> nodes) throws RemoteException;
 
     void updateCoNodes(HashMap<String, NodeLocation> coNodes) throws RemoteException;
+
+    void checkNodes() throws RemoteException;
 }

@@ -1,5 +1,6 @@
 package net.objects;
 
+import net.actions.verifyThread;
 import utils.Util;
 
 import java.rmi.AlreadyBoundException;
@@ -57,19 +58,6 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         } catch (RemoteException e) {
             System.out.println(port + " porta occupata");
         }
-
-
-//        boolean portNotFound = true;
-//        while (portNotFound) {
-//            try {
-//                registry = LocateRegistry.createRegistry(port);
-//                portNotFound = false;
-//            } catch (RemoteException e) {
-//                System.out.println(port + " porta occupata");
-//                port++;
-//            }
-//        }
-
 
         String connectPath = "rmi://" + ip + ":" + port + "/" + fsName;
         System.out.println(connectPath);
@@ -151,6 +139,12 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
         System.out.println("[JOIN] -> plot connected nodes");
         Util.plot(connectedNodes);
         System.out.println("connesso");
+
+        System.out.println("Avvio Thread verifica nodi connessi");
+        verifyThread v = new verifyThread(ipNode, hostName, portNode);
+        Thread t = new Thread(v);
+        t.start();
+
         return ret;
     }
 
@@ -209,7 +203,7 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
     }
 
 
-    public void updateCoNodes(HashMap<String, NodeLocation> coNodes) {
+    public synchronized void updateCoNodes(HashMap<String, NodeLocation> coNodes) {
 
         for (Map.Entry<String, NodeLocation> entry : coNodes.entrySet()) {
 
@@ -277,5 +271,46 @@ public class NodeImpl extends UnicastRemoteObject implements Node {
 
         }
         return port;
+    }
+
+    @Override
+    public synchronized void checkNodes() throws RemoteException {
+
+        HashMap<String, NodeLocation> downNodes = new HashMap<>();
+
+        for (Map.Entry<String, NodeLocation> entry : this.connectedNodes.entrySet()) {
+            if (!entry.getKey().equals(hostName)) {
+                System.out.println("Verifico la comunicazione con : " + entry.getValue().toString());
+                Registry registry = null;
+                try {
+
+                    registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
+                    String path = entry.getValue().toUrl() + entry.getKey();
+
+                    Node nodeTemp = (Node) registry.lookup(path);
+                    System.out.println(nodeTemp.saluta());
+
+                } catch (RemoteException e) {
+                    System.out.println("RemoteException problema checkNodes1-- nodo non trovato: " + entry.getKey().toString());
+                    downNodes.put(entry.getKey(),entry.getValue());
+                    e.printStackTrace();
+
+                } catch (NotBoundException e) {
+                    System.out.println("NotBoundException checkNodes2");
+                    e.printStackTrace();
+
+                }
+
+            }
+        }
+
+        for (Map.Entry<String, NodeLocation> entry : this.connectedNodes.entrySet()) {
+            if(connectedNodes.containsKey(entry.getKey())){
+                System.out.println("Rimosso un nodo dai connectedNodes");
+                connectedNodes.remove(entry.getKey());
+            }
+        }
+
+
     }
 }
