@@ -14,7 +14,6 @@ import java.util.Map;
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     private int num = 0;
-
     private String hostName = "host";
 
     //<host,ip>
@@ -62,6 +61,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
         this.connectedNodes = connectedNodes;
+        System.out.println();
+        System.out.println("[MAPPA AGGIORNATA]");
+        Util.plot(this.connectedNodes);
     }
 
     @Override
