@@ -274,4 +274,9 @@ public class FSTreeNode {
         }
         return sb.toString();
     }
+
+    @Override
+    public String toString() {
+        return nameNode;
+    }
 }

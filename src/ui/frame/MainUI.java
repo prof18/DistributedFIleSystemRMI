@@ -5,12 +5,11 @@ import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import ui.dialog.SettingsDialog;
-import ui.utility.DelegateAction;
-import ui.utility.FileViewTableModel;
-import ui.utility.TableItem;
+import ui.utility.*;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileView;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
@@ -66,14 +65,18 @@ public class MainUI extends JFrame {
         setLayout(new GridBagLayout());
 
         //Tree View
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode("The Java Series");
-        createNodes(top);
-        JTree tree = new JTree(top);
+        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+        JTree tree = new JTree();
+        tree.setModel(treeModel);
         //Only One Selection
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.addTreeSelectionListener((TreeSelectionListener) -> {
             System.out.println("Item Selected");
+            //load table ui
         });
+
+        tree.setCellRenderer(new TreeCellRenderer());
+
         tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JScrollPane treeScroll = new JScrollPane(tree);
 
@@ -200,6 +203,7 @@ public class MainUI extends JFrame {
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         if (!goingUp) {
             int row = table.getSelectedRow();
+            //selected table item
             TableItem item = model.getItems().get(row);
             if (item.isFile()) {
                 //open the file
@@ -221,45 +225,6 @@ public class MainUI extends JFrame {
 
     private void openFile(FileWrapper fileWrapper) {
         System.out.println("Opening file");
-    }
-
-    private void createNodes(DefaultMutableTreeNode top) {
-        DefaultMutableTreeNode category = null;
-        DefaultMutableTreeNode book = null;
-
-        category = new DefaultMutableTreeNode("Books for Java Programmers");
-        top.add(category);
-
-        //original Tutorial
-        book = new DefaultMutableTreeNode("The Java Tutorial: A Short Course on the Basics");
-        category.add(book);
-
-        //Tutorial Continued
-        book = new DefaultMutableTreeNode("The Java Tutorial Continued: The Rest of the JDK");
-        category.add(book);
-
-        //JFC Swing Tutorial
-        book = new DefaultMutableTreeNode("The JFC Swing Tutorial: A Guide to Constructing GUIs");
-        category.add(book);
-
-        //Bloch
-        book = new DefaultMutableTreeNode("Effective Java Programming Language Guide");
-        category.add(book);
-
-        //Arnold/Gosling
-        book = new DefaultMutableTreeNode("The Java Programming Language");
-        category.add(book);
-
-        //Chan
-        book = new DefaultMutableTreeNode("The Java Developers Almanac");
-        category.add(book);
-
-        category = new DefaultMutableTreeNode("Books for Java Implementers");
-        top.add(category);
-
-        //VM
-        book = new DefaultMutableTreeNode("The Java Virtual Machine Specification");
-        category.add(book);
     }
 
     private JPanel createDetailsUI() {
@@ -493,7 +458,6 @@ public class MainUI extends JFrame {
         menuBar.add(Box.createHorizontalGlue());
         navigateUpBtn = new JButton("Navigate Up");
         navigateUpBtn.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Action Up");
             //navigate up
             changeTableView(true);
         });

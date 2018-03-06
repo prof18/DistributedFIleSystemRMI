@@ -46,4 +46,9 @@ public class FileWrapper {
     public void setContent(byte[] content) {
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        return fileName;
+    }
 }
