@@ -74,8 +74,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
-        System.out.println();
-        System.out.println("[MAPPA AGGIORNATA]");
+        this.connectedNodes = connectedNodes;
         Util.plot(this.connectedNodes);
     }
 

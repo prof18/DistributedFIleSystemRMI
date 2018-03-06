@@ -68,14 +68,14 @@ public class FlatServiceUtil {
                 System.out.println();
                 for (Map.Entry<Integer, NetNodeLocation> entry : ownNode.getHashMap().entrySet()) {
 
-                    if( !((ownNode.getHost()+port).hashCode()== entry.getKey() || (ipRec + porta).hashCode()== entry.getKey() ) ) {
+                    if( !((ownNode.getHost()+ownNode.getPort()).hashCode()== entry.getKey() || (masterIP + portMaster).hashCode()== entry.getKey() ) ) {
 
                         NetNodeLocation tmp = entry.getValue();
                         String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
 
                         Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(),tmp.getPort());
                         NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
-                        tmpNode.setConnectedNodes(node.getHashMap());
+                        tmpNode.setConnectedNodes(ownNode.getHashMap());
 
                     }
 

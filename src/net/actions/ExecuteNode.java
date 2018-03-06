@@ -67,8 +67,6 @@ public class ExecuteNode {
                 System.out.println();
                 Util.plot(retMap);
                 node.setConnectedNodes(retMap);
-//                System.out.println("[MAPPA AGGIORNATA]");
-//                Util.plot(node.getHashMap());
 
                 //Se i nodi sono solo 2 le Map saranno già aggiornate
                 if (!(retMap.size() == 2)) {

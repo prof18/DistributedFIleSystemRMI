@@ -12,17 +12,29 @@ import java.io.*;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
-
+import java.util.Scanner;
 
 
 public class FlatServiceImpl implements FlatService {
 
-    private NetNodeImpl netNode;
+    private NetNode netNode;
     private String path;
 
     public FlatServiceImpl(String path,String ownIP,String nameService) {
+        Scanner scanner=new Scanner(System.in);
         this.path = path;
-        FlatServiceUtil.create(ownIP,nameService);
+        this.netNode=FlatServiceUtil.create(ownIP,nameService);
+        System.out.println("vuoi connetterti ad un host?");
+        if(scanner.next().equals("y")){
+            System.out.println("inserire indirizzo nuovo host");
+            String masterIP=scanner.next();
+            System.out.println("inserire porta nuovo host");
+            int portMaster=scanner.nextInt();
+            System.out.println("inserire nome nuovo servizio");
+            String nameServiceMaster=scanner.next();
+            FlatServiceUtil.connect(netNode,masterIP,portMaster,nameServiceMaster);
+        }
+
     }
 
 

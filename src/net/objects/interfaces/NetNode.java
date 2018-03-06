@@ -2,7 +2,6 @@ package net.objects.interfaces;
 
 import net.objects.NetNodeLocation;
 import net.objects.NetNodeWrap;
-import org.graalvm.compiler.lir.sparc.SPARCArithmetic;
 
 import java.io.Serializable;
 import java.rmi.Remote;
