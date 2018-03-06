@@ -6,35 +6,27 @@ FlatServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizi
 import fs.actions.interfaces.FlatService;
 import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeImpl;
+import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
 import java.io.*;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Scanner;
 
 
 public class FlatServiceImpl implements FlatService {
 
-    private NetNode netNode;
+    private HashMap<Integer,NetNodeLocation> nodes;
     private String path;
 
     public FlatServiceImpl(String path,String ownIP,String nameService) {
         Scanner scanner=new Scanner(System.in);
         this.path = path;
-        this.netNode=FlatServiceUtil.create(ownIP,nameService);
-        System.out.println("vuoi connetterti ad un host?");
-        if(scanner.next().equals("y")){
-            System.out.println("inserire indirizzo nuovo host");
-            String masterIP=scanner.next();
-            System.out.println("inserire porta nuovo host");
-            int portMaster=scanner.nextInt();
-            System.out.println("inserire nome nuovo servizio");
-            String nameServiceMaster=scanner.next();
-            FlatServiceUtil.connect(netNode,masterIP,portMaster,nameServiceMaster);
-        }
-
+        this.nodes=FlatServiceUtil.create(ownIP,nameService);
+        System.out.println("sono tornato al costruttore");
     }
 
 
