@@ -2,6 +2,7 @@ package net.objects.interfaces;
 
 import net.objects.NetNodeLocation;
 import net.objects.NetNodeWrap;
+import org.graalvm.compiler.lir.sparc.SPARCArithmetic;
 
 import java.io.Serializable;
 import java.rmi.Remote;
@@ -9,6 +10,10 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 
 public interface NetNode extends Remote, Serializable {
+
+    String getHost() throws RemoteException;
+
+    int getPort() throws RemoteException;
 
     HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) throws RemoteException;
 

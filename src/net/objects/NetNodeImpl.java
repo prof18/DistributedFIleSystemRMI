@@ -13,6 +13,8 @@ import java.util.Map;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
+    private String ownIP;
+    private int port;
     private int num = 0;
     private String hostName = "host";
 
@@ -21,10 +23,22 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public NetNodeImpl(String ownIP, int port, String name) throws RemoteException {
         super();
+        this.ownIP=ownIP;
+        this.port=port;
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
         Util.plot(connectedNodes);
+    }
+
+    @Override
+    public String getHost() throws RemoteException {
+        return ownIP;
+    }
+
+    @Override
+    public int getPort() throws RemoteException {
+        return port;
     }
 
     @Override
@@ -60,7 +74,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
-        this.connectedNodes = connectedNodes;
         System.out.println();
         System.out.println("[MAPPA AGGIORNATA]");
         Util.plot(this.connectedNodes);

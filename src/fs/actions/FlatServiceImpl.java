@@ -1,39 +1,28 @@
 package fs.actions;
 
-
+/*
+FlatServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
+ */
 import fs.actions.interfaces.FlatService;
 import fs.objects.structure.FileAttribute;
+import net.objects.NetNodeImpl;
+import net.objects.interfaces.NetNode;
 
 import java.io.*;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 
+
+
 public class FlatServiceImpl implements FlatService {
 
+    private NetNodeImpl netNode;
     private String path;
 
-    public FlatServiceImpl(String path) {
+    public FlatServiceImpl(String path,String ownIP,String nameService) {
         this.path = path;
-
-
-    }
-
-    //sistemare se count è maggiore della lunghezza
-    public static void main(String[] args) throws Exception {
-        FlatServiceImpl impl = new FlatServiceImpl("/home/zigio/Scrivania/prova/");
-        impl.create("ciao");
-        String a = "andrea";
-        String b = "la bella vita che si fa in questo posto è incredibile";
-        byte[] ab = a.getBytes();
-        byte[] bb = b.getBytes();
-        impl.write("ciao", 0, ab.length, ab);
-        System.out.println(new String(impl.read("ciao", 0)));
-        //ho dei problemi in questo punto
-        impl.write("ciao", 0, bb.length, bb);
-        System.out.println(new String(impl.read("ciao", 0)));
-
-
+        FlatServiceUtil.create(ownIP,nameService);
     }
 
 
@@ -43,6 +32,7 @@ public class FlatServiceImpl implements FlatService {
         try {
             File file = new File(path + fileID);
             if (!file.exists()) {
+                //provo a vedere se è nella cache o negli altri nodi
                 throw new FileNotFoundException();
             }
             System.out.println("[READ XX] lunghezza file: " + file.length());
