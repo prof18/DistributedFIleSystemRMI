@@ -1,6 +1,7 @@
 package net.actions;
 
 import net.objects.interfaces.NetNode;
+
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -8,12 +9,12 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 
-public class verifyThread extends UnicastRemoteObject implements Runnable {
+public class GarbageService extends UnicastRemoteObject implements Runnable {
     private String hostname;
     private String ipNode;
     private int portNode;
 
-    public verifyThread(String ip, String host, int port) throws RemoteException {
+    public GarbageService(String ip, String host, int port) throws RemoteException {
 
         hostname = host;
         ipNode = ip;
@@ -48,7 +49,7 @@ public class verifyThread extends UnicastRemoteObject implements Runnable {
 
                 NetNode node = (NetNode) registry.lookup(path);
                 // Chiamo il metodo check solamente se sono presenti altri nodi
-                if (!(node.getHashMap().size()==1)) {
+                if (!(node.getHashMap().size() == 1)) {
                     System.out.println("-CHECK NODES-" + i);
                     i++;
                     node.checkNodes();

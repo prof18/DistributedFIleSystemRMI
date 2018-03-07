@@ -1,7 +1,7 @@
 package net.objects;
 
 import fs.actions.CacheFileWrapper;
-import net.actions.verifyThread;
+import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
@@ -35,9 +35,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         Util.plot(connectedNodes);
 
         System.out.println("AVVIO THREAD");
-        verifyThread v;
+        GarbageService v;
         try {
-            v = new verifyThread(this.ownIP, this.hostName, this.port);
+            v = new GarbageService(this.ownIP, this.hostName, this.port);
             Thread t = new Thread(v);
             t.start();
         } catch (RemoteException e) {

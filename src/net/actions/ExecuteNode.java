@@ -71,27 +71,27 @@ public class ExecuteNode {
                 node.setConnectedNodes(retMap);
                 //Util.plot(node.getHashMap());
 
+                if (node.getHashMap().size() > 2) {
+                    System.out.println();
+                    System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
+                    System.out.println();
+                    for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
-                System.out.println();
-                System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
-                System.out.println();
-                for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
+                        //if (!((ownIP + port).hashCode() == entry.getKey() || (ipRec + porta).hashCode() == entry.getKey())) {
+                        if (!((ownIP + port).hashCode() == entry.getKey())) {
 
-                    //if (!((ownIP + port).hashCode() == entry.getKey() || (ipRec + porta).hashCode() == entry.getKey())) {
-                    if (!((ownIP + port).hashCode() == entry.getKey())) {
+                            NetNodeLocation tmp = entry.getValue();
+                            String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
 
-                        NetNodeLocation tmp = entry.getValue();
-                        String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
+                            Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
+                            NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
+                            tmpNode.setConnectedNodes(node.getHashMap());
 
-                        Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
-                        NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
-                        tmpNode.setConnectedNodes(node.getHashMap());
+                        }
+
 
                     }
-
-
                 }
-
 
             } catch (RemoteException e) {
                 e.printStackTrace();
