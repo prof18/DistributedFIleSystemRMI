@@ -1,10 +1,14 @@
 package ui.frame;
 
 import fs.actions.FSStructure;
+import fs.actions.FlatServiceUtil;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
+import net.objects.NetNodeLocation;
 import ui.dialog.SettingsDialog;
 import ui.utility.*;
+import utils.Constants;
+import utils.PropertiesHelper;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -36,6 +40,15 @@ public class MainUI extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
         this.setJMenuBar(createMenuBar());
+
+        //connect netStuff
+        String ipHost=PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
+        String nameServiceHost=PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
+        String ipRet=PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
+        int portRet=Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
+        String nameRet=PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
+        NetNodeLocation location=new NetNodeLocation(ipRet,portRet,nameRet);
+        FlatServiceUtil.create(ipHost,nameServiceHost,location);
 
         //Loading file system structure
         System.out.println("Loading structure");
