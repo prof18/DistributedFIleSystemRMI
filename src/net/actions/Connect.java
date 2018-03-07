@@ -83,22 +83,6 @@ public class Connect {
             }
         }
 
-        System.out.println("Avvio Thread verifica nodi connessi");
-        verifyThread v;
-        try {
-
-            HashMap<String, NodeLocation> connectedNodes = node.getHashMap();
-            NodeLocation tmp = connectedNodes.get(node.getHostName());
-            int port = tmp.getPort();
-
-            v = new verifyThread(ipHost, node.getHostName(), port);
-            Thread t = new Thread(v);
-            t.start();
-
-        } catch (RemoteException e) {
-            System.out.println("Avvio Thread Remote Exc");
-        }
-
 
     }
 }
