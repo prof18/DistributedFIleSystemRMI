@@ -1,24 +1,19 @@
 package ui.frame;
 
 import fs.actions.FSStructure;
-import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import ui.dialog.SettingsDialog;
 import ui.utility.*;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileView;
 import javax.swing.table.TableColumn;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 
 public class MainUI extends JFrame {
 
@@ -71,8 +66,23 @@ public class MainUI extends JFrame {
         //Only One Selection
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.addTreeSelectionListener((TreeSelectionListener) -> {
-            System.out.println("Item Selected");
+            clearInfo();
             //load table ui
+            Object o = tree.getLastSelectedPathComponent();
+            if (o instanceof FileWrapper) {
+                //its a file
+                FileWrapper fileWrapper = (FileWrapper) o;
+                setFileInfo(fileWrapper);
+            } else {
+                //its a folder
+                FSTreeNode node = (FSTreeNode) o;
+
+                TableItem item = new TableItem();
+                item.setTreeNode(node);
+                item.setFile(false);
+
+                changeTableView(false, item);
+            }
         });
 
         tree.setCellRenderer(new TreeCellRenderer());
@@ -100,7 +110,7 @@ public class MainUI extends JFrame {
         //table listener with enter
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
         table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, "enter");
-        table.getActionMap().put("enter", new DelegateAction(action -> changeTableView(false)));
+        table.getActionMap().put("enter", new DelegateAction(action -> changeTableView(false, null)));
         //table listener with double click
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
@@ -108,7 +118,7 @@ public class MainUI extends JFrame {
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && row != -1) {
-                    changeTableView(false);
+                    changeTableView(false, null);
                 }
             }
         });
@@ -198,13 +208,14 @@ public class MainUI extends JFrame {
         info6VLabel.setText("-");
     }
 
-    private void changeTableView(boolean goingUp) {
+    private void changeTableView(boolean goingUp, TableItem item) {
         clearInfo();
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         if (!goingUp) {
             int row = table.getSelectedRow();
             //selected table item
-            TableItem item = model.getItems().get(row);
+            if (item == null)
+                item = model.getItems().get(row);
             if (item.isFile()) {
                 //open the file
                 openFile(item.getFileWrapper());
@@ -459,7 +470,7 @@ public class MainUI extends JFrame {
         navigateUpBtn = new JButton("Navigate Up");
         navigateUpBtn.addActionListener((ActionListener) -> {
             //navigate up
-            changeTableView(true);
+            changeTableView(true, null);
         });
         menuBar.add(navigateUpBtn);
 
