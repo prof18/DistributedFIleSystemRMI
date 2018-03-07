@@ -26,5 +26,7 @@ public interface NetNode extends Remote, Serializable {
 
     HashMap<Integer, NetNodeLocation> getHashMap() throws RemoteException;
 
+    void checkNodes() throws RemoteException;
+
     String verify() throws RemoteException;
 }
