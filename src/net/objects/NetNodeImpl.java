@@ -1,9 +1,11 @@
 package net.objects;
 
 import fs.actions.CacheFileWrapper;
+import fs.objects.structure.FileAttribute;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
+import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -30,8 +32,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
         Util.plot(connectedNodes);
-
-
 
 
     }
@@ -73,15 +73,32 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
 
-
-
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
     }
 
     @Override
-    public CacheFileWrapper getFile(String UFID) throws RemoteException {
-        return null;
+    public CacheFileWrapper getFile(String path, String UFID) throws RemoteException {
+        File file = new File(path + UFID);
+        FileAttribute fileAttribute = null;
+        if (file.exists()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(path + UFID + ".attr");
+                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+                fileAttribute = (FileAttribute) objectInputStream.readObject();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            NetNodeLocation netNodeLocation = new NetNodeLocation(ownIP, port, hostName);
+            return new CacheFileWrapper(file, fileAttribute, netNodeLocation);
+        } else
+            return null;
+
+
     }
 
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
