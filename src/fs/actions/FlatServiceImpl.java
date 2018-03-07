@@ -1,39 +1,34 @@
 package fs.actions;
 
-
+/*
+FlatServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
+ */
 import fs.actions.interfaces.FlatService;
 import fs.objects.structure.FileAttribute;
+import net.objects.NetNodeImpl;
+import net.objects.NetNodeLocation;
+import net.objects.interfaces.NetNode;
 
 import java.io.*;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Scanner;
+
 
 public class FlatServiceImpl implements FlatService {
 
+    private HashMap<Integer,NetNodeLocation> nodes;
     private String path;
+    private NodeCache nodeCache;
 
-    public FlatServiceImpl(String path) {
+    public FlatServiceImpl(String path,String ownIP,String nameService) {
+        Scanner scanner=new Scanner(System.in);
         this.path = path;
-
-
-    }
-
-    //sistemare se count è maggiore della lunghezza
-    public static void main(String[] args) throws Exception {
-        FlatServiceImpl impl = new FlatServiceImpl("/home/zigio/Scrivania/prova/");
-        impl.create("ciao");
-        String a = "andrea";
-        String b = "la bella vita che si fa in questo posto è incredibile";
-        byte[] ab = a.getBytes();
-        byte[] bb = b.getBytes();
-        impl.write("ciao", 0, ab.length, ab);
-        System.out.println(new String(impl.read("ciao", 0)));
-        //ho dei problemi in questo punto
-        impl.write("ciao", 0, bb.length, bb);
-        System.out.println(new String(impl.read("ciao", 0)));
-
-
+        this.nodes=FlatServiceUtil.create(ownIP,nameService);
+        System.out.println("sono tornato al costruttore");
+        nodeCache=new NodeCache();
     }
 
 
@@ -43,6 +38,19 @@ public class FlatServiceImpl implements FlatService {
         try {
             File file = new File(path + fileID);
             if (!file.exists()) {
+                CacheFileWrapper retFile = nodeCache.get(fileID);
+                if(retFile!=null){
+                    System.out.println("file trovato nella cache");
+                    //devo controllare se è ancora valido il file salvato nella cache
+                    long elapsedTime=Date.from(Instant.now()).getTime()-retFile.getLastValidatedTime();
+                    if(elapsedTime<nodeCache.getTimeInterval()){
+                        System.out.println("il file è ancora valido");
+                    }
+                    else{
+                        //devo andare a prendere l'instante dell'ultima modifica sul server e sulla cache
+
+                    }
+                }
                 throw new FileNotFoundException();
             }
             System.out.println("[READ XX] lunghezza file: " + file.length());

@@ -8,16 +8,16 @@ import net.objects.NetNodeLocation;
 import java.util.*;
 
 public class Util {
-    public static void plot(HashMap<String, NetNodeLocation> hashMap){
-        String leftAlignFormat = "| %-10s | %-10s | %-8d | %n";
+    public static void plot(HashMap<Integer, NetNodeLocation> hashMap){
+        String leftAlignFormat = "| %-15d | %-10s | %-8d |  %-8s|%n";
 
-        System.out.format("+------------+------------+----------+%n");
-        System.out.format("| NameHost   | Ip         | Port     |%n");
-        System.out.format("+------------+------------+----------+%n");
+        System.out.format("+-----------------+------------+----------+----------+%n");
+        System.out.format("| NameHost        | Ip         | Port     |   Name   |%n");
+        System.out.format("+-----------------+------------+----------+----------+%n");
 
-        for(Map.Entry<String,NetNodeLocation> entry:hashMap.entrySet()){
-            System.out.format(leftAlignFormat,entry.getKey(),entry.getValue().getIp(),entry.getValue().getPort());
-            System.out.format("+------------+------------+----------+%n");
+        for(Map.Entry<Integer,NetNodeLocation> entry:hashMap.entrySet()){
+            System.out.format(leftAlignFormat,entry.getKey(),entry.getValue().getIp(),entry.getValue().getPort(),entry.getValue().getName());
+            System.out.format("+-----------------+------------+----------+----------+%n");
         }
 
     }

@@ -17,72 +17,71 @@ import java.util.Map;
 public class Connect {
 
     public static void join(String ipMaster, String name, String ipHost) {
-        System.out.println("ipMaster = " + ipMaster);
-        System.out.println("ipHost = " + ipHost);
-        System.out.println("name = " + name);
-        NetNode node = null;
-        NetNodeWrap nodi = null;
-        try {
-            node = new NetNodeImpl();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        try {
-            //modificare qui ipMaster e ipNode
-            nodi = node.join(ipMaster, name, ipHost);
-            System.out.println("mi sono aggiunto al filesystem");
-            System.out.println("numero di nodi " + nodi.getNodes().size());
-            Util.plot(nodi.getNodes());
-
-            node.updateCoNodes(nodi.getNodes());
-
-            System.out.println();
-            System.out.println();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        System.out.println("sono il nodo : " + nodi.getOwnNode());
-        System.out.println("cosa vuoi fare ...");
-        for (Map.Entry<String, NetNodeLocation> entry : nodi.getNodes().entrySet()) {
-            if (!entry.getKey().equals(nodi.getOwnNode())) {
-                System.out.println("Comunicazione con : " + entry.getValue().toString());
-                Registry registry = null;
-                try {
-                    System.setProperty("java.rmi.server.hostname", ipHost);
-                    registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
-                    String path = entry.getValue().toUrl() + entry.getKey();
-                    System.out.println(path);
-                    System.out.println(registry.toString());
-                    String[] lista = registry.list();
-                    for (String tmp : lista) {
-                        System.out.println(tmp);
-                    }
-                    System.out.println("path problema :" + path);
-                    NetNode nodeTemp = (NetNode) registry.lookup(path);
-                    System.out.println(nodeTemp.saluta());
-
-                    System.out.println(node.getHashMap().toString());
-                    System.out.println(nodi.getNodes().toString());
-                    System.out.println(nodeTemp.getHashMap().toString());
-
-                    System.out.println("UpdateCoNodes");
-                    nodeTemp.updateCoNodes(node.getHashMap());
-
-                } catch (RemoteException e) {
-                    System.out.println("problema strano1");
-                    e.printStackTrace();
-
-                } catch (NotBoundException e) {
-                    System.out.println("non trovato errore1");
-                    e.printStackTrace();
-
-                }
-
-            }
-        }
-
-
-    }
+        //TODO da sistemare una volta finito
+//        System.out.println("ipMaster = " + ipMaster);
+//        System.out.println("ipHost = " + ipHost);
+//        System.out.println("name = " + name);
+//        NetNode node = null;
+//        NetNodeWrap nodi = null;
+//        try {
+//            node = new NetNodeImpl();
+//        } catch (RemoteException e) {
+//            e.printStackTrace();
+//            System.exit(-1);
+//        }
+//        try {
+//            //modificare qui ipMaster e ipNode
+//            nodi = node.join(ipMaster, name, ipHost);
+//            System.out.println("mi sono aggiunto al filesystem");
+//            System.out.println("numero di nodi " + nodi.getNodes().size());
+//            Util.plot(nodi.getNodes());
+//
+//            node.updateCoNodes(nodi.getNodes());
+//
+//            System.out.println();
+//            System.out.println();
+//        } catch (RemoteException e) {
+//            e.printStackTrace();
+//            System.exit(-1);
+//        }
+//        System.out.println("sono il nodo : " + nodi.getOwnNode());
+//        System.out.println("cosa vuoi fare ...");
+//        for (Map.Entry<String, NetNodeLocation> entry : nodi.getNodes().entrySet()) {
+//            if (!entry.getKey().equals(nodi.getOwnNode())) {
+//                System.out.println("Comunicazione con : " + entry.getValue().toString());
+//                Registry registry = null;
+//                try {
+//                    System.setProperty("java.rmi.server.hostname", ipHost);
+//                    registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
+//                    String path = entry.getValue().toUrl() + entry.getKey();
+//                    System.out.println(path);
+//                    System.out.println(registry.toString());
+//                    String[] lista = registry.list();
+//                    for (String tmp : lista) {
+//                        System.out.println(tmp);
+//                    }
+//                    System.out.println("path problema :" + path);
+//                    NetNode nodeTemp = (NetNode) registry.lookup(path);
+//                    System.out.println(nodeTemp.saluta());
+//
+//                    System.out.println(node.getHashMap().toString());
+//                    System.out.println(nodi.getNodes().toString());
+//                    System.out.println(nodeTemp.getHashMap().toString());
+//
+//                    System.out.println("UpdateCoNodes");
+//                    nodeTemp.updateCoNodes(node.getHashMap());
+//
+//                } catch (RemoteException e) {
+//                    System.out.println("problema strano1");
+//                    e.printStackTrace();
+//
+//                } catch (NotBoundException e) {
+//                    System.out.println("non trovato errore1");
+//                    e.printStackTrace();
+//
+//                }
+//
+//            }
+//        }
+  }
 }
