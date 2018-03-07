@@ -3,7 +3,7 @@ package fs.actions;
 import java.util.HashMap;
 
 public class NodeCache {
-    private final int timeInterval = 3000;   //in ms
+    private final long timeInterval = 3000;   //in ms
     HashMap<String, CacheFileWrapper> cache;
 
     public NodeCache() {
@@ -19,5 +19,7 @@ public class NodeCache {
         return ret;
     }
 
-
+    public long getTimeInterval() {
+        return timeInterval;
+    }
 }

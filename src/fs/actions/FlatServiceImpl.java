@@ -21,12 +21,14 @@ public class FlatServiceImpl implements FlatService {
 
     private HashMap<Integer,NetNodeLocation> nodes;
     private String path;
+    private NodeCache nodeCache;
 
     public FlatServiceImpl(String path,String ownIP,String nameService) {
         Scanner scanner=new Scanner(System.in);
         this.path = path;
         this.nodes=FlatServiceUtil.create(ownIP,nameService);
         System.out.println("sono tornato al costruttore");
+        nodeCache=new NodeCache();
     }
 
 
@@ -36,7 +38,19 @@ public class FlatServiceImpl implements FlatService {
         try {
             File file = new File(path + fileID);
             if (!file.exists()) {
-                //provo a vedere se è nella cache o negli altri nodi
+                CacheFileWrapper retFile = nodeCache.get(fileID);
+                if(retFile!=null){
+                    System.out.println("file trovato nella cache");
+                    //devo controllare se è ancora valido il file salvato nella cache
+                    long elapsedTime=Date.from(Instant.now()).getTime()-retFile.getLastValidatedTime();
+                    if(elapsedTime<nodeCache.getTimeInterval()){
+                        System.out.println("il file è ancora valido");
+                    }
+                    else{
+                        //devo andare a prendere l'instante dell'ultima modifica sul server e sulla cache
+
+                    }
+                }
                 throw new FileNotFoundException();
             }
             System.out.println("[READ XX] lunghezza file: " + file.length());
