@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class FlatServiceUtil {
-    public static HashMap<Integer, NetNodeLocation> create(String ownIP, String nameService) {
+    public static HashMap<Integer, NetNodeLocation> create(String ownIP, String nameService,NetNodeLocation locationRet) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
         Registry registry = null;
@@ -45,20 +45,13 @@ public class FlatServiceUtil {
         } catch (AlreadyBoundException e) {
             e.printStackTrace();
         }
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("indirizzo a cui connettersi ");
-        String ipRec = scanner.next();
-        System.out.println("porta a cui è salvato ");
-        int porta = scanner.nextInt();
-        System.out.println("nome del servizio ");
-        String nome = scanner.next();
-        String recPat = "rmi://" + ipRec + ":" + porta + "/" + nome;
+        String recPat = locationRet.toUrl();
         try {
-            Registry registryRec = LocateRegistry.getRegistry(ipRec, porta);
+            Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
             NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
             System.out.println("[AGGIORNAMENTO NODI]");
-            HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, nome);
+            HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, locationRet.getName());
             System.out.println();
             System.out.println("[MAPPA RITORNATA]");
             System.out.println();
@@ -73,7 +66,7 @@ public class FlatServiceUtil {
                 System.out.println();
                 for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
-                    if (!((ownIP + port).hashCode() == entry.getKey() || (ipRec + porta).hashCode() == entry.getKey())) {
+                    if (!((ownIP + port).hashCode() == entry.getKey() || (locationRet.getIp() + locationRet.getPort()).hashCode() == entry.getKey())) {
 
                         NetNodeLocation tmp = entry.getValue();
                         String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
