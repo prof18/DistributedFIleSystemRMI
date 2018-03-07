@@ -15,11 +15,12 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class ExecuteNode {
-    private static String ownIP="localhost";
-    private static String nameService="host";
-    public static void main(String[] args){
+    private static String ownIP = "localhost";
+    private static String nameService = "host";
+
+    public static void main(String[] args) {
         System.setProperty("java.rmi.server.hostname", ownIP);
-        NetNode node=null;
+        NetNode node = null;
         Registry registry = null;
         int port = 1099;
         boolean notFound = true;
@@ -33,7 +34,7 @@ public class ExecuteNode {
             }
         }
         try {
-            node = new NetNodeImpl(ownIP,port,nameService);
+            node = new NetNodeImpl(ownIP, port, nameService);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -61,35 +62,35 @@ public class ExecuteNode {
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
                 System.out.println("[AGGIORNAMENTO NODI]");
-                HashMap<Integer,NetNodeLocation> retMap= node1.join(ownIP,port,nome);
+                HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, nome);
                 System.out.println();
                 System.out.println("[MAPPA RITORNATA]");
                 System.out.println();
                 Util.plot(retMap);
+                System.out.println("[MAPPA AGGIORNATA]");
                 node.setConnectedNodes(retMap);
+                //Util.plot(node.getHashMap());
 
-                //Se i nodi sono solo 2 le Map saranno già aggiornate
-                if (!(retMap.size() == 2)) {
-                    System.out.println();
-                    System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
-                    System.out.println();
-                    for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
-                        if( !((ownIP+port).hashCode()== entry.getKey() || (ipRec + porta).hashCode()== entry.getKey() ) ) {
+                System.out.println();
+                System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
+                System.out.println();
+                for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
-                            NetNodeLocation tmp = entry.getValue();
-                            String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
+                    //if (!((ownIP + port).hashCode() == entry.getKey() || (ipRec + porta).hashCode() == entry.getKey())) {
+                    if (!((ownIP + port).hashCode() == entry.getKey())) {
 
-                            Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(),tmp.getPort());
-                            NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
-                            tmpNode.setConnectedNodes(node.getHashMap());
+                        NetNodeLocation tmp = entry.getValue();
+                        String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
 
-                        }
-
+                        Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
+                        NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
+                        tmpNode.setConnectedNodes(node.getHashMap());
 
                     }
-                }
 
+
+                }
 
 
             } catch (RemoteException e) {

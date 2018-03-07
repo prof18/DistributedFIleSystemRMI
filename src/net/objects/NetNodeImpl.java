@@ -1,6 +1,7 @@
 package net.objects;
 
 import fs.actions.CacheFileWrapper;
+import net.actions.verifyThread;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
@@ -26,12 +27,23 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         super();
         this.ownIP = ownIP;
         this.port = port;
+        this.hostName = name;
+
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
         Util.plot(connectedNodes);
 
-
+        System.out.println("AVVIO THREAD");
+        verifyThread v;
+        try {
+            v = new verifyThread(this.ownIP, this.hostName, this.port);
+            Thread t = new Thread(v);
+            t.start();
+        } catch (RemoteException e) {
+            System.out.println("Avvio Thread Remote Exc");
+            e.printStackTrace();
+        }
 
 
     }
@@ -73,8 +85,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
 
-
-
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
     }
@@ -84,8 +94,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return null;
     }
 
-    public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
-        this.connectedNodes = connectedNodes;
+    public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> coNodes) {
+
+        for (Map.Entry<Integer, NetNodeLocation> entry : coNodes.entrySet()) {
+
+            this.connectedNodes.putIfAbsent(entry.getKey(),entry.getValue());
+
+        }
+
         Util.plot(this.connectedNodes);
     }
 
@@ -97,10 +113,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     public synchronized void checkNodes() throws RemoteException {
 
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
-
+        System.out.println("Size ConnectedNodes: "+ this.connectedNodes.size());
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
 
-            if ((ownIP + port).hashCode() == entry.getKey()) {
+            if ( !((ownIP + port).hashCode() == entry.getKey()) ) {
 
                 System.out.println("[ CHECKNODES ]");
 
@@ -126,7 +142,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 } catch (RemoteException e) {
                     System.out.println("NODO non trovato alla porta: " + tmpPort + "; Ip: " + tmpIp);
                     downNodes.put(entry.getKey(), entry.getValue());
-                    e.printStackTrace();
+                    //e.printStackTrace();
 
                 } catch (NotBoundException e) {
                     System.out.println("NotBoundException checkNodes2");
@@ -134,13 +150,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 }
 
-            }
+            } //else System.out.println("NON CI SONO NODI DA CONTROLLARE");
         }
 
         for (Map.Entry<Integer, NetNodeLocation> entry : downNodes.entrySet()) {
             if (connectedNodes.containsKey(entry.getKey())) {
                 System.out.println("RIMOSSO NODO, porta: " + entry.getValue().getPort() + "; Ip: " + entry.getValue().getIp());
                 connectedNodes.remove(entry.getKey());
+                Util.plot(this.connectedNodes);
             }
         }
 

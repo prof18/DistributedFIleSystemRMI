@@ -26,10 +26,11 @@ public class verifyThread extends UnicastRemoteObject implements Runnable {
     public void run() {
         System.out.println("THREAD RUN");
         System.out.println(" ");
+        int i = 0;
         while (true) {
             String path = null;
             try {
-                Thread.sleep(10000);
+                Thread.sleep(60000);
 
                 Registry registry = null;
                 registry = LocateRegistry.getRegistry(ipNode, portNode);
@@ -46,7 +47,13 @@ public class verifyThread extends UnicastRemoteObject implements Runnable {
 //                }
 
                 NetNode node = (NetNode) registry.lookup(path);
-                node.checkNodes();
+                // Chiamo il metodo check solamente se sono presenti altri nodi
+                if (!(node.getHashMap().size()==1)) {
+                    System.out.println("-CHECK NODES-" + i);
+                    i++;
+                    node.checkNodes();
+                }
+
 
             } catch (InterruptedException e) {
                 System.out.println("InterruptedException Verify Thread");
