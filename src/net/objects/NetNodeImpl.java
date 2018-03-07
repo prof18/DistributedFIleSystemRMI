@@ -1,5 +1,6 @@
 package net.objects;
 
+import fs.actions.CacheFileWrapper;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
@@ -29,6 +30,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
         Util.plot(connectedNodes);
+
+
+
+
     }
 
     @Override
@@ -68,8 +73,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
 
+
+
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
+    }
+
+    @Override
+    public CacheFileWrapper getFile(String UFID) throws RemoteException {
+        return null;
     }
 
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {

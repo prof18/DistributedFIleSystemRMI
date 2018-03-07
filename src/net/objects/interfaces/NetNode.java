@@ -1,5 +1,6 @@
 package net.objects.interfaces;
 
+import fs.actions.CacheFileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.NetNodeWrap;
 
@@ -25,6 +26,8 @@ public interface NetNode extends Remote, Serializable {
     void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) throws RemoteException;
 
     HashMap<Integer, NetNodeLocation> getHashMap() throws RemoteException;
+
+    CacheFileWrapper getFile(String UFID) throws  RemoteException;
 
     void checkNodes() throws RemoteException;
 
