@@ -1,6 +1,7 @@
 //package net.actions;
 //
 //import net.objects.Node;
+//import net.objects.interfaces.NetNode;
 //
 //import java.rmi.NotBoundException;
 //import java.rmi.RemoteException;
@@ -36,17 +37,17 @@
 //                registry = LocateRegistry.getRegistry(ipNode, portNode);
 //                path = "rmi://" + ipNode + ":" + portNode + "/" + hostname;
 //
-//                System.out.println("ipNode "+ipNode);
-//                System.out.println("portNode "+portNode);
-//                System.out.println("host "+hostname);
-//                System.out.println(" ");
+////                System.out.println("ipNode "+ipNode);
+////                System.out.println("portNode "+portNode);
+////                System.out.println("host "+hostname);
+////                System.out.println(" ");
 //
-//                String[] service = registry.list();
-//                for (String tmp : service) {
-//                    System.out.println(tmp);
-//                }
-//                Node node = (Node) registry.lookup(path);
+////                String[] service = registry.list();
+////                for (String tmp : service) {
+////                    System.out.println(tmp);
+////                }
 //
+//                NetNode node = (NetNode) registry.lookup(path);
 //                node.checkNodes();
 //
 //            } catch (InterruptedException e) {

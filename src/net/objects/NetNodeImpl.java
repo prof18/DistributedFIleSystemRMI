@@ -23,8 +23,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public NetNodeImpl(String ownIP, int port, String name) throws RemoteException {
         super();
-        this.ownIP=ownIP;
-        this.port=port;
+        this.ownIP = ownIP;
+        this.port = port;
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
@@ -42,7 +42,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) throws RemoteException {
+    public synchronized HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) throws RemoteException {
         System.out.println("si è connesso un nuovo nodo: " + ipNode + " " + port + " " + name);
         connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, name));
         System.out.println("[JOIN]");
@@ -59,7 +59,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
 
     public NetNodeWrap add(String ip, int port) throws RemoteException {
-
         return null;
     }
 
@@ -73,15 +72,67 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return connectedNodes;
     }
 
-    public void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
+    public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
         this.connectedNodes = connectedNodes;
         Util.plot(this.connectedNodes);
     }
 
     @Override
     public String verify() throws RemoteException {
-        return " collegamento verificato";
+        return "--COLLEGAMENTO VERIFICATO--";
     }
 
+    public synchronized void checkNodes() throws RemoteException {
+
+        HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
+
+        for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
+
+            if ((ownIP + port).hashCode() == entry.getKey()) {
+
+                System.out.println("[ CHECKNODES ]");
+
+                Registry registry = null;
+
+                String tmpIp = "-NOT UPDATE-";
+                int tmpPort = -1;
+                String tmpName = "-NOT UPDATE-";
+
+                try {
+
+                    tmpIp = entry.getValue().getIp();
+                    tmpPort = entry.getValue().getPort();
+                    tmpName = entry.getValue().getName();
+
+                    registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
+                    String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
+
+                    NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+                    System.out.println(nodeTemp.verify());
+
+                } catch (RemoteException e) {
+                    System.out.println("NODO non trovato alla porta: " + tmpPort + "; Ip: " + tmpIp);
+                    downNodes.put(entry.getKey(), entry.getValue());
+                    e.printStackTrace();
+
+                } catch (NotBoundException e) {
+                    System.out.println("NotBoundException checkNodes2");
+                    e.printStackTrace();
+
+                }
+
+            }
+        }
+
+        for (Map.Entry<Integer, NetNodeLocation> entry : downNodes.entrySet()) {
+            if (connectedNodes.containsKey(entry.getKey())) {
+                System.out.println("RIMOSSO NODO, porta: " + entry.getValue().getPort() + "; Ip: " + entry.getValue().getIp());
+                connectedNodes.remove(entry.getKey());
+            }
+        }
+
+
+    }
 
 }
