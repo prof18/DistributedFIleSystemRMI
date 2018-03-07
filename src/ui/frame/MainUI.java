@@ -76,12 +76,11 @@ public class MainUI extends JFrame {
             } else {
                 //its a folder
                 FSTreeNode node = (FSTreeNode) o;
-
                 TableItem item = new TableItem();
                 item.setTreeNode(node);
                 item.setFile(false);
-
                 changeTableView(false, item);
+                setFolderInfo(node);
             }
         });
 
@@ -174,7 +173,7 @@ public class MainUI extends JFrame {
         if (fileWrapper != null) {
             fileNameVLabel.setText(fileWrapper.getFileName());
             typeVLabel.setText(fileWrapper.getAttribute().getType());
-            pathVLabel.setText("<to compute>");
+            pathVLabel.setText(fileWrapper.getPath());
             fileSizeVLabel.setText(String.valueOf(fileWrapper.getAttribute().getFileLength()));
             ownerVLabel.setText(fileWrapper.getAttribute().getOwner());
             if (fileWrapper.getAttribute().getLastModifiedTime() != null)
@@ -186,7 +185,7 @@ public class MainUI extends JFrame {
         if (node != null) {
             fileNameVLabel.setText(node.getNameNode());
             typeVLabel.setText("folder");
-            pathVLabel.setText("<to compute>");
+            pathVLabel.setText(node.getPath());
             fileSizeVLabel.setText("<to compute>");
             lastEditVLabel.setText("<to compute>");
         }

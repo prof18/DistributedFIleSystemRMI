@@ -6,6 +6,7 @@ public class JsonFile {
 
     private String fileName;
     private String UFID;
+    private String path;
     private FileAttribute attribute;
 
     public JsonFile() {
@@ -39,6 +40,14 @@ public class JsonFile {
 
     public void setAttribute(FileAttribute attribute) {
         this.attribute = attribute;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override

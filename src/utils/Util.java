@@ -85,6 +85,7 @@ public class Util {
         String UFIDFile1 = UUID.randomUUID().toString();
         file1.setUFID(UFIDFile1);
         file1.setFileName("File 1");
+        file1.setPath("/File 1");
         FileAttribute attribute1 = new FileAttribute();
         attribute1.setFileLength(2048L);
         attribute1.setOwner("marco");
@@ -97,6 +98,7 @@ public class Util {
         String UFIDFile2 = UUID.randomUUID().toString();
         file2.setUFID(UFIDFile2);
         file2.setFileName("File 2");
+        file2.setPath("/File 2");
         FileAttribute attribute2 = new FileAttribute();
         attribute2.setFileLength(10556L);
         attribute2.setOwner("lr");
@@ -109,6 +111,7 @@ public class Util {
         String UFIDFile3 = UUID.randomUUID().toString();
         file3.setUFID(UFIDFile3);
         file3.setFileName("File 3");
+        file3.setPath("/Folder 1 /Folder 2/File 3");
         FileAttribute attribute3 = new FileAttribute();
         attribute3.setFileLength(25478L);
         attribute3.setOwner("zigio");

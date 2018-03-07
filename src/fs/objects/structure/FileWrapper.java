@@ -4,6 +4,7 @@ public class FileWrapper {
 
     private String fileName;
     private String UFID;
+    private String path;
     private FileAttribute attribute;
     private byte[] content; //fare checksum per verificare correttezza messaggio
 
@@ -45,6 +46,14 @@ public class FileWrapper {
 
     public void setContent(byte[] content) {
         this.content = content;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override

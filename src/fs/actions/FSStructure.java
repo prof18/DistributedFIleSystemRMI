@@ -92,6 +92,7 @@ public class FSStructure {
                             file.setAttribute(jsonFile.getAttribute());
                             file.setUFID(jsonFile.getUFID());
                             file.setFileName(jsonFile.getFileName());
+                            file.setPath(jsonFile.getPath());
                             files.add(file);
                         }
                     }
