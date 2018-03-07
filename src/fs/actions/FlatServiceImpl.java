@@ -1,41 +1,50 @@
-package fs.objects;
+package fs.actions;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import fs.actions.interfaces.FlatService;
+import fs.objects.structure.FileAttribute;
+
+import java.io.*;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 
-public class FlatImpl {
+public class FlatServiceImpl implements FlatService {
 
     private String path;
 
-    public FlatImpl(String path) {
+    public FlatServiceImpl(String path) {
         this.path = path;
+
+
     }
 
     //sistemare se count è maggiore della lunghezza
-    public static void main(String[] args) {
-        FlatImpl impl = new FlatImpl("/home/zigio/Scrivania/prova/");
+    public static void main(String[] args) throws Exception {
+        FlatServiceImpl impl = new FlatServiceImpl("/home/zigio/Scrivania/prova/");
+        impl.create("ciao");
         String a = "andrea";
-        String b = "davide";
+        String b = "la bella vita che si fa in questo posto è incredibile";
         byte[] ab = a.getBytes();
         byte[] bb = b.getBytes();
         impl.write("ciao", 0, ab.length, ab);
-        System.out.println(new String(impl.read("ciao", 0, 6)));
+        System.out.println(new String(impl.read("ciao", 0)));
         //ho dei problemi in questo punto
-        impl.write("ciao", 1, bb.length, bb);
-        System.out.println(new String(impl.read("ciao", 0, 7)));
+        impl.write("ciao", 0, bb.length, bb);
+        System.out.println(new String(impl.read("ciao", 0)));
+
 
     }
 
 
-    public byte[] read(String fileID, int offset, int count) {
+    public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
         FileInputStream fileInputStream = null;
         byte[] content = null;
         try {
             File file = new File(path + fileID);
+            if (!file.exists()) {
+                throw new FileNotFoundException();
+            }
             System.out.println("[READ XX] lunghezza file: " + file.length());
             content = new byte[(int) file.length()];
             fileInputStream = new FileInputStream(file);
@@ -49,8 +58,11 @@ public class FlatImpl {
         return content;
     }
 
-    public byte[] read(String fileID, int offset) {
+    public byte[] read(String fileID, int offset) throws FileNotFoundException {
         File file = new File(path + fileID);
+        if (!file.exists()) {
+            throw new FileNotFoundException();
+        }
         long length = file.length();
         System.out.println("[READ]: lunghezza file " + length);
         byte[] content = read(fileID, offset, (int) length);
@@ -59,7 +71,7 @@ public class FlatImpl {
     }
 
 
-    public void write(String fileID, int offset, int count, byte[] data) {
+    public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         byte[] newContent = null;
         try {
             byte[] content = read(fileID, 0);
@@ -74,7 +86,7 @@ public class FlatImpl {
         FileOutputStream fileOutputStream = null;
         try {
             File file = new File(path + fileID);
-            file.delete();
+            System.out.println(file.delete());
             file = new File(path + fileID);
             fileOutputStream = new FileOutputStream(file);
             System.out.println("newContent = " + new String(newContent));
@@ -85,22 +97,68 @@ public class FlatImpl {
     }
 
 
-    public String create(String dir, String name, FileAttribute attribute) {
-        return null;
+    public String create(String name, FileAttribute attribute) throws Exception {
+        File file = new File(name);
+        if (file.exists()) {
+            throw new Exception();
+        }
+        file.createNewFile();
+        File fileAttr = new File(name + ".attr");
+        FileOutputStream fileOutputStream = new FileOutputStream(name + ".attr");
+        ObjectOutputStream outputStream = new ObjectOutputStream(fileOutputStream);
+        outputStream.writeObject(fileAttr);
+        outputStream.close();
+        return "dir" + "name";
+    }
+
+    @Override
+    public String create(String name) throws Exception {
+        Date date = Date.from(Instant.now());
+        FileAttribute attribute = new FileAttribute(0, date, date, 1);
+        create(path + name, attribute);
+        return path + name;
     }
 
     public void delete(String fileID) {
-
+        File file = new File(path + fileID);
+        File fileAttr = new File(path + fileID + ".attr");
+        System.out.println(file.delete());
+        System.out.println(fileAttr.delete());
     }
 
 
     public FileAttribute getAttributes(String fileID) {
-        return null;
+        FileInputStream fileInputStream = null;
+        ObjectInputStream objectInputStream = null;
+        FileAttribute fileAttribute = null;
+        try {
+            fileInputStream = new FileInputStream(fileID + ".attr");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            objectInputStream = new ObjectInputStream(fileInputStream);
+            fileAttribute = (FileAttribute) objectInputStream.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return fileAttribute;
+
     }
 
 
     public void setAttributes(String fileID, FileAttribute attr) {
-
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(fileID + ".attr");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(attr);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws Exception {
@@ -121,6 +179,7 @@ public class FlatImpl {
         }
         while (i < first.length) {
             ret[i] = first[i];
+            i++;
         }
         System.out.println("[JOIN]: la stringa concatenata: " + new String(ret));
         byte[] cleanRet = cleanArray(ret);

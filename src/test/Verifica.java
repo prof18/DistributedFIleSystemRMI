@@ -1,6 +1,6 @@
 package test;
 
-import net.objects.Node;
+import net.objects.interfaces.NetNode;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -17,8 +17,8 @@ public class Verifica {
         String[] lista=registry.list();
         for(String riga:lista){
             System.out.println(riga);
-            Node node=(Node)registry.lookup(riga);
-            System.out.println(node.saluta());
+            NetNode netNode =(NetNode)registry.lookup(riga);
+            System.out.println(netNode.saluta());
         }
     }
 }

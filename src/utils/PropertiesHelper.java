@@ -37,7 +37,7 @@ public class PropertiesHelper {
             return props.getProperty(key);
         } catch (IOException e) {
             System.out.println("Config not found");
-            return "";
+            return null;
         }
     }
 

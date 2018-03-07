@@ -1,84 +1,138 @@
-package ui;
+package ui.frame;
 
+import fs.actions.FSStructure;
+import fs.objects.structure.FSTreeNode;
+import fs.objects.structure.FileWrapper;
 import ui.dialog.SettingsDialog;
-import ui.utils.FileViewTableModel;
+import ui.utility.*;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.plaf.BorderUIResource;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
 
 public class MainUI extends JFrame {
 
     private LogUI logUI;
 
-    private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel,
-            ownerVLabel, lastEditVLabel;
-
-    String[] files = {"Folder1", "Folder2", "File1"};
+    private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
+    private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
+    private FSStructure fsStructure;
+    private JButton navigateUpBtn;
+    private JTable table;
+    private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
 
     public MainUI() {
         super("LR18 File System");
 
-
-        //"Creare" cartella file system se non è presente
-        //Guardare se ci sono già le configurazioni nel file system
-
-        //Se non è presente nessuna configurazione, eseguire primo nodo
-
-        //Se è presente
-
         //Create and show the main UI block
         setLocationRelativeTo(null);
-        setSize(1000, 700);
+        setSize(1050, 700);
         setVisible(true);
         setLocationRelativeTo(null);
         setVisible(true);
         this.setJMenuBar(createMenuBar());
 
+        //Loading file system structure
+        System.out.println("Loading structure");
+        fsStructure = FSStructure.getInstance();
+        fsStructure.generateTreeStructure();
+        FSTreeNode directoryTree = fsStructure.getTree();
+        System.out.println(directoryTree.printTree());
+        //if root, disable the navigate up button
+        if (directoryTree.isRoot())
+            navigateUpBtn.setEnabled(false);
 
-        System.out.println("Loading config");
+        //Generate Tree View
+
+        //Generate details view
 
         JPanel rightWrapper = new JPanel(new GridBagLayout());
 
-        //File UI
+        //FileWrapper UI
         JPanel filesUI = new JPanel(new GridLayout());
-        //File Details
+        //FileWrapper Details
         JPanel filesDetail = createDetailsUI();
         setLayout(new GridBagLayout());
 
         //Tree View
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode("The Java Series");
-        createNodes(top);
-        JTree tree = new JTree(top);
+        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+        JTree tree = new JTree();
+        tree.setModel(treeModel);
         //Only One Selection
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.addTreeSelectionListener((TreeSelectionListener) -> {
-            System.out.println("Item Selected");
+            clearInfo();
+            //load table ui
+            Object o = tree.getLastSelectedPathComponent();
+            if (o instanceof FileWrapper) {
+                //its a file
+                FileWrapper fileWrapper = (FileWrapper) o;
+                setFileInfo(fileWrapper);
+            } else {
+                //its a folder
+                FSTreeNode node = (FSTreeNode) o;
+
+                TableItem item = new TableItem();
+                item.setTreeNode(node);
+                item.setFile(false);
+
+                changeTableView(false, item);
+            }
         });
+
+        tree.setCellRenderer(new TreeCellRenderer());
+
         tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JScrollPane treeScroll = new JScrollPane(tree);
 
         //Table UI
         FileViewTableModel model = new FileViewTableModel();
         final JTable table = new JTable();
+        this.table = table;
         table.setFillsViewportHeight(true);
         table.setTableHeader(null);
         table.setModel(model);
         table.setRowHeight(table.getRowHeight() + 8);
-        model.setColumnData(files);
+        model.setNode(directoryTree);
         table.setShowGrid(false);
-         //Set width of the first column
+        //Set width of the first column
         TableColumn tableColumn = table.getColumnModel().getColumn(0);
         tableColumn.setPreferredWidth(25);
         tableColumn.setMaxWidth(25);
         tableColumn.setMinWidth(25);
         JScrollPane tableScroll = new JScrollPane(table);
         filesUI.add(tableScroll);
+        //table listener with enter
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+        table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, "enter");
+        table.getActionMap().put("enter", new DelegateAction(action -> changeTableView(false, null)));
+        //table listener with double click
+        table.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent mouseEvent) {
+                JTable table = (JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = table.rowAtPoint(point);
+                if (mouseEvent.getClickCount() == 2 && row != -1) {
+                    changeTableView(false, null);
+                }
+            }
+        });
+        table.getSelectionModel().addListSelectionListener((ListSelectionListener) -> {
+            int row = table.getSelectedRow();
+            if (row != -1) {
+                TableItem item = model.getItems().get(row);
+                if (item.isFile()) {
+                    setFileInfo(item.getFileWrapper());
+                } else {
+                    setFolderInfo(item.getTreeNode());
+                }
+            }
+        });
 
         //Constraints for the main UI
         GridBagConstraints globalCS = new GridBagConstraints();
@@ -116,19 +170,87 @@ public class MainUI extends JFrame {
         cs.fill = GridBagConstraints.BOTH;
     }
 
+    private void setFileInfo(FileWrapper fileWrapper) {
+        if (fileWrapper != null) {
+            fileNameVLabel.setText(fileWrapper.getFileName());
+            typeVLabel.setText(fileWrapper.getAttribute().getType());
+            pathVLabel.setText("<to compute>");
+            fileSizeVLabel.setText(String.valueOf(fileWrapper.getAttribute().getFileLength()));
+            ownerVLabel.setText(fileWrapper.getAttribute().getOwner());
+            if (fileWrapper.getAttribute().getLastModifiedTime() != null)
+                lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
+        }
+    }
+
+    private void setFolderInfo(FSTreeNode node) {
+        if (node != null) {
+            fileNameVLabel.setText(node.getNameNode());
+            typeVLabel.setText("folder");
+            pathVLabel.setText("<to compute>");
+            fileSizeVLabel.setText("<to compute>");
+            lastEditVLabel.setText("<to compute>");
+        }
+    }
+
+    private void clearInfo() {
+        fileNameVLabel.setText("-");
+        typeVLabel.setText("-");
+        fileSizeVLabel.setText("-");
+        pathVLabel.setText("-");
+        ownerVLabel.setText("-");
+        lastEditVLabel.setText("-");
+
+        info1VLabel.setText("-");
+        info2VLabel.setText("-");
+        info3VLabel.setText("-");
+        info4VLabel.setText("-");
+        info5VLabel.setText("-");
+        info6VLabel.setText("-");
+    }
+
+    private void changeTableView(boolean goingUp, TableItem item) {
+        clearInfo();
+        FileViewTableModel model = (FileViewTableModel) table.getModel();
+        if (!goingUp) {
+            int row = table.getSelectedRow();
+            //selected table item
+            if (item == null)
+                item = model.getItems().get(row);
+            if (item.isFile()) {
+                //open the file
+                openFile(item.getFileWrapper());
+            } else {
+                //update the table with the new directory
+                FSTreeNode node = item.getTreeNode();
+                if (!node.isRoot())
+                    navigateUpBtn.setEnabled(true);
+                model.setNode(node);
+            }
+        } else {
+            FSTreeNode node = model.getCurrentTreeNode();
+            if (node.getParent().isRoot())
+                navigateUpBtn.setEnabled(false);
+            model.setNode(node.getParent());
+        }
+    }
+
+    private void openFile(FileWrapper fileWrapper) {
+        System.out.println("Opening file");
+    }
+
     private JPanel createDetailsUI() {
 
         JPanel filesDetail = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
         cs.insets = new Insets(5, 10, 5, 70);
 
-        //File Name
-        JLabel fileNameLabel = new JLabel("File Name: ");
+        //FileWrapper Name
+        JLabel fileNameLabel = new JLabel("Name: ");
         fileNameLabel.setOpaque(true);
         cs.gridx = 0;
         cs.gridy = 0;
         filesDetail.add(fileNameLabel, cs);
-        fileNameVLabel = new JLabel("LR Exam Schedule");
+        fileNameVLabel = new JLabel("-");
         //cs.fill = GridBagConstraints.BOTH;
         cs.gridx = 1;
         cs.gridy = 0;
@@ -139,7 +261,7 @@ public class MainUI extends JFrame {
         cs.gridx = 0;
         cs.gridy = 1;
         filesDetail.add(typeLabel, cs);
-        typeVLabel = new JLabel("file");
+        typeVLabel = new JLabel("-");
         cs.gridx = 1;
         cs.gridy = 1;
         filesDetail.add(typeVLabel, cs);
@@ -149,17 +271,17 @@ public class MainUI extends JFrame {
         cs.gridx = 0;
         cs.gridy = 2;
         filesDetail.add(pathLabel, cs);
-        pathVLabel = new JLabel("/home/luca/ansia/");
+        pathVLabel = new JLabel("-");
         cs.gridx = 1;
         cs.gridy = 2;
         filesDetail.add(pathVLabel, cs);
 
-        //File Size
-        JLabel fileSizeLabel = new JLabel("File Size: ");
+        //FileWrapper Size
+        JLabel fileSizeLabel = new JLabel("Size: ");
         cs.gridx = 0;
         cs.gridy = 3;
         filesDetail.add(fileSizeLabel, cs);
-        fileSizeVLabel = new JLabel("35kb");
+        fileSizeVLabel = new JLabel("-");
         cs.gridx = 1;
         cs.gridy = 3;
         filesDetail.add(fileSizeVLabel, cs);
@@ -169,7 +291,7 @@ public class MainUI extends JFrame {
         cs.gridx = 0;
         cs.gridy = 4;
         filesDetail.add(ownerLabel, cs);
-        ownerVLabel = new JLabel("LR18");
+        ownerVLabel = new JLabel("-");
         cs.gridx = 1;
         cs.gridy = 4;
         filesDetail.add(ownerVLabel, cs);
@@ -179,115 +301,77 @@ public class MainUI extends JFrame {
         cs.gridx = 0;
         cs.gridy = 5;
         filesDetail.add(lastEditLabel, cs);
-        lastEditVLabel = new JLabel("Thu Feb 24 17:34:55");
+        lastEditVLabel = new JLabel("-");
         cs.gridx = 1;
         cs.gridy = 5;
         filesDetail.add(lastEditVLabel, cs);
 
         //Second Column
 
-        //File Name
-        JLabel fileNameLabel1 = new JLabel("File Name: ");
+        //FileWrapper Name
+        JLabel info1Label = new JLabel("Info1: ");
         cs.gridx = 2;
         cs.gridy = 0;
-        filesDetail.add(fileNameLabel1, cs);
-        fileNameVLabel = new JLabel("LR Exam Schedule");
+        filesDetail.add(info1Label, cs);
+        info1VLabel = new JLabel("-");
         cs.gridx = 3;
         cs.gridy = 0;
-        filesDetail.add(fileNameVLabel, cs);
+        filesDetail.add(info1VLabel, cs);
 
         //Type
-        JLabel typeLabel1 = new JLabel("Type: ");
+        JLabel info2Label = new JLabel("Info2: ");
         cs.gridx = 2;
         cs.gridy = 1;
-        filesDetail.add(typeLabel1, cs);
-        typeVLabel = new JLabel("file");
+        filesDetail.add(info2Label, cs);
+        info2VLabel = new JLabel("-");
         cs.gridx = 3;
         cs.gridy = 1;
-        filesDetail.add(typeVLabel, cs);
+        filesDetail.add(info2VLabel, cs);
 
         //Path
-        JLabel pathLabel1 = new JLabel("Path: ");
+        JLabel info3Label = new JLabel("Info3: ");
         cs.gridx = 2;
         cs.gridy = 2;
-        filesDetail.add(pathLabel1, cs);
-        pathVLabel = new JLabel("/home/luca/ansia/");
+        filesDetail.add(info3Label, cs);
+        info3VLabel = new JLabel("-");
         cs.gridx = 3;
         cs.gridy = 2;
-        filesDetail.add(pathVLabel, cs);
+        filesDetail.add(info3VLabel, cs);
 
-        //File Size
-        JLabel fileSizeLabel1 = new JLabel("File Size: ");
+        //FileWrapper Size
+        JLabel info4Label = new JLabel("Info4: ");
         cs.gridx = 2;
         cs.gridy = 3;
-        filesDetail.add(fileSizeLabel1, cs);
-        fileSizeVLabel = new JLabel("35kb");
+        filesDetail.add(info4Label, cs);
+        info4VLabel = new JLabel("-");
         cs.gridx = 3;
         cs.gridy = 3;
-        filesDetail.add(fileSizeVLabel, cs);
+        filesDetail.add(info4VLabel, cs);
 
         //Owner
-        JLabel ownerLabel1 = new JLabel("Owner: ");
+        JLabel info5Label = new JLabel("Info5: ");
         cs.gridx = 2;
         cs.gridy = 4;
-        filesDetail.add(ownerLabel1, cs);
-        ownerVLabel = new JLabel("LR18");
+        filesDetail.add(info5Label, cs);
+        info5VLabel = new JLabel("-");
         cs.gridx = 3;
         cs.gridy = 4;
-        filesDetail.add(ownerVLabel, cs);
+        filesDetail.add(info5VLabel, cs);
 
         //Last Edit
-        JLabel lastEditLabel1 = new JLabel("Last Edit: ");
+        JLabel info6Label = new JLabel("Info6: ");
         cs.gridx = 2;
         cs.gridy = 5;
-        filesDetail.add(lastEditLabel1, cs);
-        lastEditVLabel = new JLabel("Thu Feb 24 17:34:55");
+        filesDetail.add(info6Label, cs);
+        info6VLabel = new JLabel("-");
         cs.gridx = 3;
         cs.gridy = 5;
-        filesDetail.add(lastEditVLabel, cs);
+        filesDetail.add(info6VLabel, cs);
 
         return filesDetail;
 
     }
 
-    private void createNodes(DefaultMutableTreeNode top) {
-        DefaultMutableTreeNode category = null;
-        DefaultMutableTreeNode book = null;
-
-        category = new DefaultMutableTreeNode("Books for Java Programmers");
-        top.add(category);
-
-        //original Tutorial
-        book = new DefaultMutableTreeNode("The Java Tutorial: A Short Course on the Basics");
-        category.add(book);
-
-        //Tutorial Continued
-        book = new DefaultMutableTreeNode("The Java Tutorial Continued: The Rest of the JDK");
-        category.add(book);
-
-        //JFC Swing Tutorial
-        book = new DefaultMutableTreeNode("The JFC Swing Tutorial: A Guide to Constructing GUIs");
-        category.add(book);
-
-        //Bloch
-        book = new DefaultMutableTreeNode("Effective Java Programming Language Guide");
-        category.add(book);
-
-        //Arnold/Gosling
-        book = new DefaultMutableTreeNode("The Java Programming Language");
-        category.add(book);
-
-        //Chan
-        book = new DefaultMutableTreeNode("The Java Developers Almanac");
-        category.add(book);
-
-        category = new DefaultMutableTreeNode("Books for Java Implementers");
-        top.add(category);
-
-        //VM
-        book = new DefaultMutableTreeNode("The Java Virtual Machine Specification");
-        category.add(book);
-    }
 
     /**
      * Creation of the Menu Bar
@@ -298,7 +382,7 @@ public class MainUI extends JFrame {
         //Create the menu bar.
         JMenuBar menuBar = new JMenuBar();
 
-        //File Menu.
+        //FileWrapper Menu.
         JMenu menu = new JMenu("File");
         //Open
         JMenuItem menuItem = new JMenuItem("Open");
@@ -306,13 +390,13 @@ public class MainUI extends JFrame {
             System.out.println("Clicked Open");
         });
         menu.add(menuItem);
-        //New File
+        //New FileWrapper
         menuItem = new JMenuItem("New File");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New File");
         });
         menu.add(menuItem);
-        //New Folder
+        //New JsonFolder
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New Folder");
@@ -322,7 +406,7 @@ public class MainUI extends JFrame {
         //Settings
         menuItem = new JMenuItem("Settings");
         menuItem.addActionListener((ActionListener) -> {
-            SettingsDialog settingsDialog = new SettingsDialog();
+            SettingsDialog settingsDialog = new SettingsDialog(false);
             settingsDialog.setVisible(true);
 
         });
@@ -381,17 +465,19 @@ public class MainUI extends JFrame {
         menu.add(menuItem);
         menuBar.add(menu);
 
-        //Navigate Folder Up
+        //Navigate JsonFolder Up
         menuBar.add(Box.createHorizontalGlue());
-        JButton navigateUp = new JButton("Navigate Up");
-        navigateUp.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Action Up");
+        navigateUpBtn = new JButton("Navigate Up");
+        navigateUpBtn.addActionListener((ActionListener) -> {
+            //navigate up
+            changeTableView(true, null);
         });
-        menuBar.add(navigateUp);
+        menuBar.add(navigateUpBtn);
 
         return menuBar;
     }
 
 
 }
+
 

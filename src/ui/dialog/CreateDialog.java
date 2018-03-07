@@ -1,17 +1,17 @@
 package ui.dialog;
 
 import net.actions.Create;
-import ui.MainUI;
+import ui.frame.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
+import utils.Util;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.*;
-import java.util.Properties;
+
 
 public class CreateDialog extends JDialog {
 
@@ -37,7 +37,7 @@ public class CreateDialog extends JDialog {
         cs.fill = GridBagConstraints.HORIZONTAL;
 
         //file system name
-        JLabel nameFSLabel = new JLabel("File System Name: ");
+        JLabel nameFSLabel = new JLabel("FileWrapper System Name: ");
         cs.gridx = 0;
         cs.gridy = 0;
         cs.gridwidth = 1;
@@ -105,7 +105,52 @@ public class CreateDialog extends JDialog {
                 //launch the main ui
                 dispose();
 
-                Create.create(ip, fSName);
+                //TODO: enable this only if you want to generate some fake data of the fs
+               // Util.saveFSExample();
+
+
+                //  Create.create(ip, fSName);
+                /*String[] dirName = Constants.WORKING_DIR_CONFIG.split("/");
+                DirectoryTree<File> directoryRoot = new DirectoryTree<File>(UUID.randomUUID().toString(), dirName[dirName.length-1], null);
+                FsOperation fsOp = FsOperation.getInstance();
+                File dirFile = new File(Constants.WORKING_DIR_CONFIG + "fs.config");
+                fsOp.setDirFile(dirFile);
+                fsOp.setRoot(directoryRoot);
+
+                BufferedReader br;
+                FileWriter fw;
+                FileReader fr;
+                FolderWrapper fow = null;
+
+                try{
+                    br = new BufferedReader(new FileReader(dirFile));
+                    if (br.readLine() == null) {
+                        System.out.println("No errors, and directory file is empty");
+                        fw = new FileWriter(dirFile, true);
+                        Gson gson = new Gson();
+                        gson.toJson(directoryRoot, fw);
+
+                        fw.close();
+                    } else {
+                        System.out.println("directory file is not empty");
+                        fr = new FileReader(dirFile);
+                        Gson gson = new Gson();
+                        fow = gson.fromJson(fr, FolderWrapper.class);
+
+                        fr.close();
+                    }
+
+                }catch(java.io.IOException e){
+                    e.printStackTrace();
+                    System.out.println("Problema metodo setRoot classe FsOperation");
+                    System.exit(-1);
+                }
+
+                for (JsonFolder fowEl: fow.jsonFIleList){
+                    fowEl.createDir(fsOp);
+*/
+               // Create.create(ip, fSName);
+
 
                 new MainUI();
             }

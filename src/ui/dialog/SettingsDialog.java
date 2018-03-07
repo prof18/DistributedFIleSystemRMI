@@ -14,16 +14,18 @@ public class SettingsDialog extends JDialog {
 
     private String ip;
 
-    public SettingsDialog() {
+    public SettingsDialog(boolean exit) {
 
         //prevent closing the dialog
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                showErrorMessage();
-                System.exit(1);
-            }
-        });
+        if (exit) {
+            this.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    showErrorMessage();
+                    System.exit(1);
+                }
+            });
+        }
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
