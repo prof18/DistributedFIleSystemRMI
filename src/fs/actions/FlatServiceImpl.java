@@ -8,6 +8,8 @@ import fs.actions.interfaces.FlatService;
 import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
+import net.objects.interfaces.NetNode;
+import utils.Util;
 
 import java.io.*;
 import java.rmi.NotBoundException;
@@ -26,13 +28,22 @@ public class FlatServiceImpl implements FlatService {
     public FlatServiceImpl(String path, String ownIP, String nameService) {
         Scanner scanner = new Scanner(System.in);
         this.path = path;
-        this.nodes = FlatServiceUtil.create(ownIP, nameService);
+        this.nodes = FlatServiceUtil.create(path, ownIP, nameService);
         System.out.println("sono tornato al costruttore");
         nodeCache = new NodeCache();
     }
 
 
     public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
+        byte[] ret=read(fileID,offset);
+        byte[] newRet=new byte[count];
+        for (int i = 0; i < count; i++) {
+            newRet[i]=ret[i];
+        }
+        return newRet;
+    }
+
+    public byte[] read(String fileID, int offset) throws FileNotFoundException {
         FileInputStream fileInputStream = null;
         byte[] content = null;
         try {
@@ -70,7 +81,8 @@ public class FlatServiceImpl implements FlatService {
                     for (Map.Entry<Integer, NetNodeLocation> entry : nodes.entrySet()) {
                         Registry registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
                         try {
-                            NetNodeImpl node = (NetNodeImpl) registry.lookup(entry.getValue().getName());
+                            Util.plotService(registry);
+                            NetNode node = (NetNode) registry.lookup(entry.getValue().toUrl());
                             CacheFileWrapper fileTemp = node.getFile(fileID);
                             if (fileTemp != null) {
                                 file = fileTemp.getFile();
@@ -86,7 +98,8 @@ public class FlatServiceImpl implements FlatService {
             }
 
             System.out.println("[READ XX] lunghezza file: " + file.length());
-            content = new byte[(int) file.length()];
+            int count=(int)file.length();
+            content = new byte[count];
             fileInputStream = new FileInputStream(file);
             System.out.println("count = " + count);
             System.out.println("length content = " + content.length);
@@ -95,18 +108,6 @@ public class FlatServiceImpl implements FlatService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return content;
-    }
-
-    public byte[] read(String fileID, int offset) throws FileNotFoundException {
-        File file = new File(path + fileID);
-        if (!file.exists()) {
-            throw new FileNotFoundException();
-        }
-        long length = file.length();
-        System.out.println("[READ]: lunghezza file " + length);
-        byte[] content = read(fileID, offset, (int) length);
-        System.out.println("[READ]: contenuto: " + new String(content));
         return content;
     }
 

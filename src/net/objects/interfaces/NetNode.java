@@ -27,7 +27,7 @@ public interface NetNode extends Remote, Serializable {
 
     HashMap<Integer, NetNodeLocation> getHashMap() throws RemoteException;
 
-    CacheFileWrapper getFile(String path,String UFID) throws  RemoteException;
+    CacheFileWrapper getFile(String UFID) throws  RemoteException;
 
     void checkNodes() throws RemoteException;
 

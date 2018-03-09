@@ -17,6 +17,7 @@ import java.util.Scanner;
 public class ExecuteNode {
     private static String ownIP="localhost";
     private static String nameService="host";
+    private static String path="/zigio/Desktop/";
     public static void main(String[] args){
         System.setProperty("java.rmi.server.hostname", ownIP);
         NetNode node=null;
@@ -33,7 +34,7 @@ public class ExecuteNode {
             }
         }
         try {
-            node = new NetNodeImpl(ownIP,port,nameService);
+            node = new NetNodeImpl(path,ownIP,port,nameService);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

@@ -5,6 +5,8 @@ import fs.objects.json.JsonFolder;
 import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
 
+import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.util.*;
 
 public class Util {
@@ -20,6 +22,17 @@ public class Util {
             System.out.format("+-----------------+------------+----------+----------+%n");
         }
 
+    }
+
+    public static void plotService(Registry registry){
+        try {
+            String[] lista=registry.list();
+            for (String tmp:lista){
+                System.out.printf(tmp);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

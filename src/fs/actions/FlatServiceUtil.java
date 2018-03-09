@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class FlatServiceUtil {
-    public static HashMap<Integer, NetNodeLocation> create(String ownIP, String nameService) {
+    public static HashMap<Integer, NetNodeLocation> create(String path,String ownIP, String nameService) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
         Registry registry = null;
@@ -32,7 +32,7 @@ public class FlatServiceUtil {
             }
         }
         try {
-            node = new NetNodeImpl(ownIP, port, nameService);
+            node = new NetNodeImpl(path,ownIP, port, nameService);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -46,53 +46,57 @@ public class FlatServiceUtil {
             e.printStackTrace();
         }
         Scanner scanner = new Scanner(System.in);
-        System.out.println("indirizzo a cui connettersi ");
-        String ipRec = scanner.next();
-        System.out.println("porta a cui è salvato ");
-        int porta = scanner.nextInt();
-        System.out.println("nome del servizio ");
-        String nome = scanner.next();
-        String recPat = "rmi://" + ipRec + ":" + porta + "/" + nome;
-        try {
-            Registry registryRec = LocateRegistry.getRegistry(ipRec, porta);
-            NetNode node1 = (NetNode) registryRec.lookup(recPat);
+        System.out.printf("Vuoi connetterti?");
+        String respret=scanner.next();
+        if(respret.equals("y")) {
+            System.out.println("indirizzo a cui connettersi ");
+            String ipRec = scanner.next();
+            System.out.println("porta a cui è salvato ");
+            int porta = scanner.nextInt();
+            System.out.println("nome del servizio ");
+            String nome = scanner.next();
+            String recPat = "rmi://" + ipRec + ":" + porta + "/" + nome;
+            try {
+                Registry registryRec = LocateRegistry.getRegistry(ipRec, porta);
+                NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
-            System.out.println("[AGGIORNAMENTO NODI]");
-            HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, nome);
-            System.out.println();
-            System.out.println("[MAPPA RITORNATA]");
-            System.out.println();
-            Util.plot(retMap);
-            node.setConnectedNodes(retMap);
-            ret = retMap;
-
-            //Se i nodi sono solo 2 le Map saranno già aggiornate
-            if (!(retMap.size() == 2)) {
+                System.out.println("[AGGIORNAMENTO NODI]");
+                HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, nome);
                 System.out.println();
-                System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
+                System.out.println("[MAPPA RITORNATA]");
                 System.out.println();
-                for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
+                Util.plot(retMap);
+                node.setConnectedNodes(retMap);
+                ret = retMap;
 
-                    if (!((ownIP + port).hashCode() == entry.getKey() || (ipRec + porta).hashCode() == entry.getKey())) {
+                //Se i nodi sono solo 2 le Map saranno già aggiornate
+                if (!(retMap.size() == 2)) {
+                    System.out.println();
+                    System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
+                    System.out.println();
+                    for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
-                        NetNodeLocation tmp = entry.getValue();
-                        String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
+                        if (!((ownIP + port).hashCode() == entry.getKey() || (ipRec + porta).hashCode() == entry.getKey())) {
 
-                        Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
-                        NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
-                        tmpNode.setConnectedNodes(node.getHashMap());
-                        ret=node.getHashMap();
+                            NetNodeLocation tmp = entry.getValue();
+                            String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
+
+                            Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
+                            NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
+                            tmpNode.setConnectedNodes(node.getHashMap());
+                            ret = node.getHashMap();
+                        }
+
+
                     }
-
-
                 }
+
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (NotBoundException e) {
+                e.printStackTrace();
             }
-
-
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
-            e.printStackTrace();
         }
         return ret;
 
