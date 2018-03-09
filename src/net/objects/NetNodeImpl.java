@@ -25,9 +25,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
 
-    public NetNodeImpl(String path,String ownIP, int port, String name) throws RemoteException {
+    public NetNodeImpl(String path, String ownIP, int port, String name) throws RemoteException {
         super();
-        this.path=path;
+        this.path = path;
         this.ownIP = ownIP;
         this.port = port;
         connectedNodes = new HashMap<>();
@@ -82,23 +82,23 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     @Override
     public CacheFileWrapper getFile(String UFID) throws RemoteException {
         File file = new File(path + UFID);
-        File fileAttribute = null;
+        FileAttribute ret = null;
         if (file.exists()) {
+            ObjectInputStream ois = null;
             try {
-                FileInputStream fileInputStream = new FileInputStream(path + UFID + ".attr");
-                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-                fileAttribute = (File) objectInputStream.readObject();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                ois = new ObjectInputStream(new FileInputStream("test.attr"));
+                ret = (FileAttribute) ois.readObject();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
+
             NetNodeLocation netNodeLocation = new NetNodeLocation(ownIP, port, hostName);
-            return new CacheFileWrapper(file, null, netNodeLocation);
-        } else
+            return new CacheFileWrapper(file, ret, netNodeLocation);
+        } else {
             return null;
+        }
 
 
     }

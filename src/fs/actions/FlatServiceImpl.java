@@ -61,7 +61,7 @@ public class FlatServiceImpl implements FlatService {
                         NetNodeLocation netNodeLocation = retFile.getOriginLocation();
                         Registry registry = LocateRegistry.getRegistry(netNodeLocation.getIp(), netNodeLocation.getPort());
                         try {
-                            NetNodeImpl node = (NetNodeImpl) registry.lookup(netNodeLocation.getName());
+                            NetNodeImpl node = (NetNodeImpl) registry.lookup(netNodeLocation.toUrl());
                             CacheFileWrapper fileWrapperMaster = node.getFile(fileID);
                             if (fileWrapperMaster.getLastValidatedTime() == retFile.getLastValidatedTime()) {
                                 System.out.println("il file non è stato modificato");
