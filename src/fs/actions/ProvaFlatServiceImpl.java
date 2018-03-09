@@ -1,5 +1,7 @@
 package fs.actions;
 
+import fs.objects.structure.FileAttribute;
+
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
@@ -21,6 +23,16 @@ public class ProvaFlatServiceImpl {
         if(ret.equals("y")){
             try {
                 flatService.create("ciao");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("vuoi leggere gli attributi del file ?");
+        ret=console.next();
+        if(ret.equals("y")){
+            try {
+                FileAttribute fileAttribute=flatService.getAttributes("ciao");
+                System.out.println(fileAttribute.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }

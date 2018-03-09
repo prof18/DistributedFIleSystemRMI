@@ -4,10 +4,11 @@ import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
 
 import java.io.File;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 
-public class CacheFileWrapper {
+public class CacheFileWrapper implements Serializable {
     private File file;
     private FileAttribute attribute;
     private Date lastValidatedTime;

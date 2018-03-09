@@ -138,17 +138,17 @@ public class FlatServiceImpl implements FlatService {
     }
 
 
-    public String create(String name, FileAttribute attribute) throws Exception {
-        File file = new File(name);
+    public String create(String pathName, FileAttribute attribute) throws Exception {
+        System.out.println("pathName = " + pathName);
+        File file = new File(pathName);
         if (file.exists()) {
             throw new Exception();
         }
         file.createNewFile();
-        File fileAttr = new File(name + ".attr");
-        FileOutputStream fileOutputStream = new FileOutputStream(name + ".attr");
-        ObjectOutputStream outputStream = new ObjectOutputStream(fileOutputStream);
-        outputStream.writeObject(fileAttr);
-        outputStream.close();
+        FileOutputStream out = new FileOutputStream(pathName+".attr");
+        ObjectOutputStream oout = new ObjectOutputStream(out);
+        oout.writeObject(attribute);
+        oout.flush();
         return "dir" + "name";
     }
 
@@ -169,23 +169,18 @@ public class FlatServiceImpl implements FlatService {
 
 
     public FileAttribute getAttributes(String fileID) {
-        FileInputStream fileInputStream = null;
-        ObjectInputStream objectInputStream = null;
-        FileAttribute fileAttribute = null;
+        ObjectInputStream ois = null;
+        FileAttribute ret = null;
         try {
-            fileInputStream = new FileInputStream(fileID + ".attr");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            objectInputStream = new ObjectInputStream(fileInputStream);
-            fileAttribute = (FileAttribute) objectInputStream.readObject();
+            ois = new ObjectInputStream(new FileInputStream("test.attr"));
+            ret = (FileAttribute) ois.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return fileAttribute;
+
+        return ret;
 
     }
 

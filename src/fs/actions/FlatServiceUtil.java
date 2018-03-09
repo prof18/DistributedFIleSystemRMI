@@ -70,13 +70,13 @@ public class FlatServiceUtil {
                 ret = retMap;
 
                 //Se i nodi sono solo 2 le Map saranno già aggiornate
-                if (!(retMap.size() == 2)) {
+                if ((retMap.size() > 2)) {
                     System.out.println();
                     System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
                     System.out.println();
                     for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
-                        if (!((ownIP + port).hashCode() == entry.getKey() || (ipRec + porta).hashCode() == entry.getKey())) {
+                        if (!((ownIP + port).hashCode() == entry.getKey())) {
 
                             NetNodeLocation tmp = entry.getValue();
                             String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
