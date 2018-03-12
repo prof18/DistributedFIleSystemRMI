@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class FlatServiceUtil {
-    public static HashMap<Integer, NetNodeLocation> create(String ownIP, String nameService,NetNodeLocation locationRet) {
+    public static HashMap<Integer, NetNodeLocation> create(String path,String ownIP, String nameService,NetNodeLocation locationRet) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
         Registry registry = null;
@@ -32,7 +32,7 @@ public class FlatServiceUtil {
             }
         }
         try {
-            node = new NetNodeImpl(ownIP, port, nameService);
+            node = new NetNodeImpl(path,ownIP, port, nameService);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

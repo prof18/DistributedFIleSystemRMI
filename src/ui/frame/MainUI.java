@@ -45,10 +45,11 @@ public class MainUI extends JFrame {
         String ipHost=PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
         String nameServiceHost=PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
         String ipRet=PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
+        String path=PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         int portRet=Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
         String nameRet=PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
         NetNodeLocation location=new NetNodeLocation(ipRet,portRet,nameRet);
-        FlatServiceUtil.create(ipHost,nameServiceHost,location);
+        FlatServiceUtil.create(path,ipHost,nameServiceHost,location);
 
         //Loading file system structure
         System.out.println("Loading structure");
