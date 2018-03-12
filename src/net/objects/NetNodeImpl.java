@@ -119,7 +119,26 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
         else{
             // se il file in questo host non è stato modicato nel mentre si procede alla modifica
-
+            if(lastModified==file.getAttribute().getLastModifiedTime().getTime())
+            {
+                File file1=new File(UFID);
+                file1.delete();
+                file1=new File(UFID+".attr");
+                file1.delete();
+                File newFileh=new File(UFID);
+                try {
+                    FileWriter writer=new FileWriter(newFileh);
+                    System.out.println("Writer : "+newFile.getFile().toString());
+                    writer.write(newFile.getFile().toString());
+                    ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(UFID+".attr"));
+                    ois.writeObject(newFile.getAttribute());
+                    ois.flush();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             //altrimenti si lancia un'eccezione
             return "Il file "+UFID+" è stato modificato";
         }

@@ -8,19 +8,19 @@ import java.util.Scanner;
 public class ProvaFlatServiceImpl {
     public static void main(String[] args) throws FileNotFoundException {
 
-        Scanner console=new Scanner(System.in);
+        Scanner console = new Scanner(System.in);
         System.out.println("inserire il path");
-        String path="/home/zigio/Scrivania/"+console.next()+"/";
+        String path = "/home/zigio/Scrivania/" + console.next() + "/";
         //System.out.println("inserire l'host");
         //String host=console.next();
-        String host="localhost";
+        String host = "localhost";
         //System.out.println("inserire il nome del servizio");
         //String nameService=console.next();
-        String nameService="host";
-        FlatServiceImpl flatService=new FlatServiceImpl(path,host,nameService);
+        String nameService = "host";
+        FlatServiceImpl flatService = new FlatServiceImpl(path, host, nameService);
         System.out.println("vuoi creare il file ?");
-        String ret=console.next();
-        if(ret.equals("y")){
+        String ret = console.next();
+        if (ret.equals("y")) {
             try {
                 flatService.create("ciao");
             } catch (Exception e) {
@@ -28,10 +28,10 @@ public class ProvaFlatServiceImpl {
             }
         }
         System.out.println("vuoi leggere gli attributi del file ?");
-        ret=console.next();
-        if(ret.equals("y")){
+        ret = console.next();
+        if (ret.equals("y")) {
             try {
-                FileAttribute fileAttribute=flatService.getAttributes("ciao");
+                FileAttribute fileAttribute = flatService.getAttributes("ciao");
                 System.out.println(fileAttribute.toString());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -43,6 +43,12 @@ public class ProvaFlatServiceImpl {
             if (ret.equals("y")) {
                 flatService.read("ciao", 0);
             }
+            System.out.println("vuoi scrivere ciao ?");
+            ret = console.next();
+            if(ret.equals("y")){
+                flatService.write("ciao",0,15,"nuova scrittura".getBytes());
+            }
+
         }
     }
 }

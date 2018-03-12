@@ -29,7 +29,7 @@ public class FlatServiceImpl implements FlatService {
 
     public FlatServiceImpl(String path, String ownIP, String nameService) {
         this.path = path;
-        this.nodes = FlatServiceUtil.create(path,path, ownIP,null);
+        this.nodes = FlatServiceUtil.create(path, ownIP,nameService,null);
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
         writingNodeCache=new WritingNodeCache();
