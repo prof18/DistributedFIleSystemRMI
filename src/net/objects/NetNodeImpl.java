@@ -99,9 +99,21 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         } else {
             return null;
         }
-
-
     }
+
+    public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) throws RemoteException{
+        CacheFileWrapper file=getFile(UFID);
+        if(file==null){
+            return "In questo host il file "+UFID+" non è presente";
+        }
+        else{
+            // se il file in questo host non è stato modicato nel mentre si procede alla modifica
+
+            //altrimenti si lancia un'eccezione
+            return "Il file "+UFID+" è stato modificato";
+        }
+    }
+
 
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
         this.connectedNodes = connectedNodes;

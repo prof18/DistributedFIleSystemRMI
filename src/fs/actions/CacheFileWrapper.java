@@ -12,6 +12,7 @@ public class CacheFileWrapper implements Serializable {
     private File file;
     private FileAttribute attribute;
     private Date lastValidatedTime;
+    private Date lastModifiedBeforeDownloadTime;
     private NetNodeLocation originLocation;
 
     public CacheFileWrapper(File file, FileAttribute attribute,NetNodeLocation originLocation) {

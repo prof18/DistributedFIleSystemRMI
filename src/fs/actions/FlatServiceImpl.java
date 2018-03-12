@@ -25,13 +25,14 @@ public class FlatServiceImpl implements FlatService {
     private HashMap<Integer, NetNodeLocation> nodes;
     private String path;
     private ReadingNodeCache readingCache;
-
+    private WritingNodeCache writingNodeCache;
 
     public FlatServiceImpl(String path, String ownIP, String nameService) {
         this.path = path;
         this.nodes = FlatServiceUtil.create(path, ownIP, nameService);
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
+        writingNodeCache=new WritingNodeCache();
     }
 
 
