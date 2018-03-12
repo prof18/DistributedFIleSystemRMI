@@ -1,10 +1,11 @@
 package net.objects;
 
 import fs.actions.CacheFileWrapper;
-import net.actions.GarbageService;
+import fs.objects.structure.FileAttribute;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
+import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -19,31 +20,20 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private int port;
     private int num = 0;
     private String hostName = "host";
+    private String path;
 
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
 
-    public NetNodeImpl(String ownIP, int port, String name) throws RemoteException {
+    public NetNodeImpl(String path, String ownIP, int port, String name) throws RemoteException {
         super();
+        this.path = path;
         this.ownIP = ownIP;
         this.port = port;
-        this.hostName = name;
-
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
         Util.plot(connectedNodes);
-
-        System.out.println("AVVIO THREAD");
-        GarbageService v;
-        try {
-            v = new GarbageService(this.ownIP, this.hostName, this.port);
-            Thread t = new Thread(v);
-            t.start();
-        } catch (RemoteException e) {
-            System.out.println("Avvio Thread Remote Exc");
-            e.printStackTrace();
-        }
 
 
     }
@@ -91,17 +81,42 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public CacheFileWrapper getFile(String UFID) throws RemoteException {
-        return null;
+        File file = new File(path + UFID);
+        FileAttribute ret = null;
+        if (file.exists()) {
+            ObjectInputStream ois = null;
+            try {
+                ois = new ObjectInputStream(new FileInputStream("test.attr"));
+                ret = (FileAttribute) ois.readObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            NetNodeLocation netNodeLocation = new NetNodeLocation(ownIP, port, hostName);
+            return new CacheFileWrapper(file, ret, netNodeLocation);
+        } else {
+            return null;
+        }
     }
 
-    public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> coNodes) {
-
-        for (Map.Entry<Integer, NetNodeLocation> entry : coNodes.entrySet()) {
-
-            this.connectedNodes.putIfAbsent(entry.getKey(),entry.getValue());
-
+    public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) throws RemoteException{
+        CacheFileWrapper file=getFile(UFID);
+        if(file==null){
+            return "In questo host il file "+UFID+" non è presente";
         }
+        else{
+            // se il file in questo host non è stato modicato nel mentre si procede alla modifica
 
+            //altrimenti si lancia un'eccezione
+            return "Il file "+UFID+" è stato modificato";
+        }
+    }
+
+
+    public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
+        this.connectedNodes = connectedNodes;
         Util.plot(this.connectedNodes);
     }
 
@@ -113,10 +128,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     public synchronized void checkNodes() throws RemoteException {
 
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
-        System.out.println("Size ConnectedNodes: "+ this.connectedNodes.size());
+
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
 
-            if ( !((ownIP + port).hashCode() == entry.getKey()) ) {
+            if ((ownIP + port).hashCode() == entry.getKey()) {
 
                 System.out.println("[ CHECKNODES ]");
 
@@ -142,7 +157,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 } catch (RemoteException e) {
                     System.out.println("NODO non trovato alla porta: " + tmpPort + "; Ip: " + tmpIp);
                     downNodes.put(entry.getKey(), entry.getValue());
-                    //e.printStackTrace();
+                    e.printStackTrace();
 
                 } catch (NotBoundException e) {
                     System.out.println("NotBoundException checkNodes2");
@@ -150,14 +165,13 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 }
 
-            } //else System.out.println("NON CI SONO NODI DA CONTROLLARE");
+            }
         }
 
         for (Map.Entry<Integer, NetNodeLocation> entry : downNodes.entrySet()) {
             if (connectedNodes.containsKey(entry.getKey())) {
                 System.out.println("RIMOSSO NODO, porta: " + entry.getValue().getPort() + "; Ip: " + entry.getValue().getIp());
                 connectedNodes.remove(entry.getKey());
-                Util.plot(this.connectedNodes);
             }
         }
 

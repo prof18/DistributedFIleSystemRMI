@@ -79,4 +79,17 @@ public class FileAttribute implements Serializable {
     public void setAcl(Object acl) {
         this.acl = acl;
     }
+
+    @Override
+    public String toString() {
+        return "FileAttribute{" +
+                "fileLength=" + fileLength +
+                ", creationTime=" + creationTime +
+                ", lastModifiedTime=" + lastModifiedTime +
+                ", referenceCount=" + referenceCount +
+                ", Owner='" + Owner + '\'' +
+                ", type='" + type + '\'' +
+                ", acl=" + acl +
+                '}';
+    }
 }

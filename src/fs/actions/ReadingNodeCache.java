@@ -2,11 +2,11 @@ package fs.actions;
 
 import java.util.HashMap;
 
-public class NodeCache {
+public class ReadingNodeCache {
     private final long timeInterval = 3000;   //in ms
     HashMap<String, CacheFileWrapper> cache;
 
-    public NodeCache() {
+    public ReadingNodeCache() {
         cache = new HashMap<>();
     }
 
