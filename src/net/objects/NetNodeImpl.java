@@ -2,6 +2,7 @@ package net.objects;
 
 import fs.actions.CacheFileWrapper;
 import fs.objects.structure.FileAttribute;
+import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
@@ -34,6 +35,16 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
         Util.plot(connectedNodes);
+        System.out.println("AVVIO THREAD");
+        GarbageService v;
+        try {
+            v = new GarbageService(this.ownIP, this.hostName, this.port);
+            Thread t = new Thread(v);
+            t.start();
+        } catch (RemoteException e) {
+            System.out.println("Avvio Thread Remote Exc");
+            e.printStackTrace();
+        }
 
 
     }
