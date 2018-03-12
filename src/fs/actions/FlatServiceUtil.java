@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class FlatServiceUtil {
-    public static HashMap<Integer, NetNodeLocation> create(String path,String ownIP, String nameService,NetNodeLocation locationRet) {
+    public static WrapperFlatServiceUtil create(String path, String ownIP, String nameService, NetNodeLocation locationRet) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
         Registry registry = null;
@@ -32,7 +32,7 @@ public class FlatServiceUtil {
             }
         }
         try {
-            node = new NetNodeImpl(path,ownIP, port, nameService);
+            node = new NetNodeImpl(path, ownIP, port, nameService);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -45,49 +45,51 @@ public class FlatServiceUtil {
         } catch (AlreadyBoundException e) {
             e.printStackTrace();
         }
-        String recPat = locationRet.toUrl();
-        try {
-            Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
-            NetNode node1 = (NetNode) registryRec.lookup(recPat);
+        if (locationRet != null) {
+            String recPat = locationRet.toUrl();
+            try {
+                Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
+                NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
-            System.out.println("[AGGIORNAMENTO NODI]");
-            HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, locationRet.getName());
-            System.out.println();
-            System.out.println("[MAPPA RITORNATA]");
-            System.out.println();
-            Util.plot(retMap);
-            node.setConnectedNodes(retMap);
-            ret = retMap;
-
-            //Se i nodi sono solo 2 le Map saranno già aggiornate
-            if (!(retMap.size() == 2)) {
+                System.out.println("[AGGIORNAMENTO NODI]");
+                HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, locationRet.getName());
                 System.out.println();
-                System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
+                System.out.println("[MAPPA RITORNATA]");
                 System.out.println();
-                for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
+                Util.plot(retMap);
+                node.setConnectedNodes(retMap);
+                ret = retMap;
 
-                    if (!((ownIP + port).hashCode() == entry.getKey() || (locationRet.getIp() + locationRet.getPort()).hashCode() == entry.getKey())) {
+                //Se i nodi sono solo 2 le Map saranno già aggiornate
+                if (!(retMap.size() == 2)) {
+                    System.out.println();
+                    System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
+                    System.out.println();
+                    for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
-                        NetNodeLocation tmp = entry.getValue();
-                        String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
+                        if (!((ownIP + port).hashCode() == entry.getKey() || (locationRet.getIp() + locationRet.getPort()).hashCode() == entry.getKey())) {
 
-                        Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
-                        NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
-                        tmpNode.setConnectedNodes(node.getHashMap());
-                        ret=node.getHashMap();
+                            NetNodeLocation tmp = entry.getValue();
+                            String tmpPath = "rmi://" + tmp.getIp() + ":" + tmp.getPort() + "/" + tmp.getName();
+
+                            Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
+                            NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
+                            tmpNode.setConnectedNodes(node.getHashMap());
+                            ret = node.getHashMap();
+                        }
+
+
                     }
-
-
                 }
+
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (NotBoundException e) {
+                e.printStackTrace();
             }
-
-
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
-            e.printStackTrace();
         }
-        return ret;
+        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP,port,nameService),ret);
 
     }
 }

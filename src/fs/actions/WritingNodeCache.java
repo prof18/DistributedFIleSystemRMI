@@ -14,12 +14,14 @@ import java.util.*;
 public class WritingNodeCache {
     private ArrayList<WritingCacheFileWrapper> fileList;
     private ArrayList<NetNodeLocation> nodeLocations;
-    private final int replacedTimer=6000; //ms
-    public WritingNodeCache() {
+    private final int replacedTimer=20000; //ms
+    private NetNodeLocation netNodeLocation;
+    public WritingNodeCache(NetNodeLocation netNodeLocation) {
         fileList = new ArrayList<>();
         nodeLocations = new ArrayList<>();
         Timer timer=new Timer();
         timer.schedule(new ReplacerFile(),0,replacedTimer);
+        this.netNodeLocation=netNodeLocation;
     }
 
     //devo aggiornare la lista ogni tot
@@ -28,8 +30,10 @@ public class WritingNodeCache {
             System.out.println("iniziato aggiornamento dei nodi");
             nodeLocations.clear();
             System.out.println("size : "+nodeLocations.size());
-            for (Map.Entry<Integer,NetNodeLocation> entry:newNodeLocations.entrySet()){
-                nodeLocations.add(entry.getValue());
+            if(nodeLocations.size()!=0) {
+                for (Map.Entry<Integer, NetNodeLocation> entry : newNodeLocations.entrySet()) {
+                    nodeLocations.add(entry.getValue());
+                }
             }
             System.out.println("concluso aggiornamento dei nodi");
         }
@@ -45,10 +49,24 @@ public class WritingNodeCache {
         public void run() {
             synchronized (fileList) {
                 System.out.println("Iniziata la pulizia della cache");
-                for (WritingCacheFileWrapper cacheFileWrapper : fileList) {
+                HashMap<Integer,NetNodeLocation> locashions=null;
+                try {
+                    Registry registry=LocateRegistry.getRegistry(netNodeLocation.getIp(),netNodeLocation.getPort());
+                    NetNode node=(NetNode)registry.lookup(netNodeLocation.toUrl());
+                    locashions=node.getHashMap();
+                    node.getHashMap();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                } catch (NotBoundException e) {
+                    e.printStackTrace();
+                }
+                Iterator<WritingCacheFileWrapper> iterator=fileList.iterator();
+                while (iterator.hasNext()){
+                    WritingCacheFileWrapper cacheFileWrapper=iterator.next();
                     //devo trovare tutte le posizioni in cui è salvato il file e modificarlo
-                    for (NetNodeLocation netNodeLocation : nodeLocations) {
+                    for (Map.Entry<Integer,NetNodeLocation> entry : locashions.entrySet()) {
                         try {
+                            System.out.println(netNodeLocation.toString());
                             Registry registry = LocateRegistry.getRegistry(netNodeLocation.getIp(), netNodeLocation.getPort());
                             NetNode node = (NetNode) registry.lookup(netNodeLocation.toUrl());
                             System.out.println(node.replaceFile(cacheFileWrapper, cacheFileWrapper.getLastModifiedBeforeDownload(), cacheFileWrapper.getFile().getName()));
@@ -59,7 +77,7 @@ public class WritingNodeCache {
                             e.printStackTrace();
                         }
                     }
-                    fileList.remove(cacheFileWrapper);
+                    iterator.remove();
                 }
                 System.out.println("Terminata la pulizia della cache");
             }

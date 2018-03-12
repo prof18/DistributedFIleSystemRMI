@@ -27,19 +27,13 @@ public class FlatServiceImpl implements FlatService {
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-    public FlatServiceImpl(String path, String ownIP, String nameService) {
+    public FlatServiceImpl(String path, String ownIP, String nameService,NetNodeLocation locationToConnect) {
         this.path = path;
-        this.nodes = FlatServiceUtil.create(path, ownIP,nameService,null);
+        WrapperFlatServiceUtil wrapper=FlatServiceUtil.create(path, ownIP,nameService,locationToConnect);
+        this.nodes =wrapper.getLocationHashMap();
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
-        writingNodeCache=new WritingNodeCache();
-        Timer timer=new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                writingNodeCache.setNodeLocations(nodes);
-            }
-        },0,6000);
+        writingNodeCache=new WritingNodeCache(wrapper.getOwnLocation());
     }
 
     //utilizza cache in lettura

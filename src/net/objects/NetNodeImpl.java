@@ -114,6 +114,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) throws RemoteException{
         CacheFileWrapper file=getFile(UFID);
+        System.out.println("UFID = " + UFID);
         if(file==null){
             return "In questo host il file "+UFID+" non è presente";
         }
