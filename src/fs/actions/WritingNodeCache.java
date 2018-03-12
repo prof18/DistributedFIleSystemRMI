@@ -4,13 +4,12 @@ import fs.actions.CacheFileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
+import javax.swing.text.html.parser.Entity;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class WritingNodeCache {
     private ArrayList<WritingCacheFileWrapper> fileList;
@@ -24,9 +23,21 @@ public class WritingNodeCache {
     }
 
     //devo aggiornare la lista ogni tot
-    public void setNodeLocations(ArrayList<NetNodeLocation> nodeLocations) {
+    public void setNodeLocations(HashMap<Integer,NetNodeLocation> newNodeLocations) {
         synchronized (this.nodeLocations) {
-            this.nodeLocations = nodeLocations;
+            System.out.println("iniziato aggiornamento dei nodi");
+            nodeLocations.clear();
+            System.out.println("size : "+nodeLocations.size());
+            for (Map.Entry<Integer,NetNodeLocation> entry:newNodeLocations.entrySet()){
+                nodeLocations.add(entry.getValue());
+            }
+            System.out.println("concluso aggiornamento dei nodi");
+        }
+    }
+
+    public void add(WritingCacheFileWrapper writingCacheFileWrapper){
+        synchronized (fileList){
+            fileList.add(writingCacheFileWrapper);
         }
     }
 

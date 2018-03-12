@@ -23,7 +23,7 @@ import java.util.*;
 public class FlatServiceImpl implements FlatService {
 
     private HashMap<Integer, NetNodeLocation> nodes;
-    private String path;
+    private final String path;
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
@@ -33,18 +33,24 @@ public class FlatServiceImpl implements FlatService {
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
         writingNodeCache=new WritingNodeCache();
+        Timer timer=new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                writingNodeCache.setNodeLocations(nodes);
+            }
+        },0,6000);
     }
 
-
+    //utilizza cache in lettura
     public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
         byte[] ret = read(fileID, offset);
         byte[] newRet = new byte[count];
-        for (int i = 0; i < count; i++) {
-            newRet[i] = ret[i];
-        }
+        System.arraycopy(ret, 0, newRet, 0, count);
         return newRet;
     }
 
+    //utilizza cache in lettura
     public byte[] read(String fileID, int offset) throws FileNotFoundException {
             File file=getFile(fileID).getFile();
             System.out.println("[READ XX] lunghezza file: " + file.length());
@@ -62,8 +68,8 @@ public class FlatServiceImpl implements FlatService {
         return content;
     }
 
-
-    public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
+    //utilizza cache in scrittura
+    public void write(String fileID, int offset, int count, byte[] data) {
         byte[] newContent = null;
         try {
             byte[] content = read(fileID, 0);
@@ -75,12 +81,29 @@ public class FlatServiceImpl implements FlatService {
             System.exit(-1);
         }
 
+        ObjectInputStream ois = null;
+        Date lastModified=null;
+        FileAttribute fileAttribute=null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream("test.attr"));
+            fileAttribute = (FileAttribute) ois.readObject();
+            lastModified=fileAttribute.getLastModifiedTime();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
         FileOutputStream fileOutputStream = null;
         try {
             File file = new File(path + fileID);
             System.out.println(file.delete());
             file = new File(path + fileID);
             fileOutputStream = new FileOutputStream(file);
+            fileAttribute.setFileLength(file.length());
+            fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
+            setAttributes(fileID,fileAttribute);
+            writingNodeCache.add(new WritingCacheFileWrapper(file,fileAttribute,lastModified,null));
             System.out.println("newContent = " + new String(newContent));
             fileOutputStream.write(newContent, 0, newContent.length);
         } catch (IOException e) {
@@ -88,7 +111,7 @@ public class FlatServiceImpl implements FlatService {
         }
     }
 
-
+    //utilizzo replicazione
     public String create(String pathName, FileAttribute attribute) throws Exception {
         System.out.println("pathName = " + pathName);
         File file = new File(pathName);
@@ -104,6 +127,7 @@ public class FlatServiceImpl implements FlatService {
         return "dir" + "name";
     }
 
+    //utilizzo replicazione
     @Override
     public String create(String name) throws Exception {
         Date date = Date.from(Instant.now());
@@ -113,6 +137,7 @@ public class FlatServiceImpl implements FlatService {
         return path + name;
     }
 
+    //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
     public void delete(String fileID) {
         File file = new File(path + fileID);
         File fileAttr = new File(path + fileID + ".attr");
@@ -120,20 +145,18 @@ public class FlatServiceImpl implements FlatService {
         System.out.println(fileAttr.delete());
     }
 
-
+    // utilizza cache in lettura
     public FileAttribute getAttributes(String fileID) {
         CacheFileWrapper cacheFileWrapper=getFile(fileID);
         return cacheFileWrapper.getAttribute();
     }
 
-
+    // utilizza cache in scrittura
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(fileID + ".attr");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(attr);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -171,8 +194,8 @@ public class FlatServiceImpl implements FlatService {
         while (tmp[count] == 0) {
             count--;
         }
-        byte[] newArray = Arrays.copyOfRange(tmp, 0, count + 1);
-        return newArray;
+        return Arrays.copyOfRange(tmp, 0, count + 1);
+
 
 
     }
@@ -189,9 +212,7 @@ public class FlatServiceImpl implements FlatService {
             FileAttribute ret = null;
             try {
                 ret = (FileAttribute) ois.readObject();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
             return new CacheFileWrapper(file, ret, null);
@@ -228,9 +249,7 @@ public class FlatServiceImpl implements FlatService {
                             file = retFile.getFile();
                         }
                         return retFile;
-                    } catch (NotBoundException e) {
-                        e.printStackTrace();
-                    } catch (AccessException e) {
+                    } catch (NotBoundException | AccessException e) {
                         e.printStackTrace();
                     } catch (RemoteException e) {
                         e.printStackTrace();
@@ -258,9 +277,7 @@ public class FlatServiceImpl implements FlatService {
                             readingCache.put(UFID, new CacheFileWrapper(fileTemp.getFile(), fileTemp.getAttribute(), entry.getValue()));
                             return fileTemp;
                         }
-                    } catch (NotBoundException e) {
-                        e.printStackTrace();
-                    } catch (RemoteException e) {
+                    } catch (NotBoundException | RemoteException e) {
                         e.printStackTrace();
                     }
                 }
