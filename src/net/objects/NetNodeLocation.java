@@ -1,6 +1,7 @@
 package net.objects;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class NetNodeLocation implements Serializable {
     private String ip;
@@ -33,5 +34,21 @@ public class NetNodeLocation implements Serializable {
 
     public String toUrl() {
         return "rmi://" + ip + ":" + port + "/"+name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NetNodeLocation)) return false;
+        NetNodeLocation that = (NetNodeLocation) o;
+        return getPort() == that.getPort() &&
+                Objects.equals(getIp(), that.getIp()) &&
+                Objects.equals(getName(), that.getName());
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(getIp(), getPort(), getName());
     }
 }

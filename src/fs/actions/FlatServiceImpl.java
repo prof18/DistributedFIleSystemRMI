@@ -27,16 +27,25 @@ public class FlatServiceImpl implements FlatService {
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-    public FlatServiceImpl(String path, String ownIP, String nameService,NetNodeLocation locationToConnect) {
+    /*
+    Nel costruttore vengono forniti in input il percorso della cartella dove verranno salvati i file, l'indirizzo IP proprio,
+    il nome che si vuole dare al proprio servizio, e il netNodeLocation indicante il nodo a cui si vuole connettersi. Nel caso
+    in cui non si voglia connettersi ad alcun nodo scrivere null. Nel costruttore viene lanciato
+    FlatServiceUtil.create che provvede ad inizializzare tutte le funzionalità di rete.
+     */
+    public FlatServiceImpl(String path, String ownIP, String nameService, NetNodeLocation locationToConnect) {
         this.path = path;
-        WrapperFlatServiceUtil wrapper=FlatServiceUtil.create(path, ownIP,nameService,locationToConnect);
-        this.nodes =wrapper.getLocationHashMap();
+        WrapperFlatServiceUtil wrapper = FlatServiceUtil.create(path, ownIP, nameService, locationToConnect);
+        this.nodes = wrapper.getLocationHashMap();
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
-        writingNodeCache=new WritingNodeCache(wrapper.getOwnLocation());
+        writingNodeCache = new WritingNodeCache(wrapper.getOwnLocation());
     }
 
-    //utilizza cache in lettura
+    /*
+    Lettura del file con nome fileID, con offset e count inseriti dall'utente, in caso il file
+    non venga trovato sia in locale che in remoto viene lanciata l'eccezione FileNotFoundException.
+     */
     public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
         byte[] ret = read(fileID, offset);
         byte[] newRet = new byte[count];
@@ -44,15 +53,18 @@ public class FlatServiceImpl implements FlatService {
         return newRet;
     }
 
-    //utilizza cache in lettura
+    /*Lettura del file con nome file ID, e offset assegnato con l'utente, il count è assegnato automaticamente
+    al valore corrispondente alla lunghezza del file, se il file non viene trovato sia in locale che in
+    remoto viene lanciata l'eccezione FileNotFoundException.
+     */
     public byte[] read(String fileID, int offset) throws FileNotFoundException {
-            File file=getFile(fileID).getFile();
-            System.out.println("[READ XX] lunghezza file: " + file.length());
-            int count = (int) file.length();
-            byte[] content = new byte[count];
-            FileInputStream fileInputStream = new FileInputStream(file);
-            System.out.println("count = " + count);
-            System.out.println("length content = " + content.length);
+        File file = getFile(fileID).getFile();
+        System.out.println("[READ XX] lunghezza file: " + file.length());
+        int count = (int) file.length();
+        byte[] content = new byte[count];
+        FileInputStream fileInputStream = new FileInputStream(file);
+        System.out.println("count = " + count);
+        System.out.println("length content = " + content.length);
         try {
             fileInputStream.read(content, offset, count);
         } catch (IOException e1) {
@@ -65,43 +77,51 @@ public class FlatServiceImpl implements FlatService {
     //utilizza cache in scrittura
     public void write(String fileID, int offset, int count, byte[] data) {
         byte[] newContent = null;
+        byte[] content = null;
+        boolean fileAvailable = false;
         try {
-            byte[] content = read(fileID, 0);
-            newContent = new byte[0];
-            newContent = joinArray(content, data, offset, count);
-        } catch (Exception e) {
+            content = read(fileID, 0);
+            fileAvailable = true;
+        } catch (NullPointerException e) {
+            System.out.println("il file ha qualche problema");
+        } catch (FileNotFoundException e) {
+            System.out.println("il file non è presente");
+        } catch (IndexOutOfBoundsException e) {
             System.out.println("problema con gli indici");
             e.printStackTrace();
             System.exit(-1);
         }
 
-        ObjectInputStream ois = null;
-        Date lastModified=null;
-        FileAttribute fileAttribute=null;
-        try {
-            ois = new ObjectInputStream(new FileInputStream("test.attr"));
-            fileAttribute = (FileAttribute) ois.readObject();
-            lastModified=fileAttribute.getLastModifiedTime();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        if (fileAvailable) {
+            newContent = joinArray(content, data, offset, count);
+            ObjectInputStream ois = null;
+            Date lastModified = null;
+            FileAttribute fileAttribute = null;
+            try {
+                ois = new ObjectInputStream(new FileInputStream(fileID + ".attr"));
+                fileAttribute = (FileAttribute) ois.readObject();
+                lastModified = fileAttribute.getLastModifiedTime();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
 
-        FileOutputStream fileOutputStream = null;
-        try {
-            File file = new File(path + fileID);
-            System.out.println(file.delete());
-            file = new File(path + fileID);
-            fileOutputStream = new FileOutputStream(file);
-            fileAttribute.setFileLength(file.length());
-            fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
-            setAttributes(fileID,fileAttribute);
-            writingNodeCache.add(new WritingCacheFileWrapper(file,fileAttribute,lastModified,null));
-            System.out.println("newContent = " + new String(newContent));
-            fileOutputStream.write(newContent, 0, newContent.length);
-        } catch (IOException e) {
-            e.printStackTrace();
+            FileOutputStream fileOutputStream = null;
+            try {
+                File file = new File(path + fileID);
+                System.out.println(file.delete());
+                file = new File(path + fileID);
+                fileOutputStream = new FileOutputStream(file);
+                fileAttribute.setFileLength(file.length());
+                fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
+                setAttributes(fileID, fileAttribute);
+                writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, null));
+                System.out.println("newContent = " + new String(newContent));
+                fileOutputStream.write(newContent, 0, newContent.length);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -110,7 +130,7 @@ public class FlatServiceImpl implements FlatService {
         System.out.println("pathName = " + pathName);
         File file = new File(pathName);
         if (file.exists()) {
-            throw new Exception();
+            throw new FileNotFoundException();
         }
         file.createNewFile();
         FileOutputStream out = new FileOutputStream(pathName + ".attr");
@@ -141,7 +161,12 @@ public class FlatServiceImpl implements FlatService {
 
     // utilizza cache in lettura
     public FileAttribute getAttributes(String fileID) {
-        CacheFileWrapper cacheFileWrapper=getFile(fileID);
+        CacheFileWrapper cacheFileWrapper = null;
+        try {
+            cacheFileWrapper = getFile(fileID);
+        } catch (FileNotFoundException e) {
+            System.out.println("file non trovato sia in locale che in remoto");
+        }
         return cacheFileWrapper.getAttribute();
     }
 
@@ -157,12 +182,12 @@ public class FlatServiceImpl implements FlatService {
         //gestire aggiornamento delle informazioni
     }
 
-    private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws Exception {
+    private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws IndexOutOfBoundsException {
         System.out.println("[JOINARRAY]: prima stringa : " + new String(first));
         System.out.println("[JOINARRAY]: seconda stringa : " + new String(second));
         byte[] ret = new byte[first.length + second.length];
         int i = 0;
-        if (offset > first.length) throw new Exception();
+        if (offset > first.length) throw new IndexOutOfBoundsException();
         while (i < first.length && i < offset) {
             ret[i] = first[i];
             i++;
@@ -191,10 +216,9 @@ public class FlatServiceImpl implements FlatService {
         return Arrays.copyOfRange(tmp, 0, count + 1);
 
 
-
     }
 
-    private CacheFileWrapper getFile(String UFID) {
+    private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
         File file = new File(path + UFID);
         if (file.exists()) {
             ObjectInputStream ois = null;
@@ -278,6 +302,6 @@ public class FlatServiceImpl implements FlatService {
             }
 
         }
-        return null;
+        throw new FileNotFoundException();
     }
 }
