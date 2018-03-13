@@ -13,7 +13,7 @@ public class HelloImpl extends UnicastRemoteObject implements Hello {
         super();
     }
 
-    public static void main(String[] args) throws RemoteException, AlreadyBoundException, MalformedURLException {
+    public static void main(String[] args) throws RemoteException {
         System.setProperty("java.rmi.server.hostname", "10.8.0.3");
         String ip="10.8.0.3";
         int port=1099;
@@ -26,7 +26,7 @@ public class HelloImpl extends UnicastRemoteObject implements Hello {
 
     }
 
-    public String sayHello() throws RemoteException {
+    public String sayHello() {
         System.out.println("hai salutato qualcuno");
         return "Ciao bello";
     }

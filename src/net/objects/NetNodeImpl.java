@@ -50,17 +50,17 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public String getHost() throws RemoteException {
+    public String getHost() {
         return ownIP;
     }
 
     @Override
-    public int getPort() throws RemoteException {
+    public int getPort() {
         return port;
     }
 
     @Override
-    public synchronized HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) throws RemoteException {
+    public synchronized HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) {
         System.out.println("si è connesso un nuovo nodo: " + ipNode + " " + port + " " + name);
         connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, name));
         System.out.println("[JOIN]");
@@ -76,12 +76,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
 
-    public NetNodeWrap add(String ip, int port) throws RemoteException {
+    public NetNodeWrap add(String ip, int port) {
         return null;
     }
 
     @Override
-    public String getHostName() throws RemoteException {
+    public String getHostName() {
         return hostName;
     }
 
@@ -91,7 +91,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public CacheFileWrapper getFile(String UFID) throws RemoteException {
+    public CacheFileWrapper getFile(String UFID) {
         File file = new File(path + UFID);
         FileAttribute ret = null;
         if (file.exists()) {
@@ -114,6 +114,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) throws RemoteException{
         CacheFileWrapper file=getFile(UFID);
+        try {
+            FileInputStream fis=new FileInputStream(UFID);
+            System.out.println("file "+new String(fis.readAllBytes()));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("UFID = " + UFID);
         if(file==null){
             return "In questo host il file "+UFID+" non è presente";
@@ -152,11 +160,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public String verify() throws RemoteException {
+    public String verify() {
         return "--COLLEGAMENTO VERIFICATO--";
     }
 
-    public synchronized void checkNodes() throws RemoteException {
+    public synchronized void checkNodes() {
 
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
 

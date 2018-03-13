@@ -21,7 +21,7 @@ public interface NetNode extends Remote, Serializable {
 
     NetNodeWrap add(String ip, int port) throws RemoteException;
 
-    public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) throws RemoteException;
+    String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
 
     String getHostName() throws RemoteException;
 

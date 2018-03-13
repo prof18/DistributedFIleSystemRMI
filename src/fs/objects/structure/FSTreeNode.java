@@ -114,10 +114,7 @@ public class FSTreeNode {
     }
 
     public boolean hasChild(){
-        if(childrens == null || childrens.size() == 0){
-            return false;
-        }
-        return true;
+        return childrens != null && childrens.size() != 0;
     }
 
     public boolean hasChild(FSTreeNode node){

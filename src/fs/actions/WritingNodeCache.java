@@ -3,6 +3,7 @@ package fs.actions;
 import fs.actions.CacheFileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
+import utils.Util;
 
 import javax.swing.text.html.parser.Entity;
 import java.rmi.NotBoundException;
@@ -49,7 +50,8 @@ public class WritingNodeCache {
     private class ReplacerFile extends TimerTask {
         public void run() {
             synchronized (fileList) {
-                System.out.println("Iniziata la pulizia della cache");
+                System.out.println("[PULIZIA CACHE] : Iniziata la pulizia della cache");
+                System.out.println("dimensione della cache : "+fileList.size());
                 HashMap<Integer, NetNodeLocation> locashions = null;
                 try {
                     Registry registry = LocateRegistry.getRegistry(netNodeLocation.getIp(), netNodeLocation.getPort());
@@ -62,15 +64,20 @@ public class WritingNodeCache {
                     e.printStackTrace();
                 }
                 Iterator<WritingCacheFileWrapper> iterator = fileList.iterator();
+
+
+
                 while (iterator.hasNext()) {
                     WritingCacheFileWrapper cacheFileWrapper = iterator.next();
                     //devo trovare tutte le posizioni in cui è salvato il file e modificarlo
                     for (Map.Entry<Integer, NetNodeLocation> entry : locashions.entrySet()) {
+                        System.out.println(entry.getValue().toString());
                         if (!entry.getValue().equals(netNodeLocation)) {
                             try {
-                                System.out.println(netNodeLocation.toString());
-                                Registry registry = LocateRegistry.getRegistry(netNodeLocation.getIp(), netNodeLocation.getPort());
-                                NetNode node = (NetNode) registry.lookup(netNodeLocation.toUrl());
+                                System.out.println("entrato per vedere se contiene il file in");
+                                System.out.println(entry.getValue().toString());
+                                Registry registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
+                                NetNode node = (NetNode) registry.lookup(entry.getValue().toUrl());
                                 System.out.println(node.replaceFile(cacheFileWrapper, cacheFileWrapper.getLastModifiedBeforeDownload(), cacheFileWrapper.getFile().getName()));
 
                             } catch (RemoteException e) {
@@ -79,10 +86,15 @@ public class WritingNodeCache {
                                 e.printStackTrace();
                             }
                         }
-                        iterator.remove();
+                        else {
+                            System.out.println("si tratta del nodo stesso");
+                        }
+
                     }
                 }
-                System.out.println("Terminata la pulizia della cache");
+                fileList.clear();
+                System.out.println("dimensione della cache : "+fileList.size());
+                System.out.println("[PULIZIA CACHE] : Terminata la pulizia della cache");
             }
         }
     }
