@@ -4,8 +4,14 @@ package fs.actions;
 FlatServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
  */
 
+import fs.actions.cache.ReadingNodeCache;
+import fs.actions.cache.WritingNodeCache;
 import fs.actions.interfaces.FlatService;
+import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.WrapperFlatServiceUtil;
+import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import utils.Util;
@@ -22,29 +28,23 @@ import java.util.*;
 
 public class FlatServiceImpl implements FlatService {
 
-    private HashMap<Integer, NetNodeLocation> nodes;
+    private MediatorFsNet mediator;
     private final String path;
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-    /*
-    Nel costruttore vengono forniti in input il percorso della cartella dove verranno salvati i file, l'indirizzo IP proprio,
-    il nome che si vuole dare al proprio servizio, e il netNodeLocation indicante il nodo a cui si vuole connettersi. Nel caso
-    in cui non si voglia connettersi ad alcun nodo scrivere null. Nel costruttore viene lanciato
-    FlatServiceUtil.create che provvede ad inizializzare tutte le funzionalità di rete.
-     */
-    public FlatServiceImpl(String path, String ownIP, String nameService, NetNodeLocation locationToConnect) {
+
+    public FlatServiceImpl(String path, MediatorFsNet mediatorFsNet) {
+        mediator = mediatorFsNet;
         this.path = path;
-        WrapperFlatServiceUtil wrapper = FlatServiceUtil.create(path, ownIP, nameService, locationToConnect);
-        this.nodes = wrapper.getLocationHashMap();
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
-        writingNodeCache = new WritingNodeCache(wrapper.getOwnLocation());
+        writingNodeCache = new WritingNodeCache();
     }
 
-    /*
-    Lettura del file con nome fileID, con offset e count inseriti dall'utente, in caso il file
-    non venga trovato sia in locale che in remoto viene lanciata l'eccezione FileNotFoundException.
+    /**
+     * Lettura del file con nome fileID, con offset e count inseriti dall'utente, in caso il file
+     * non venga trovato sia in locale che in remoto viene lanciata l'eccezione FileNotFoundException.
      */
     public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
         byte[] ret = read(fileID, offset);
@@ -53,24 +53,21 @@ public class FlatServiceImpl implements FlatService {
         return newRet;
     }
 
-    /*Lettura del file con nome file ID, e offset assegnato con l'utente, il count è assegnato automaticamente
-    al valore corrispondente alla lunghezza del file, se il file non viene trovato sia in locale che in
-    remoto viene lanciata l'eccezione FileNotFoundException.
+    /**
+     * Lettura del file con nome file ID, e offset assegnato con l'utente, il count è assegnato automaticamente
+     * al valore corrispondente alla lunghezza del file, se il file non viene trovato sia in locale che in
+     * remoto viene lanciata l'eccezione FileNotFoundException.
      */
     public byte[] read(String fileID, int offset) throws FileNotFoundException {
         File file = getFile(fileID).getFile();
-        System.out.println("[READ XX] lunghezza file: " + file.length());
         int count = (int) file.length();
         byte[] content = new byte[count];
         FileInputStream fileInputStream = new FileInputStream(file);
-        System.out.println("count = " + count);
-        System.out.println("length content = " + content.length);
         try {
             fileInputStream.read(content, offset, count);
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        System.out.println("[READ XX] contenuto: " + new String(content));
         return content;
     }
 
@@ -126,8 +123,9 @@ public class FlatServiceImpl implements FlatService {
     }
 
     //utilizzo replicazione
-    public String create(String pathName, FileAttribute attribute) throws Exception {
-        System.out.println("pathName = " + pathName);
+    public String create(FileAttribute attribute) throws Exception {
+        //TODO : aggiungere un identificativo per l'host
+        String pathName = "file" + Date.from(Instant.now()).hashCode();
         File file = new File(pathName);
         if (file.exists()) {
             throw new FileNotFoundException();
@@ -138,17 +136,18 @@ public class FlatServiceImpl implements FlatService {
         oout.writeObject(attribute);
         oout.flush();
         //in questo punto deve essere aggiunta la replicazione
-        return "dir" + "name";
+        return pathName;
     }
 
-    //utilizzo replicazione
+    /**
+     * Utilizzo replicazione, ma viene gestita dal metodo sopra
+     */
     @Override
-    public String create(String name) throws Exception {
+    public String create() throws Exception {
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
-        create(path + name, attribute);
-        //in questo punto deve essere aggiunta la replicazione
-        return path + name;
+        return create(attribute);
+
     }
 
     //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
@@ -159,7 +158,14 @@ public class FlatServiceImpl implements FlatService {
         System.out.println(fileAttr.delete());
     }
 
-    // utilizza cache in lettura
+    /**
+     * Ritorna gli attributi di uno specifico file
+     *
+     * @param fileID nome del file
+     * @return ritorna gli attributi di un file in formato FileAttribute
+     */
+
+
     public FileAttribute getAttributes(String fileID) {
         CacheFileWrapper cacheFileWrapper = null;
         try {
@@ -170,7 +176,14 @@ public class FlatServiceImpl implements FlatService {
         return cacheFileWrapper.getAttribute();
     }
 
-    // utilizza cache in scrittura
+    /**
+     * Setta gli attributi di un file,
+     *
+     * @param fileID nome del file
+     * @param attr   nuovi attributi da scrivere nel file
+     */
+
+
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(fileID + ".attr");
@@ -182,9 +195,8 @@ public class FlatServiceImpl implements FlatService {
         //gestire aggiornamento delle informazioni
     }
 
+
     private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws IndexOutOfBoundsException {
-        System.out.println("[JOINARRAY]: prima stringa : " + new String(first));
-        System.out.println("[JOINARRAY]: seconda stringa : " + new String(second));
         byte[] ret = new byte[first.length + second.length];
         int i = 0;
         if (offset > first.length) throw new IndexOutOfBoundsException();
@@ -202,9 +214,7 @@ public class FlatServiceImpl implements FlatService {
             ret[i] = first[i];
             i++;
         }
-        System.out.println("[JOIN]: la stringa concatenata: " + new String(ret));
         byte[] cleanRet = cleanArray(ret);
-        System.out.println("[JOIN]: la stringa concatenata pulita: " + new String(cleanRet));
         return cleanRet;
     }
 
@@ -214,94 +224,59 @@ public class FlatServiceImpl implements FlatService {
             count--;
         }
         return Arrays.copyOfRange(tmp, 0, count + 1);
-
-
     }
+
 
     private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
         File file = new File(path + UFID);
-        if (file.exists()) {
-            ObjectInputStream ois = null;
-            try {
-                ois = new ObjectInputStream(new FileInputStream("test.attr"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            FileAttribute ret = null;
-            try {
-                ret = (FileAttribute) ois.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            return new CacheFileWrapper(file, ret, null);
+        if (file.exists()) {  //il file è contenuto nella memoria interna
+            return new CacheFileWrapper(file, getLocalAttributeFile(UFID));
         } else {
-            CacheFileWrapper retFile = readingCache.get(UFID);
-            if (retFile != null) {
-                System.out.println("file trovato nella cache");
-                //devo controllare se è ancora valido il file salvato nella cache
-                long elapsedTime = Date.from(Instant.now()).getTime() - retFile.getLastValidatedTime();
-                System.out.println("elapsedTime = " + elapsedTime);
-                if (elapsedTime < readingCache.getTimeInterval()) {
-                    System.out.println("[CACHE] : il file è ancora valido");
+            CacheFileWrapper cacheFileWrapper = getCacheFile(UFID);
+            if (cacheFileWrapper != null) {//il file è contenuto nella cache
+                return cacheFileWrapper;
+            } else return mediator.getFile(UFID);
+        }
+    }
+
+    private FileAttribute getLocalAttributeFile(String UFID) {
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream("test.attr"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileAttribute ret = null;
+        try {
+            ret = (FileAttribute) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    private CacheFileWrapper getCacheFile(String UFID) {
+        CacheFileWrapper retFile = readingCache.get(UFID);
+        if (retFile != null) {
+            System.out.println("file trovato nella cache");
+            //devo controllare se è ancora valido il file salvato nella cache
+            long elapsedTime = Date.from(Instant.now()).getTime() - retFile.getLastValidatedTime();
+            if (elapsedTime < readingCache.getTimeInterval()) {
+                return retFile;
+            } else {
+                System.out.println("[CACHE] : il file è obsoleto");
+                CacheFileWrapper fileWrapperMaster = mediator.getFile(UFID);
+                if (fileWrapperMaster.getLastValidatedTime() == retFile.getLastValidatedTime()) {
+                    System.out.println("il file non è stato modificato");
+                    retFile.setLastValidatedTime(Date.from(Instant.now()));
                     return retFile;
                 } else {
-                    System.out.println("[CACHE] : il file è obsoleto");
-                    NetNodeLocation netNodeLocation = retFile.getOriginLocation();
-                    System.out.println("netNodeLocation.toUrl() = " + netNodeLocation.toUrl());
-                    Registry registry = null;
-                    try {
-                        registry = LocateRegistry.getRegistry(netNodeLocation.getIp(), netNodeLocation.getPort());
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        NetNode node = (NetNode) registry.lookup(netNodeLocation.toUrl());
-                        CacheFileWrapper fileWrapperMaster = node.getFile(UFID);
-                        if (fileWrapperMaster.getLastValidatedTime() == retFile.getLastValidatedTime()) {
-                            System.out.println("il file non è stato modificato");
-                            retFile.setLastValidatedTime(Date.from(Instant.now()));
-                            file = retFile.getFile();
-                        } else {
-                            System.out.println("il file è stato modificato");
-                            retFile = fileWrapperMaster;
-                            file = retFile.getFile();
-                        }
-                        return retFile;
-                    } catch (NotBoundException | AccessException e) {
-                        e.printStackTrace();
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {
-                System.out.println("il file non è contenuto nella cache");
-                for (Map.Entry<Integer, NetNodeLocation> entry : nodes.entrySet()) {
-                    Registry registry = null;
-                    try {
-                        registry = LocateRegistry.getRegistry(entry.getValue().getIp(), entry.getValue().getPort());
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        Util.plotService(registry);
-                        NetNode node = null;
-                        try {
-                            node = (NetNode) registry.lookup(entry.getValue().toUrl());
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-                        CacheFileWrapper fileTemp = node.getFile(UFID);
-                        if (fileTemp != null) {
-                            readingCache.put(UFID, new CacheFileWrapper(fileTemp.getFile(), fileTemp.getAttribute(), entry.getValue()));
-                            return fileTemp;
-                        }
-                    } catch (NotBoundException | RemoteException e) {
-                        e.printStackTrace();
-                    }
+                    System.out.println("il file è stato modificato");
+                    retFile = fileWrapperMaster;
+                    return retFile;
                 }
             }
-
         }
-        throw new FileNotFoundException();
+        return null;
     }
 }

@@ -14,9 +14,9 @@ public interface FlatService extends Remote, Serializable {
 
     void write(String fileID, int i, int count, byte[] data) throws FileNotFoundException;
 
-    String create(String name, FileAttribute attribute) throws Exception;
+    String create(FileAttribute attribute) throws Exception;
 
-    String create(String name) throws Exception;
+    String create() throws Exception;
 
     void delete(String fileID);
 

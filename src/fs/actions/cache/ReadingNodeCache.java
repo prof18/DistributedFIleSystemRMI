@@ -1,4 +1,6 @@
-package fs.actions;
+package fs.actions.cache;
+
+import fs.actions.object.CacheFileWrapper;
 
 import java.util.HashMap;
 

@@ -1,6 +1,6 @@
 package net.objects;
 
-import fs.actions.CacheFileWrapper;
+import fs.actions.object.CacheFileWrapper;
 import fs.objects.structure.FileAttribute;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
@@ -90,6 +90,26 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return connectedNodes;
     }
 
+    public CacheFileWrapper getFileOtherHost(String UFID){
+        for (Map.Entry<Integer,NetNodeLocation> entry:connectedNodes.entrySet()) {
+            NetNodeLocation location=entry.getValue();
+            Registry registry= null;
+            CacheFileWrapper fileWrapper=null;
+            try {
+                registry = LocateRegistry.getRegistry(location.getIp(),location.getPort());
+                NetNode node=(NetNode) registry.lookup(location.toUrl());
+                fileWrapper=node.getFile(UFID);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+            }
+
+            if(fileWrapper!=null) return fileWrapper;
+        }
+        return null;
+    }
+
     @Override
     public CacheFileWrapper getFile(String UFID) {
         File file = new File(path + UFID);
@@ -106,7 +126,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
 
             NetNodeLocation netNodeLocation = new NetNodeLocation(ownIP, port, hostName);
-            return new CacheFileWrapper(file, ret, netNodeLocation);
+            return new CacheFileWrapper(file, ret);
         } else {
             return null;
         }

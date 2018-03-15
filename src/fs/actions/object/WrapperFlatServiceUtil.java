@@ -1,4 +1,4 @@
-package fs.actions;
+package fs.actions.object;
 
 import net.objects.NetNodeLocation;
 

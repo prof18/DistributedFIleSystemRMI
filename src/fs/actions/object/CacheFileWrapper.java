@@ -1,4 +1,4 @@
-package fs.actions;
+package fs.actions.object;
 
 import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
@@ -13,18 +13,14 @@ public class CacheFileWrapper implements Serializable {
     private FileAttribute attribute;
     private Date lastValidatedTime;
     private Date lastModifiedBeforeDownloadTime;
-    private NetNodeLocation originLocation;
 
-    public CacheFileWrapper(File file, FileAttribute attribute,NetNodeLocation originLocation) {
+
+    public CacheFileWrapper(File file, FileAttribute attribute) {
         this.file = file;
         this.attribute = attribute;
-        this.originLocation=originLocation;
         lastValidatedTime = Date.from(Instant.now());
     }
 
-    public NetNodeLocation getOriginLocation() {
-        return originLocation;
-    }
 
     public File getFile() {
         return file;

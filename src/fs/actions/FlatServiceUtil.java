@@ -1,5 +1,6 @@
 package fs.actions;
 
+import fs.actions.object.WrapperFlatServiceUtil;
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
@@ -12,7 +13,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class FlatServiceUtil {
     public static WrapperFlatServiceUtil create(String path, String ownIP, String nameService, NetNodeLocation locationRet) {
