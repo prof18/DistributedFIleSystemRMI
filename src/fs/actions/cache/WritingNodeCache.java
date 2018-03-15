@@ -1,6 +1,7 @@
 package fs.actions.cache;
 
 import fs.actions.object.WritingCacheFileWrapper;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
@@ -13,10 +14,11 @@ import java.util.*;
 public class WritingNodeCache {
     private ArrayList<WritingCacheFileWrapper> fileList;
     private final int replacedTimer = 20000; //ms
+    private MediatorFsNet mediatorFsNet;
 
-
-    public WritingNodeCache() {
+    public WritingNodeCache(MediatorFsNet mediatorFsNet) {
         fileList = new ArrayList<>();
+        this.mediatorFsNet = mediatorFsNet;
         Timer timer = new Timer();
         timer.schedule(new ReplacerFile(), 0, replacedTimer);
 
@@ -32,7 +34,10 @@ public class WritingNodeCache {
     private class ReplacerFile extends TimerTask {
         public void run() {
             synchronized (fileList) {
-               //TODO delegare al MEDIATOR questa cosa
+                System.out.println("AVVIO PULIZIA CACHE");
+                mediatorFsNet.replaceFile(fileList);
+                fileList.clear();
+                System.out.println("FINE PULIZIA CACHE");
             }
         }
     }

@@ -1,30 +1,49 @@
 package mediator_fs_net;
 
 import fs.actions.FlatServiceImpl;
+import fs.actions.interfaces.FlatService;
 import fs.actions.object.CacheFileWrapper;
-import net.objects.NetNodeImpl;
+import fs.actions.object.WritingCacheFileWrapper;
+import net.objects.interfaces.NetNode;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 
 public class MediatorFsNet {
-    private NetNodeImpl node;
-    private FlatServiceImpl service;
+    private NetNode node;
+    private FlatService service;
 
     public MediatorFsNet() {
 
     }
 
-    public void addNetService(NetNodeImpl node1) {
+    public void addNetService(NetNode node1) {
         node = node1;
     }
 
-    public void addService(FlatServiceImpl service1) {
+    public void addService(FlatService service1) {
         service = service1;
     }
 
     public CacheFileWrapper getFile(String UFID) {
+        try {
             return node.getFile(UFID);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
+    public CacheFileWrapper getFilefromFS(String UFID){
+        return service.getFileAndAttribute(UFID);
+    }
+
+    public void replaceFile(ArrayList<WritingCacheFileWrapper> list){
+        try {
+            node.replaceFileFromFS(list);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }

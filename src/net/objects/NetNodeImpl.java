@@ -1,7 +1,9 @@
 package net.objects;
 
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
+import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
 import utils.Util;
@@ -12,25 +14,29 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
+    private MediatorFsNet mediatorFsNet;
     private String ownIP;
     private int port;
     private int num = 0;
     private String hostName = "host";
     private String path;
-
+    private NetNodeLocation ownLocation;
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
 
-    public NetNodeImpl(String path, String ownIP, int port, String name) throws RemoteException {
+    public NetNodeImpl(String path, String ownIP, int port, String name,MediatorFsNet mediatorFsNet1) throws RemoteException {
         super();
+        mediatorFsNet=mediatorFsNet1;
         this.path = path;
         this.ownIP = ownIP;
         this.port = port;
+        ownLocation=new NetNodeLocation(ownIP,port,name);
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
@@ -111,25 +117,29 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public CacheFileWrapper getFile(String UFID) {
-        File file = new File(path + UFID);
-        FileAttribute ret = null;
-        if (file.exists()) {
-            ObjectInputStream ois = null;
-            try {
-                ois = new ObjectInputStream(new FileInputStream("test.attr"));
-                ret = (FileAttribute) ois.readObject();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+    public void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) throws RemoteException {
+        for (WritingCacheFileWrapper fileWrapper : fileWrappers) {
+            for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
+                if (entry.getValue().equals(ownLocation)) {
+                    NetNodeLocation location = entry.getValue();
+                    Registry registry = null;
+                    try {
+                        registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
+                        NetNode node = (NetNode) registry.lookup(location.toUrl());
+                        node.replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID());
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-
-            NetNodeLocation netNodeLocation = new NetNodeLocation(ownIP, port, hostName);
-            return new CacheFileWrapper(file, ret);
-        } else {
-            return null;
         }
+    }
+
+    @Override
+    public CacheFileWrapper getFile(String UFID) {
+        return mediatorFsNet.getFilefromFS(UFID);
     }
 
     public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) throws RemoteException{

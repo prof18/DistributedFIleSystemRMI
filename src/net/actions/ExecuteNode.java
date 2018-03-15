@@ -34,7 +34,8 @@ public class ExecuteNode {
             }
         }
         try {
-            node = new NetNodeImpl(path,ownIP,port,nameService);
+            //TODO: da correggere
+            node = new NetNodeImpl(path,ownIP,port,nameService,null);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

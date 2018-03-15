@@ -1,12 +1,14 @@
 package net.objects.interfaces;
 
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.WritingCacheFileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.NetNodeWrap;
 
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface NetNode extends Remote, Serializable {
@@ -19,7 +21,9 @@ public interface NetNode extends Remote, Serializable {
 
     int getAndSetNum() throws RemoteException;
 
-    CacheFileWrapper getFileOtherHost(String UFID);
+    CacheFileWrapper getFileOtherHost(String UFID) throws RemoteException;
+
+    void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) throws RemoteException;
 
     NetNodeWrap add(String ip, int port) throws RemoteException;
 

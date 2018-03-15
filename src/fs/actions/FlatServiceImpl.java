@@ -33,13 +33,12 @@ public class FlatServiceImpl implements FlatService {
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-
     public FlatServiceImpl(String path, MediatorFsNet mediatorFsNet) {
         mediator = mediatorFsNet;
         this.path = path;
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
-        writingNodeCache = new WritingNodeCache();
+        writingNodeCache = new WritingNodeCache(mediator);
     }
 
     /**
@@ -113,7 +112,7 @@ public class FlatServiceImpl implements FlatService {
                 fileAttribute.setFileLength(file.length());
                 fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
                 setAttributes(fileID, fileAttribute);
-                writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, null));
+                writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, fileID));
                 System.out.println("newContent = " + new String(newContent));
                 fileOutputStream.write(newContent, 0, newContent.length);
             } catch (IOException e) {
@@ -230,7 +229,7 @@ public class FlatServiceImpl implements FlatService {
     private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
         File file = new File(path + UFID);
         if (file.exists()) {  //il file è contenuto nella memoria interna
-            return new CacheFileWrapper(file, getLocalAttributeFile(UFID));
+            return new CacheFileWrapper(file, getLocalAttributeFile(UFID),UFID);
         } else {
             CacheFileWrapper cacheFileWrapper = getCacheFile(UFID);
             if (cacheFileWrapper != null) {//il file è contenuto nella cache
@@ -279,4 +278,16 @@ public class FlatServiceImpl implements FlatService {
         }
         return null;
     }
+
+    public CacheFileWrapper getFileAndAttribute(String UFID) {
+        File file = new File(UFID);
+        FileAttribute ret;
+        if (file.exists()) {
+            ret = getAttributes(UFID);
+            return new CacheFileWrapper(file, ret,UFID);
+        } else {
+            return null;
+        }
+    }
+
 }

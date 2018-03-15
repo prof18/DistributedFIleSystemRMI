@@ -1,6 +1,8 @@
 package fs.actions;
 
+import fs.actions.interfaces.FlatService;
 import fs.actions.object.WrapperFlatServiceUtil;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
@@ -18,6 +20,7 @@ public class FlatServiceUtil {
     public static WrapperFlatServiceUtil create(String path, String ownIP, String nameService, NetNodeLocation locationRet) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
+        MediatorFsNet mediatorFsNet=new MediatorFsNet();
         Registry registry = null;
         NetNode node = null;
         int port = 1099;
@@ -32,10 +35,13 @@ public class FlatServiceUtil {
             }
         }
         try {
-            node = new NetNodeImpl(path, ownIP, port, nameService);
+            node = new NetNodeImpl(path, ownIP, port, nameService,mediatorFsNet);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        FlatService service=new FlatServiceImpl(path,mediatorFsNet);
+        mediatorFsNet.addNetService(node);
+        mediatorFsNet.addService(service);
         String connectPath = "rmi://" + ownIP + ":" + port + "/" + nameService;
         System.out.println("connectPath = " + connectPath);
         try {

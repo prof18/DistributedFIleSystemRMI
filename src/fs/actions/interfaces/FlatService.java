@@ -1,5 +1,6 @@
 package fs.actions.interfaces;
 
+import fs.actions.object.CacheFileWrapper;
 import fs.objects.structure.FileAttribute;
 
 import java.io.FileNotFoundException;
@@ -17,6 +18,8 @@ public interface FlatService extends Remote, Serializable {
     String create(FileAttribute attribute) throws Exception;
 
     String create() throws Exception;
+
+    CacheFileWrapper getFileAndAttribute(String UFID);
 
     void delete(String fileID);
 
