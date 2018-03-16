@@ -27,8 +27,9 @@ public class MediatorFsNet {
     }
 
     public CacheFileWrapper getFile(String UFID) {
+        System.out.println("entrato nel mediator alla ricerca del file : "+UFID);
         try {
-            return node.getFile(UFID);
+            return node.getFileOtherHost(UFID);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -36,6 +37,7 @@ public class MediatorFsNet {
     }
 
     public CacheFileWrapper getFilefromFS(String UFID){
+        System.out.println("entrato in mediator -> getFileFromFS");
         return service.getFileAndAttribute(UFID);
     }
 

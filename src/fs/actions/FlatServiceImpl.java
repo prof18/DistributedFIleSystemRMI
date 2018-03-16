@@ -45,7 +45,9 @@ public class FlatServiceImpl implements FlatService {
      * Lettura del file con nome fileID, con offset e count inseriti dall'utente, in caso il file
      * non venga trovato sia in locale che in remoto viene lanciata l'eccezione FileNotFoundException.
      */
+
     public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
+        System.out.println("entrato nel READ");
         byte[] ret = read(fileID, offset);
         byte[] newRet = new byte[count];
         System.arraycopy(ret, 0, newRet, 0, count);
@@ -58,8 +60,17 @@ public class FlatServiceImpl implements FlatService {
      * remoto viene lanciata l'eccezione FileNotFoundException.
      */
     public byte[] read(String fileID, int offset) throws FileNotFoundException {
-        File file = getFile(fileID).getFile();
+        System.out.println("Entrato nel read senza parametri");
+        CacheFileWrapper wrapper=getFile(fileID);
+        System.out.println("ritornato al read senza parametri");
+        if(wrapper==null){
+            System.out.println("il file : "+fileID+" non è stato trovato");
+            return null;
+        }
+        System.out.println("wrapper nel read non null");
+        File file = wrapper.getFile();
         int count = (int) file.length();
+        System.out.println("count = " + count);
         byte[] content = new byte[count];
         FileInputStream fileInputStream = new FileInputStream(file);
         try {
@@ -67,10 +78,13 @@ public class FlatServiceImpl implements FlatService {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+        System.out.println("content = " + new String(content));
         return content;
     }
 
     //utilizza cache in scrittura
+
+    //TODO: verifica Write
     public void write(String fileID, int offset, int count, byte[] data) {
         byte[] newContent = null;
         byte[] content = null;
@@ -122,6 +136,8 @@ public class FlatServiceImpl implements FlatService {
     }
 
     //utilizzo replicazione
+
+    //TODO:verifica create
     public String create(FileAttribute attribute) throws Exception {
         //TODO : aggiungere un identificativo per l'host
         String pathName = "file" + Date.from(Instant.now()).hashCode();
@@ -150,6 +166,7 @@ public class FlatServiceImpl implements FlatService {
     }
 
     //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
+    //TODO:verifica delete
     public void delete(String fileID) {
         File file = new File(path + fileID);
         File fileAttr = new File(path + fileID + ".attr");
@@ -165,13 +182,10 @@ public class FlatServiceImpl implements FlatService {
      */
 
 
+    //TODO: verifica getAttributes
     public FileAttribute getAttributes(String fileID) {
-        CacheFileWrapper cacheFileWrapper = null;
-        try {
-            cacheFileWrapper = getFile(fileID);
-        } catch (FileNotFoundException e) {
-            System.out.println("file non trovato sia in locale che in remoto");
-        }
+        System.out.println("entrato in getAttributes");
+        CacheFileWrapper cacheFileWrapper = getFile(fileID);
         return cacheFileWrapper.getAttribute();
     }
 
@@ -183,6 +197,7 @@ public class FlatServiceImpl implements FlatService {
      */
 
 
+    //TODO: verifica setAttributes
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(fileID + ".attr");
@@ -226,22 +241,34 @@ public class FlatServiceImpl implements FlatService {
     }
 
 
-    private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
-        File file = new File(path + UFID);
+    private CacheFileWrapper getFile(String UFID) {
+        System.out.println("entrato in getFile");
+        System.out.println(path+UFID);
+        File file = new File(path+UFID);
         if (file.exists()) {  //il file è contenuto nella memoria interna
+            System.out.println("contenuto nella memoria interna");
             return new CacheFileWrapper(file, getLocalAttributeFile(UFID),UFID);
         } else {
+            System.out.println("il file non è contenuto nella memoria interna");
             CacheFileWrapper cacheFileWrapper = getCacheFile(UFID);
             if (cacheFileWrapper != null) {//il file è contenuto nella cache
+                System.out.println("il file è contenuto nella cache");
                 return cacheFileWrapper;
-            } else return mediator.getFile(UFID);
+            } else
+            {
+                CacheFileWrapper cacheFile=mediator.getFile(UFID);
+                readingCache.put(UFID,cacheFile);
+                return cacheFile;
+            }
         }
     }
 
     private FileAttribute getLocalAttributeFile(String UFID) {
+        System.out.println("GetLocalAttributeFile");
         ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(new FileInputStream("test.attr"));
+            System.out.println(path+UFID+".attr");
+            ois = new ObjectInputStream(new FileInputStream(path+UFID+".attr"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -251,10 +278,12 @@ public class FlatServiceImpl implements FlatService {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+        System.out.println("uscito da getLocalAttributeFile");
         return ret;
     }
 
     private CacheFileWrapper getCacheFile(String UFID) {
+        System.out.println("entrato in getCacheFile");
         CacheFileWrapper retFile = readingCache.get(UFID);
         if (retFile != null) {
             System.out.println("file trovato nella cache");
@@ -280,12 +309,14 @@ public class FlatServiceImpl implements FlatService {
     }
 
     public CacheFileWrapper getFileAndAttribute(String UFID) {
-        File file = new File(UFID);
+        File file = new File(path+UFID);
         FileAttribute ret;
         if (file.exists()) {
+            System.out.println("trovato il file "+path+UFID);
             ret = getAttributes(UFID);
             return new CacheFileWrapper(file, ret,UFID);
         } else {
+            System.out.println("non trovato il file "+UFID);
             return null;
         }
     }

@@ -4,12 +4,30 @@ import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
 import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
+import net.objects.RegistryWrapper;
 
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 
 public class Util {
+
+    public static RegistryWrapper getNextFreePort(){
+        Registry registry=null;
+        int port = 1099;
+        boolean notFound = true;
+        while (notFound) {
+            try {
+                registry = LocateRegistry.createRegistry(port);
+                notFound = false;
+            } catch (RemoteException e) {
+                System.out.println("porta occupata");
+                port++;
+            }
+        }
+        return new RegistryWrapper(port,registry);
+    }
     public static void plot(HashMap<Integer, NetNodeLocation> hashMap){
         String leftAlignFormat = "| %-15d | %-10s | %-8d |  %-8s|%n";
 

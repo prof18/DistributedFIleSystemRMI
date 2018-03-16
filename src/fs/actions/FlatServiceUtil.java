@@ -5,6 +5,7 @@ import fs.actions.object.WrapperFlatServiceUtil;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
+import net.objects.RegistryWrapper;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
@@ -21,21 +22,12 @@ public class FlatServiceUtil {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
         MediatorFsNet mediatorFsNet=new MediatorFsNet();
-        Registry registry = null;
+        RegistryWrapper rw = Util.getNextFreePort();
+        Registry registry=rw.getRegistry();
+        int port=rw.getPort();
         NetNode node = null;
-        int port = 1099;
-        boolean notFound = true;
-        while (notFound) {
-            try {
-                registry = LocateRegistry.createRegistry(port);
-                notFound = false;
-            } catch (RemoteException e) {
-                System.out.println("porta occupata");
-                port++;
-            }
-        }
         try {
-            node = new NetNodeImpl(path, ownIP, port, nameService,mediatorFsNet);
+            node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -95,7 +87,7 @@ public class FlatServiceUtil {
                 e.printStackTrace();
             }
         }
-        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP,port,nameService),ret);
+        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP,port,nameService),ret,service);
 
     }
 }

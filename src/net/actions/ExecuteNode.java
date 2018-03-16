@@ -2,6 +2,7 @@ package net.actions;
 
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
+import net.objects.RegistryWrapper;
 import net.objects.interfaces.NetNode;
 import utils.Util;
 
@@ -21,18 +22,9 @@ public class ExecuteNode {
     public static void main(String[] args){
         System.setProperty("java.rmi.server.hostname", ownIP);
         NetNode node=null;
-        Registry registry = null;
-        int port = 1099;
-        boolean notFound = true;
-        while (notFound) {
-            try {
-                registry = LocateRegistry.createRegistry(port);
-                notFound = false;
-            } catch (RemoteException e) {
-                System.out.println("porta occupata");
-                port++;
-            }
-        }
+        RegistryWrapper rw=Util.getNextFreePort();
+        Registry registry=rw.getRegistry();
+        int port=rw.getPort();
         try {
             //TODO: da correggere
             node = new NetNodeImpl(path,ownIP,port,nameService,null);

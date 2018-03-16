@@ -97,6 +97,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public CacheFileWrapper getFileOtherHost(String UFID){
+        System.out.println("getFileOtherHosts "+UFID+" del nodo : "+this.ownLocation.toUrl());
         for (Map.Entry<Integer,NetNodeLocation> entry:connectedNodes.entrySet()) {
             NetNodeLocation location=entry.getValue();
             Registry registry= null;
@@ -111,13 +112,16 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 e.printStackTrace();
             }
 
-            if(fileWrapper!=null) return fileWrapper;
+            if(fileWrapper!=null) {
+                System.out.println("ritornato da getFileOtherHosts");
+                return fileWrapper;
+            }
         }
         return null;
     }
 
     @Override
-    public void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) throws RemoteException {
+    public void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) {
         for (WritingCacheFileWrapper fileWrapper : fileWrappers) {
             for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
                 if (entry.getValue().equals(ownLocation)) {
@@ -139,10 +143,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public CacheFileWrapper getFile(String UFID) {
+        System.out.println("getFile "+UFID+" del nodo : "+this.ownLocation.toUrl());
         return mediatorFsNet.getFilefromFS(UFID);
     }
 
-    public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) throws RemoteException{
+    public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) {
         CacheFileWrapper file=getFile(UFID);
         try {
             FileInputStream fis=new FileInputStream(UFID);
