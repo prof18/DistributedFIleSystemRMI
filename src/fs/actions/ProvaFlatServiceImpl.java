@@ -44,6 +44,19 @@ public class ProvaFlatServiceImpl {
                     e.printStackTrace();
                 }
             }
+            System.out.println("vuoi scrivere su un file");
+            if(console.next().equals("y")){
+                System.out.println("inserire il nome del file");
+                String nome=console.next();
+                console.nextLine();
+                System.out.println("inserire cosa scrivere");
+                String testo=console.nextLine();
+                try {
+                    fs.write(nome,0,testo.length(),testo.getBytes());
+                } catch (FileNotFoundException e) {
+                    System.out.println("il file non è stato trovato");
+                }
+            }
         }
     }
 

@@ -42,6 +42,8 @@ public class MediatorFsNet {
     }
 
     public void replaceFile(ArrayList<WritingCacheFileWrapper> list){
+        System.out.println("[MEDIATOR] entrato in replaceFile");
+        System.out.println("file da modificare "+list.size());
         try {
             node.replaceFileFromFS(list);
         } catch (RemoteException e) {

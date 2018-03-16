@@ -122,13 +122,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) {
+        System.out.println("Entrato in replaceFileFromFS del nodo "+ownLocation.toUrl());
         for (WritingCacheFileWrapper fileWrapper : fileWrappers) {
             for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
-                if (entry.getValue().equals(ownLocation)) {
+                if (!entry.getValue().equals(ownLocation)) {
                     NetNodeLocation location = entry.getValue();
                     Registry registry = null;
                     try {
                         registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
+                        System.out.println("[replaceFileFromFS]visitando il nodo : "+location.toUrl());
                         NetNode node = (NetNode) registry.lookup(location.toUrl());
                         node.replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID());
                     } catch (RemoteException e) {

@@ -14,13 +14,23 @@ public class CacheFileWrapper implements Serializable {
     private FileAttribute attribute;
     private Date lastValidatedTime;
     private Date lastModifiedBeforeDownloadTime;
+    private boolean isLocal;
 
 
-    public CacheFileWrapper(File file, FileAttribute attribute,String UFID) {
+    public CacheFileWrapper(File file, FileAttribute attribute,String UFID,boolean isLocal) {
         this.UFID=UFID;
         this.file = file;
         this.attribute = attribute;
+        this.isLocal=isLocal;
         lastValidatedTime = Date.from(Instant.now());
+    }
+
+    public boolean isLocal() {
+        return isLocal;
+    }
+
+    public void setLocal(boolean local) {
+        isLocal = local;
     }
 
     public String getUFID() {
