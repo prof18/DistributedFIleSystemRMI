@@ -30,13 +30,13 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
 
-    public NetNodeImpl(String path, String ownIP, int port, String name,MediatorFsNet mediatorFsNet1) throws RemoteException {
+    public NetNodeImpl(String path, String ownIP, int port, String name, MediatorFsNet mediatorFsNet1) throws RemoteException {
         super();
-        mediatorFsNet=mediatorFsNet1;
+        mediatorFsNet = mediatorFsNet1;
         this.path = path;
         this.ownIP = ownIP;
         this.port = port;
-        ownLocation=new NetNodeLocation(ownIP,port,name);
+        ownLocation = new NetNodeLocation(ownIP, port, name);
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
         System.out.println("[COSTRUTTORE]");
@@ -96,23 +96,23 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return connectedNodes;
     }
 
-    public CacheFileWrapper getFileOtherHost(String UFID){
-        System.out.println("getFileOtherHosts "+UFID+" del nodo : "+this.ownLocation.toUrl());
-        for (Map.Entry<Integer,NetNodeLocation> entry:connectedNodes.entrySet()) {
-            NetNodeLocation location=entry.getValue();
-            Registry registry= null;
-            CacheFileWrapper fileWrapper=null;
+    public CacheFileWrapper getFileOtherHost(String UFID) {
+        System.out.println("getFileOtherHosts " + UFID + " del nodo : " + this.ownLocation.toUrl());
+        for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
+            NetNodeLocation location = entry.getValue();
+            Registry registry = null;
+            CacheFileWrapper fileWrapper = null;
             try {
-                registry = LocateRegistry.getRegistry(location.getIp(),location.getPort());
-                NetNode node=(NetNode) registry.lookup(location.toUrl());
-                fileWrapper=node.getFile(UFID);
+                registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
+                NetNode node = (NetNode) registry.lookup(location.toUrl());
+                fileWrapper = node.getFile(UFID);
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (NotBoundException e) {
                 e.printStackTrace();
             }
 
-            if(fileWrapper!=null) {
+            if (fileWrapper != null) {
                 System.out.println("ritornato da getFileOtherHosts");
                 return fileWrapper;
             }
@@ -122,7 +122,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) {
-        System.out.println("Entrato in replaceFileFromFS del nodo "+ownLocation.toUrl());
+        System.out.println("Entrato in replaceFileFromFS del nodo " + ownLocation.toUrl());
         for (WritingCacheFileWrapper fileWrapper : fileWrappers) {
             for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
                 if (!entry.getValue().equals(ownLocation)) {
@@ -130,9 +130,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     Registry registry = null;
                     try {
                         registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
-                        System.out.println("[replaceFileFromFS]visitando il nodo : "+location.toUrl());
+                        System.out.println("[replaceFileFromFS]visitando il nodo : " + location.toUrl());
                         NetNode node = (NetNode) registry.lookup(location.toUrl());
-                        node.replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID());
+                        System.out.println(node.replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID()));
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     } catch (NotBoundException e) {
@@ -145,48 +145,55 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public CacheFileWrapper getFile(String UFID) {
-        System.out.println("getFile "+UFID+" del nodo : "+this.ownLocation.toUrl());
+        System.out.println("getFile " + UFID + " del nodo : " + this.ownLocation.toUrl());
         return mediatorFsNet.getFilefromFS(UFID);
     }
 
-    public String replaceFile(CacheFileWrapper newFile,long lastModified,String UFID) {
-        CacheFileWrapper file=getFile(UFID);
+    public String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) {
+        System.out.println("entrato in replaceFile del nodo : " + ownLocation.toUrl());
+        CacheFileWrapper file = getFile(UFID);
         try {
-            FileInputStream fis=new FileInputStream(UFID);
-            System.out.println("file "+new String(fis.readAllBytes()));
+            FileInputStream fis = new FileInputStream(UFID);
+            System.out.println("file obsoleto è" + new String(fis.readAllBytes()));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("UFID = " + UFID);
-        if(file==null){
-            return "In questo host il file "+UFID+" non è presente";
-        }
-        else{
+        if (file == null) {
+            System.out.println("[REPLACE FILE] il file non è presente nel nodo " + ownLocation.toUrl());
+            return "In questo host il file " + UFID + " non è presente";
+        } else {
+            System.out.println("lastModified : "+lastModified);
+            System.out.println("lastModified other : "+file.getAttribute().getLastModifiedTime().getTime());
             // se il file in questo host non è stato modicato nel mentre si procede alla modifica
-            if(lastModified==file.getAttribute().getLastModifiedTime().getTime())
-            {
-                File file1=new File(UFID);
-                file1.delete();
-                file1=new File(UFID+".attr");
-                file1.delete();
-                File newFileh=new File(UFID);
+            //TODO è stato tolto il check per fare delle prove lastModified == file.getAttribute().getLastModifiedTime().getTime()
+            //TODO è un errore da capire
+            if (true) {
+                System.out.println("[REPLACE FILE non è stato modificato]");
+                File file1 = new File(path+UFID);
+                System.out.println("eliminato il file " + file1.delete());
+                file1 = new File(path+UFID + ".attr");
+                System.out.println("eliminato il file attributi" + file1.delete());
+                File newFileh = new File(path+UFID);
                 try {
-                    FileWriter writer=new FileWriter(newFileh);
-                    System.out.println("Writer : "+newFile.getFile().toString());
-                    writer.write(newFile.getFile().toString());
-                    ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(UFID+".attr"));
+                    FileOutputStream writer = new FileOutputStream(newFileh);
+                    System.out.println("FileOutputStream : " + newFile.getFile().toString());
+                    writer.write(newFile.getContent());
+                    ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path+UFID + ".attr"));
                     ois.writeObject(newFile.getAttribute());
                     ois.flush();
+                    System.out.println("[REPLACEFILE] scrittura conclusa");
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                return "Il file " + UFID + " è stato modificato";
             }
             //altrimenti si lancia un'eccezione
-            return "Il file "+UFID+" è stato modificato";
+            return "impossibile";
         }
     }
 

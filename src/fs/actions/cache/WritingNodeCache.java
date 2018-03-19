@@ -13,7 +13,7 @@ import java.util.*;
 
 public class WritingNodeCache {
     private ArrayList<WritingCacheFileWrapper> fileList;
-    private final int replacedTimer = 20000; //ms
+    private final int replacedTimer = 60000; //ms
     private MediatorFsNet mediatorFsNet;
 
     public WritingNodeCache(MediatorFsNet mediatorFsNet) {

@@ -153,7 +153,8 @@ public class FlatServiceImpl implements FlatService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            FileOutputStream fos=new FileOutputStream(cacheFileWrapper.getFile());
+            File newFile=new File(cacheFileWrapper.getUFID());
+            FileOutputStream fos=new FileOutputStream(newFile);
             byte[] newctx=joinArray(context,data,offset,count);
             System.out.println("contenuto da scrivere : "+new String(newctx));
             try {
@@ -167,7 +168,7 @@ public class FlatServiceImpl implements FlatService {
                 e.printStackTrace();
             }
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
-            WritingCacheFileWrapper wcfw=new WritingCacheFileWrapper(cacheFileWrapper.getFile(),cacheFileWrapper.getAttribute(),Date.from(Instant.now()),fileID,false);
+            WritingCacheFileWrapper wcfw=new WritingCacheFileWrapper(newFile,cacheFileWrapper.getAttribute(),Date.from(Instant.now()),fileID,false);
             writingNodeCache.add(wcfw);
         }
 

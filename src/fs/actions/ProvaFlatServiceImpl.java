@@ -30,7 +30,7 @@ public class ProvaFlatServiceImpl {
             String name = console.next();
             location = new NetNodeLocation(host, port, name);
         }
-        WrapperFlatServiceUtil flatServiceUtil = FlatServiceUtil.create(path, "localhost", "computer", location);
+        WrapperFlatServiceUtil flatServiceUtil = FlatServiceUtil.create(path, "localhost", "host", location);
         FlatService fs = flatServiceUtil.getService();
 
         while (true) {
@@ -41,7 +41,7 @@ public class ProvaFlatServiceImpl {
                 try {
                     fs.read(nome, 0);
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    System.out.println("file non trovato");
                 }
             }
             System.out.println("vuoi scrivere su un file");

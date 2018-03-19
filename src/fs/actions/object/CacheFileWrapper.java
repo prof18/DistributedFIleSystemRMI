@@ -3,8 +3,7 @@ package fs.actions.object;
 import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
 
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
 import java.time.Instant;
 import java.util.Date;
 
@@ -15,6 +14,7 @@ public class CacheFileWrapper implements Serializable {
     private Date lastValidatedTime;
     private Date lastModifiedBeforeDownloadTime;
     private boolean isLocal;
+    private byte[] content;
 
 
     public CacheFileWrapper(File file, FileAttribute attribute,String UFID,boolean isLocal) {
@@ -22,7 +22,21 @@ public class CacheFileWrapper implements Serializable {
         this.file = file;
         this.attribute = attribute;
         this.isLocal=isLocal;
+        FileInputStream fis= null;
+        try {
+            fis = new FileInputStream(file);
+            content=fis.readAllBytes();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         lastValidatedTime = Date.from(Instant.now());
+    }
+
+    public byte[] getContent() {
+        return content;
     }
 
     public boolean isLocal() {
