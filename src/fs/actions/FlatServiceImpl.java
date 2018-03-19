@@ -176,7 +176,7 @@ public class FlatServiceImpl implements FlatService {
 
 
     //utilizzo replicazione
-    
+
     public String create(FileAttribute attribute) throws Exception {
         //TODO : aggiungere un identificativo per l'host
         String pathName = "file" + Date.from(Instant.now()).hashCode();

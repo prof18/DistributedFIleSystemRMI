@@ -65,6 +65,11 @@ public class ProvaFlatServiceImpl {
                     e.printStackTrace();
                 }
             }
+            System.out.println("vuoi eliminare un file?");
+            if(console.next().equals("y")){
+                System.out.println("inserire il nome del file da eliminare");
+                fs.delete(console.next());
+            }
         }
     }
 
