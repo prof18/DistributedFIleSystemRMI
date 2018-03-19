@@ -177,9 +177,8 @@ public class FlatServiceImpl implements FlatService {
 
     //utilizzo replicazione
 
-    public String create(FileAttribute attribute) throws Exception {
-        //TODO : aggiungere un identificativo per l'host
-        String pathName = "file" + Date.from(Instant.now()).hashCode();
+    public String create(String host,FileAttribute attribute) throws Exception {
+        String pathName = host+"_"+ Date.from(Instant.now()).hashCode();
         File file = new File(path+pathName);
         if (file.exists()) {
             throw new FileNotFoundException();
@@ -194,18 +193,21 @@ public class FlatServiceImpl implements FlatService {
     }
 
     /**
-     * Utilizzo replicazione, ma viene gestita dal metodo sopra
+     *
+     * @param host è il nome del servizio
+     * @return ritorna il nome assegnato al file
+     * @throws Exception
      */
     @Override
-    public String create() throws Exception {
+    public String create(String host) throws Exception {
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
-        return create(attribute);
+        return create(host,attribute);
 
     }
 
     //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
-    //TODO:verifica delete
+
     public void delete(String fileID) {
         File file = new File(path + fileID);
         File fileAttr = new File(path + fileID + ".attr");

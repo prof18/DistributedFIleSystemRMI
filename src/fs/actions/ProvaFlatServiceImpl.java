@@ -32,6 +32,7 @@ public class ProvaFlatServiceImpl {
         }
         WrapperFlatServiceUtil flatServiceUtil = FlatServiceUtil.create(path, "localhost", "host", location);
         FlatService fs = flatServiceUtil.getService();
+        String serviceName=flatServiceUtil.getOwnLocation().getName();
 
         while (true) {
             System.out.println("vuoi leggere un file");
@@ -60,7 +61,7 @@ public class ProvaFlatServiceImpl {
             System.out.println("vuoi creare un nuovo file?");
             if(console.next().equals("y")){
                 try {
-                    System.out.println("creato il file : "+fs.create());
+                    System.out.println("creato il file : "+fs.create(serviceName));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
