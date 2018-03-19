@@ -23,7 +23,7 @@ public interface FlatService extends Remote, Serializable {
 
     void delete(String fileID);
 
-    FileAttribute getAttributes(String fileID);
+    FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
     void setAttributes(String fileID, FileAttribute attr);
 }

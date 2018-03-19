@@ -224,9 +224,10 @@ public class FlatServiceImpl implements FlatService {
 
 
     //TODO: verifica getAttributes
-    public FileAttribute getAttributes(String fileID) {
+    public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
         System.out.println("entrato in getAttributes");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
+        if(cacheFileWrapper==null) throw new FileNotFoundException();
         return cacheFileWrapper.getAttribute();
     }
 
@@ -282,7 +283,7 @@ public class FlatServiceImpl implements FlatService {
     }
 
 
-    private CacheFileWrapper getFile(String UFID) {
+    private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
         System.out.println("entrato in getFile");
         System.out.println(path + UFID);
         File file = new File(path + UFID);
@@ -297,6 +298,7 @@ public class FlatServiceImpl implements FlatService {
                 return cacheFileWrapper;
             } else {
                 CacheFileWrapper cacheFile = mediator.getFile(UFID);
+                if(cacheFile==null) throw new FileNotFoundException();
                 cacheFile.setLocal(false);
                 readingCache.put(UFID, cacheFile);
                 return cacheFile;
@@ -351,15 +353,21 @@ public class FlatServiceImpl implements FlatService {
 
     public CacheFileWrapper getFileAndAttribute(String UFID) {
         File file = new File(path + UFID);
-        FileAttribute ret;
+        FileAttribute ret=null;
         if (file.exists()) {
             System.out.println("trovato il file " + path + UFID);
-            ret = getAttributes(UFID);
-            return new CacheFileWrapper(file, ret, UFID, true);
+            try {
+                ret = getAttributes(UFID);
+                return new CacheFileWrapper(file, ret, UFID, true);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
         } else {
             System.out.println("non trovato il file " + UFID);
             return null;
         }
+        return null;
     }
 
 }
