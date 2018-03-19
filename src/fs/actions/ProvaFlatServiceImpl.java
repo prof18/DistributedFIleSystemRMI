@@ -57,6 +57,14 @@ public class ProvaFlatServiceImpl {
                     System.out.println("il file non è stato trovato");
                 }
             }
+            System.out.println("vuoi creare un nuovo file?");
+            if(console.next().equals("y")){
+                try {
+                    System.out.println("creato il file : "+fs.create());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

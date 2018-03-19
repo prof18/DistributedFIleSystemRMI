@@ -84,7 +84,6 @@ public class FlatServiceImpl implements FlatService {
 
     //utilizza cache in scrittura
 
-    //TODO: verifica Write
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
@@ -153,10 +152,10 @@ public class FlatServiceImpl implements FlatService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            File newFile=new File(cacheFileWrapper.getUFID());
-            FileOutputStream fos=new FileOutputStream(newFile);
-            byte[] newctx=joinArray(context,data,offset,count);
-            System.out.println("contenuto da scrivere : "+new String(newctx));
+            File newFile = new File(cacheFileWrapper.getUFID());
+            FileOutputStream fos = new FileOutputStream(newFile);
+            byte[] newctx = joinArray(context, data, offset, count);
+            System.out.println("contenuto da scrivere : " + new String(newctx));
             try {
                 fos.write(newctx);
             } catch (IOException e) {
@@ -168,7 +167,7 @@ public class FlatServiceImpl implements FlatService {
                 e.printStackTrace();
             }
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
-            WritingCacheFileWrapper wcfw=new WritingCacheFileWrapper(newFile,cacheFileWrapper.getAttribute(),Date.from(Instant.now()),fileID,false);
+            WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
             writingNodeCache.add(wcfw);
         }
 
@@ -177,17 +176,16 @@ public class FlatServiceImpl implements FlatService {
 
 
     //utilizzo replicazione
-
-    //TODO:verifica create
+    
     public String create(FileAttribute attribute) throws Exception {
         //TODO : aggiungere un identificativo per l'host
         String pathName = "file" + Date.from(Instant.now()).hashCode();
-        File file = new File(pathName);
+        File file = new File(path+pathName);
         if (file.exists()) {
             throw new FileNotFoundException();
         }
         file.createNewFile();
-        FileOutputStream out = new FileOutputStream(pathName + ".attr");
+        FileOutputStream out = new FileOutputStream(path+pathName + ".attr");
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
