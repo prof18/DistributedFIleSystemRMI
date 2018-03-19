@@ -223,7 +223,6 @@ public class FlatServiceImpl implements FlatService {
      */
 
 
-    //TODO: verifica getAttributes
     public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
         System.out.println("entrato in getAttributes");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
@@ -242,7 +241,7 @@ public class FlatServiceImpl implements FlatService {
     //TODO: verifica setAttributes
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(fileID + ".attr");
+            FileOutputStream fileOutputStream = new FileOutputStream(path+fileID + ".attr");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(attr);
         } catch (IOException e) {

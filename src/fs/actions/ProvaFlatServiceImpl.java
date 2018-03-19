@@ -2,9 +2,12 @@ package fs.actions;
 
 import fs.actions.interfaces.FlatService;
 import fs.actions.object.WrapperFlatServiceUtil;
+import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
 
 import java.io.FileNotFoundException;
+import java.time.Instant;
+import java.util.Date;
 import java.util.Scanner;
 
 public class ProvaFlatServiceImpl {
@@ -72,6 +75,24 @@ public class ProvaFlatServiceImpl {
                 System.out.println("inserire il nome del file da esaminare");
                 try {
                     System.out.println(fs.getAttributes(console.next()).toString());
+                } catch (FileNotFoundException e) {
+                    System.out.println("file non trovato");
+                }
+            }
+
+            System.out.println("vuoi modificare gli attributi di un file?");
+            if(console.next().equals("y")){
+                System.out.println("inserire il nome del file da esaminare");
+                try {
+                    String nome=console.next();
+                    FileAttribute fa=fs.getAttributes(nome);
+                    System.out.println(fa);
+                    System.out.println("***MODIFICA***");
+                    fa.setLastModifiedTime(Date.from(Instant.now()));
+                    fa.setOwner("LR_ilsommo");
+                    System.out.println(fa);
+                    fs.setAttributes(nome,fa);
+                    System.out.println(fs.getAttributes(nome));
                 } catch (FileNotFoundException e) {
                     System.out.println("file non trovato");
                 }
