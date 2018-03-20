@@ -8,7 +8,6 @@ public class NetNodeLocation implements Serializable {
     private String ip;
     private int port;
     private String name;
-
     private long timeStamp = new Date().getTime();
 
     public NetNodeLocation(String ip, int port, String name) {
