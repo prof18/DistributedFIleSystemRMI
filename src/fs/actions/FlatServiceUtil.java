@@ -3,6 +3,7 @@ package fs.actions;
 import fs.actions.interfaces.FlatService;
 import fs.actions.object.WrapperFlatServiceUtil;
 import mediator_fs_net.MediatorFsNet;
+import net.objects.JoinWrap;
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
@@ -21,17 +22,18 @@ public class FlatServiceUtil {
     public static WrapperFlatServiceUtil create(String path, String ownIP, String nameService, NetNodeLocation locationRet) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
-        MediatorFsNet mediatorFsNet=new MediatorFsNet();
+        MediatorFsNet mediatorFsNet = new MediatorFsNet();
         RegistryWrapper rw = Util.getNextFreePort();
-        Registry registry=rw.getRegistry();
-        int port=rw.getPort();
+        Registry registry = rw.getRegistry();
+        int port = rw.getPort();
         NetNode node = null;
         try {
-            node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
+            //node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
+            node = new NetNodeImpl(path, ownIP, port, mediatorFsNet);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        FlatService service=new FlatServiceImpl(path,mediatorFsNet);
+        FlatService service = new FlatServiceImpl(path, mediatorFsNet);
         mediatorFsNet.addNetService(node);
         mediatorFsNet.addService(service);
         String connectPath = "rmi://" + ownIP + ":" + port + "/" + nameService;
@@ -50,7 +52,12 @@ public class FlatServiceUtil {
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
                 System.out.println("[AGGIORNAMENTO NODI]");
-                HashMap<Integer, NetNodeLocation> retMap = node1.join(ownIP, port, locationRet.getName());
+
+                //Modifiche per il nome Host random
+                JoinWrap jWrap = node1.join(ownIP, port, locationRet.getName());
+                HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
+                node.setNameLocation(jWrap.getNameJoin());
+
                 System.out.println();
                 System.out.println("[MAPPA RITORNATA]");
                 System.out.println();
@@ -75,8 +82,6 @@ public class FlatServiceUtil {
                             tmpNode.setConnectedNodes(node.getHashMap());
                             ret = node.getHashMap();
                         }
-
-
                     }
                 }
 
@@ -87,7 +92,7 @@ public class FlatServiceUtil {
                 e.printStackTrace();
             }
         }
-        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP,port,nameService),ret,service);
+        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP, port, nameService), ret, service);
 
     }
 }

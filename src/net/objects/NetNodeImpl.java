@@ -2,7 +2,6 @@ package net.objects;
 
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
-import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
@@ -17,25 +16,30 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     private MediatorFsNet mediatorFsNet;
     private String ownIP;
     private int port;
-    private int num = 0;
-    private String hostName = "host";
+    //private String hostName = "host";
     private String path;
     private NetNodeLocation ownLocation;
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
 
-    public NetNodeImpl(String path, String ownIP, int port, String name, MediatorFsNet mediatorFsNet1) throws RemoteException {
+    public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1) throws RemoteException {
         super();
+
         mediatorFsNet = mediatorFsNet1;
+
         this.path = path;
         this.ownIP = ownIP;
         this.port = port;
+
+        String name = "host" + new Random().nextInt(1000);
+
         ownLocation = new NetNodeLocation(ownIP, port, name);
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
@@ -44,14 +48,13 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         System.out.println("AVVIO THREAD");
         GarbageService v;
         try {
-            v = new GarbageService(this.ownIP, this.hostName, this.port);
+            v = new GarbageService(this.ownIP, ownLocation.getName(), this.port);
             Thread t = new Thread(v);
             t.start();
         } catch (RemoteException e) {
             System.out.println("Avvio Thread Remote Exc");
             e.printStackTrace();
         }
-
 
     }
 
@@ -66,21 +69,46 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public synchronized HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) {
+    public synchronized JoinWrap join(String ipNode, int port, String name) {
         System.out.println("si è connesso un nuovo nodo: " + ipNode + " " + port + " " + name);
-        connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, name));
+
+        //check if name is already used
+        String newName = checkHostName(name);
+
+        connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, newName));
         System.out.println("[JOIN]");
         Util.plot(connectedNodes);
-        return connectedNodes;
+
+        return new JoinWrap(newName,connectedNodes);
     }
 
-
-    public int getAndSetNum() {
-        int temp = num;
-        num++;
-        return temp;
+    @Override
+    public void setNameLocation(String name) {
+        this.ownLocation.setName(name);
     }
 
+    @Override
+    public String checkHostName(String oldName) {
+
+        String newName = oldName;
+        boolean validName = false;
+        while (!validName) {
+
+            boolean changed = false;
+            for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
+
+                NetNodeLocation tmp = entry.getValue();
+
+                if (tmp.getName() == oldName) {
+                    newName = "host" + new Random().nextInt(1000);
+                    changed = true;
+                }
+            }
+
+            validName = !changed;
+        }
+        return newName;
+    }
 
     public NetNodeWrap add(String ip, int port) {
         return null;
@@ -88,7 +116,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public String getHostName() {
-        return hostName;
+        return ownLocation.getName();
     }
 
 
@@ -165,23 +193,23 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             System.out.println("[REPLACE FILE] il file non è presente nel nodo " + ownLocation.toUrl());
             return "In questo host il file " + UFID + " non è presente";
         } else {
-            System.out.println("lastModified : "+lastModified);
-            System.out.println("lastModified other : "+file.getAttribute().getLastModifiedTime().getTime());
+            System.out.println("lastModified : " + lastModified);
+            System.out.println("lastModified other : " + file.getAttribute().getLastModifiedTime().getTime());
             // se il file in questo host non è stato modicato nel mentre si procede alla modifica
             //TODO è stato tolto il check per fare delle prove lastModified == file.getAttribute().getLastModifiedTime().getTime()
             //TODO è un errore da capire
             if (true) {
                 System.out.println("[REPLACE FILE non è stato modificato]");
-                File file1 = new File(path+UFID);
+                File file1 = new File(path + UFID);
                 System.out.println("eliminato il file " + file1.delete());
-                file1 = new File(path+UFID + ".attr");
+                file1 = new File(path + UFID + ".attr");
                 System.out.println("eliminato il file attributi" + file1.delete());
-                File newFileh = new File(path+UFID);
+                File newFileh = new File(path + UFID);
                 try {
                     FileOutputStream writer = new FileOutputStream(newFileh);
                     System.out.println("FileOutputStream : " + newFile.getFile().toString());
                     writer.write(newFile.getContent());
-                    ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path+UFID + ".attr"));
+                    ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path + UFID + ".attr"));
                     ois.writeObject(newFile.getAttribute());
                     ois.flush();
                     System.out.println("[REPLACEFILE] scrittura conclusa");

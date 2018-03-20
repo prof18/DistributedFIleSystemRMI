@@ -2,6 +2,7 @@ package net.objects.interfaces;
 
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
 import net.objects.NetNodeWrap;
 
@@ -17,9 +18,9 @@ public interface NetNode extends Remote, Serializable {
 
     int getPort() throws RemoteException;
 
-    HashMap<Integer, NetNodeLocation> join(String ipNode, int port, String name) throws RemoteException;
+    JoinWrap join(String ipNode, int port, String name) throws RemoteException;
 
-    int getAndSetNum() throws RemoteException;
+ //   int getAndSetNum() throws RemoteException;
 
     CacheFileWrapper getFileOtherHost(String UFID) throws RemoteException;
 
@@ -40,4 +41,8 @@ public interface NetNode extends Remote, Serializable {
     void checkNodes() throws RemoteException;
 
     String verify() throws RemoteException;
+
+    String checkHostName(String name) throws RemoteException;
+
+    void setNameLocation(String name);
 }
