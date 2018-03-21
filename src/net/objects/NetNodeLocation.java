@@ -9,6 +9,7 @@ public class NetNodeLocation implements Serializable {
     private int port;
     private String name;
     private long timeStamp = new Date().getTime();
+    private int totalByte;
 
     public NetNodeLocation(String ip, int port, String name) {
         this.ip = ip;
@@ -21,9 +22,6 @@ public class NetNodeLocation implements Serializable {
         return name;
     }
 
-    public long getTimeStamp(){return timeStamp;}
-
-    public void setName(String name){this.name = name;}
 
     public String getIp() {
         return ip;
@@ -31,6 +29,16 @@ public class NetNodeLocation implements Serializable {
 
     public int getPort() {
         return port;
+    }
+
+    public long getTimeStamp(){return timeStamp;}
+
+    public int getTotalByte(){return totalByte;}
+
+    public void setName(String name){this.name = name;}
+
+    public void setTotalByte(int tb){
+        totalByte = tb;
     }
 
     @Override
