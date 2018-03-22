@@ -14,14 +14,9 @@ import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
-import utils.Util;
 
 import java.io.*;
-import java.rmi.AccessException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
+import java.sql.SQLOutput;
 import java.time.Instant;
 import java.util.*;
 
@@ -177,32 +172,34 @@ public class FlatServiceImpl implements FlatService {
 
     //utilizzo replicazione
 
-    public String create(String host,FileAttribute attribute) throws Exception {
-        String pathName = host+"_"+ Date.from(Instant.now()).hashCode();
-        File file = new File(path+pathName);
+    public String create(String host, FileAttribute attribute, WrapperFlatServiceUtil wfsu) throws Exception { //TO DO: scegliere politica di replicazione del file nel nodo da più tempo connesso + minore spazio occupato.
+        HashMap<Integer, NetNodeLocation> nodesLocation = wfsu.getLocationHashMap();
+        String pathName = host + "_" + Date.from(Instant.now()).hashCode();
+        File file = new File(path + pathName);
         if (file.exists()) {
             throw new FileNotFoundException();
         }
         file.createNewFile();
-        FileOutputStream out = new FileOutputStream(path+pathName + ".attr");
+        FileOutputStream out = new FileOutputStream(path + pathName + ".attr");
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
         //in questo punto deve essere aggiunta la replicazione
+        replication(file, wfsu);
+
         return pathName;
     }
 
     /**
-     *
      * @param host è il nome del servizio
      * @return ritorna il nome assegnato al file
      * @throws Exception
      */
     @Override
-    public String create(String host) throws Exception {
+    public String create(String host, WrapperFlatServiceUtil wfsu) throws Exception { //crea il file (nomehost+timestamp) in locale
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
-        return create(host,attribute);
+        return create(host, attribute, wfsu);
 
     }
 
@@ -226,7 +223,7 @@ public class FlatServiceImpl implements FlatService {
     public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
         System.out.println("entrato in getAttributes");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
-        if(cacheFileWrapper==null) throw new FileNotFoundException();
+        if (cacheFileWrapper == null) throw new FileNotFoundException();
         return cacheFileWrapper.getAttribute();
     }
 
@@ -241,7 +238,7 @@ public class FlatServiceImpl implements FlatService {
     //TODO: verifica setAttributes
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(path+fileID + ".attr");
+            FileOutputStream fileOutputStream = new FileOutputStream(path + fileID + ".attr");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(attr);
         } catch (IOException e) {
@@ -297,7 +294,7 @@ public class FlatServiceImpl implements FlatService {
                 return cacheFileWrapper;
             } else {
                 CacheFileWrapper cacheFile = mediator.getFile(UFID);
-                if(cacheFile==null) throw new FileNotFoundException();
+                if (cacheFile == null) throw new FileNotFoundException();
                 cacheFile.setLocal(false);
                 readingCache.put(UFID, cacheFile);
                 return cacheFile;
@@ -352,7 +349,7 @@ public class FlatServiceImpl implements FlatService {
 
     public CacheFileWrapper getFileAndAttribute(String UFID) {
         File file = new File(path + UFID);
-        FileAttribute ret=null;
+        FileAttribute ret = null;
         if (file.exists()) {
             System.out.println("trovato il file " + path + UFID);
             try {
@@ -367,6 +364,65 @@ public class FlatServiceImpl implements FlatService {
             return null;
         }
         return null;
+    }
+
+    private void replication(File file, WrapperFlatServiceUtil wfsu){ //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+        HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
+
+        if (!hm.containsKey(file.getName())){
+            System.out.println("File not found");
+            return;
+        }
+
+        ArrayList<NetNodeLocation> nodeList = hm.get(file.getName());
+        ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
+        NetNodeLocation selectedNode = selectedNode(nodeBiggerTime);
+
+        if(selectedNode == null){
+            System.out.println("Disastro!!! Siamo rovinati!!!");
+            System.out.println(" Nessun nodo trovato per la replicazione");
+            return;
+        }
+
+    }
+
+    private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list){
+        long maxConnectedTime = maxTimeConnection(list);
+        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
+        for(NetNodeLocation node: list){
+            if(node.getTimeStamp() == maxConnectedTime){
+                nodeList.add(node);
+            }
+        }
+
+        return nodeList;
+    }
+
+    private long maxTimeConnection(ArrayList<NetNodeLocation> list){
+        long connectedTime = 0;
+        long selectedTimeStamp = 0;
+        long currentTime = new Date().getTime();
+        for (NetNodeLocation dn: list){
+            if(currentTime - dn.getTimeStamp() > connectedTime){
+                selectedTimeStamp = dn.getTimeStamp();
+                connectedTime = currentTime - dn.getTimeStamp();
+            }
+        }
+
+        return selectedTimeStamp;
+    }
+
+    private NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list){
+        NetNodeLocation selectedNode = null;
+        int occupedSpace = Integer.MAX_VALUE;
+        for (NetNodeLocation node: list){
+            if(node.getTotalByte() < occupedSpace){
+                occupedSpace = node.getTotalByte();
+                selectedNode = node;
+            }
+        }
+
+        return selectedNode;
     }
 
 }

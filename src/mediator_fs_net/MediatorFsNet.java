@@ -26,7 +26,7 @@ public class MediatorFsNet {
         service = service1;
     }
 
-    public CacheFileWrapper getFile(String UFID) {
+    public CacheFileWrapper getFile(String UFID) { //ricerca nella "rete" del file
         System.out.println("entrato nel mediator alla ricerca del file : "+UFID);
         try {
             return node.getFileOtherHost(UFID);

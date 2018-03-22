@@ -1,6 +1,7 @@
 package fs.actions.interfaces;
 
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.WrapperFlatServiceUtil;
 import fs.objects.structure.FileAttribute;
 
 import java.io.FileNotFoundException;
@@ -15,9 +16,9 @@ public interface FlatService extends Remote, Serializable {
 
     void write(String fileID, int i, int count, byte[] data) throws FileNotFoundException;
 
-    String create(String host,FileAttribute attribute) throws Exception;
+    String create(String host, FileAttribute attribute, WrapperFlatServiceUtil wfsu) throws Exception;
 
-    String create(String host) throws Exception;
+    String create(String host, WrapperFlatServiceUtil wfsu) throws Exception;
 
     CacheFileWrapper getFileAndAttribute(String UFID);
 

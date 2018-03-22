@@ -59,7 +59,7 @@ public class ProvaFlatServiceImpl {
             System.out.println("vuoi creare un nuovo file?");
             if (console.next().equals("y")) {
                 try {
-                    System.out.println("creato il file : " + fs.create(serviceName));
+                    System.out.println("creato il file : " + fs.create(serviceName, flatServiceUtil));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
