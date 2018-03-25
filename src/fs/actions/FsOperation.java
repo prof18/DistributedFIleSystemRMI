@@ -5,6 +5,7 @@ import fs.objects.structure.FSTreeNode;
 import utils.Constants;
 import utils.PropertiesHelper;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -54,6 +55,22 @@ public class FsOperation implements FSOperationI {
 
     @Override
     public void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback) {
+
+        if (!nodeToDelete.getFiles().isEmpty() || !nodeToDelete.getChildrens().isEmpty()) {
+            int dialogResult = JOptionPane.showConfirmDialog(null,
+                    "The folder is not empty. Would you like to delete all?", "Warning", JOptionPane.YES_NO_OPTION);
+            if (dialogResult == JOptionPane.YES_OPTION) {
+                // Saving code here
+                System.out.println("Delete");
+                FSTreeNode parent = nodeToDelete.getParent();
+                parent.getChildrens().remove(nodeToDelete);
+                callback.onItemChanged(parent);
+            }
+        } else {
+            FSTreeNode parent = nodeToDelete.getParent();
+            parent.getChildrens().remove(nodeToDelete);
+            callback.onItemChanged(parent);
+        }
 
     }
 

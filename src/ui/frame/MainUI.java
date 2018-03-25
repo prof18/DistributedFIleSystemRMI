@@ -23,8 +23,6 @@ import java.text.SimpleDateFormat;
 
 public class MainUI extends JFrame {
 
-    private LogUI logUI;
-
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
     private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
     private FSStructure fsStructure;
@@ -144,12 +142,13 @@ public class MainUI extends JFrame {
                 //enable rename
                 rename.setEnabled(true);
                 //enable delete
-
+                delete.setEnabled(true);
                 JTable table = (JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && row != -1) {
                     rename.setEnabled(false);
+                    delete.setEnabled(false);
                     changeTableView(false, null);
                 }
             }
@@ -451,14 +450,6 @@ public class MainUI extends JFrame {
         });
         menu.add(menuItem);
         menu.addSeparator();
-        //Settings
-        menuItem = new JMenuItem("Settings");
-        menuItem.addActionListener((ActionListener) -> {
-            SettingsDialog settingsDialog = new SettingsDialog(false);
-            settingsDialog.setVisible(true);
-
-        });
-        menu.add(menuItem);
         //About
         menuItem = new JMenuItem("About");
         menuItem.addActionListener((ActionListener) -> {
@@ -492,43 +483,27 @@ public class MainUI extends JFrame {
         menu.add(rename);
         //Delete
         delete = new JMenuItem("Delete");
+        delete.setEnabled(false);
         delete.addActionListener((ActionListener) -> {
             System.out.println("Clicked Delete");
+            int row = table.getSelectedRow();
+            TableItem item = model.getItems().get(row);
+            if (!item.isFile()) {
+                fsOperation.deleteDirectory(item.getTreeNode(), (fsTreeNode -> {
+                    FileViewTableModel model = (FileViewTableModel) table.getModel();
+                    model.setNode(fsTreeNode);
+                    //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                    FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                    tree.setModel(treeModel);
+                    fsStructure.generateJson(directoryTree);
+                    System.out.println("Callback");
+                }));
+            }
         });
         menu.add(delete);
-        //Move
-        menuItem = new JMenuItem("Move");
-        menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Move");
-        });
-        menu.add(menuItem);
         menuBar.add(menu);
 
-        //Tools Menu
-        menu = new JMenu("Tools");
-        //Show Log
-        JCheckBoxMenuItem cbMenuItem = new JCheckBoxMenuItem("Show Log");
-        cbMenuItem.setState(true);
-        cbMenuItem.addActionListener((ActionListener) -> {
-            if (cbMenuItem.getState()) {
-                logUI.setVisible(true);
-                System.out.println("Log enabled");
-            } else {
-                logUI.setVisible(false);
-                System.out.println("Log disabled");
-            }
-            System.out.println("Clicked Show Log");
-        });
-        menu.add(cbMenuItem);
-        //Say Hello
-        menuItem = new JMenuItem("Say Hello");
-        menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Say Hello");
-        });
-        menu.add(menuItem);
-        menuBar.add(menu);
-
-        //Navigate JsonFolder Up
+        //Navigate Folder Up
         menuBar.add(Box.createHorizontalGlue());
         navigateUpBtn = new JButton("Navigate Up");
         navigateUpBtn.addActionListener((ActionListener) -> {
