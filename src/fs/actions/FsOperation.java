@@ -1,21 +1,25 @@
 package fs.actions;
 
+import fs.actions.interfaces.FSOperationI;
 import fs.objects.structure.FSTreeNode;
-import fs.objects.structure.FileWrapper;
 import utils.Constants;
 import utils.PropertiesHelper;
 
-
-import java.io.File;
+import java.rmi.server.UID;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.UUID;
 
+/**
+ * We have to do two things: update the json and create new file in the PC FS
+ */
+public class FsOperation implements FSOperationI {
 
-public class FsOperation {
-
-    private String rootPath;
-    private FSTreeNode root = null; //directory root
+    //A reference to the File System in the host PC
+    private String hostFSPath;
+/*    private FSTreeNode root = null; //directory root
     private File dirFile = null; // json file
-    private FSTreeNode currentDir = root; //current UI directory
+    private FSTreeNode currentDir = root; //current UI directory*/
 
     private static FsOperation INSTANCE = null;
 
@@ -26,10 +30,30 @@ public class FsOperation {
     }
 
     private FsOperation() {
-        rootPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
+        hostFSPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
     }
 
-    public void setRoot(FSTreeNode rootDir){
+    @Override
+    public void createDirectory(FSTreeNode currentNode, String dirName, NewItemCallback callback) {
+
+        //FSTreeNode tree = FSStructure.getInstance().getTree();
+        FSTreeNode node = new FSTreeNode();
+        node.setParent(currentNode);
+        node.setNameNode(dirName);
+        //TODO; change UUID
+        node.setUFID(UUID.randomUUID().toString());
+        node.setChildrens(new ArrayList<>());
+        node.setFiles(new ArrayList<>());
+        currentNode.addChild(node);
+
+
+        callback.onItemCreated(currentNode);
+
+
+    }
+
+
+   /* public void setRoot(FSTreeNode rootDir){
         if (dirFile != null){
             root = rootDir;
         }
@@ -39,12 +63,13 @@ public class FsOperation {
         this.dirFile = dirFile;
     }
 
+
     public void createDirectory(String dirName){
         FSTreeNode newDir = new FSTreeNode(UUID.randomUUID().toString(), dirName, null, null, null);
         currentDir.addChild(newDir);
         newDir.setParent(currentDir);
 
-        /*BufferedReader br;
+        BufferedReader br;
         FileWriter fw;
 
         try{
@@ -64,7 +89,7 @@ public class FsOperation {
             e.printStackTrace();
             System.out.println("Problema metodo setRoot classe FsOperation");
             System.exit(-1);
-        }*/
+        }
 
     }
 
@@ -80,7 +105,7 @@ public class FsOperation {
         //updateFsFile();
     }
 
-    /*public void mv(String nodeName, String path){
+    public void mv(String nodeName, String path){
         String[] pathA = path.split("/");
         DirectoryTree file = currentDir.getChild(nodeName);
         currentDir = getRootFromHere();
@@ -88,7 +113,7 @@ public class FsOperation {
             currentDir = currentDir.getChild(pathA[i]);
         }
         file.setParent(currentDir);
-    }*/
+    }
 
     public void deleteAllFile(FSTreeNode currentDir) {
         currentDir.setFiles(null);
@@ -134,7 +159,7 @@ public class FsOperation {
         return currentDir;
     }
 
-    /*private void updateFsFile(){
+    private void updateFsFile(){
         if (dirFile != null){
             BufferedReader br;
             FileWriter fw;

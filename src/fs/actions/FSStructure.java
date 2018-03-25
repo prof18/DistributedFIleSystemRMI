@@ -11,10 +11,13 @@ import utils.PropertiesHelper;
 import javax.swing.tree.TreeNode;
 import java.util.*;
 
+/**
+ * In this class there is ALWAYS a reference of the File System Tree
+ */
 public class FSStructure {
 
     private static FSStructure INSTANCE = null;
-    private static FSTreeNode tree;
+    private FSTreeNode tree;
 
     public static FSStructure getInstance() {
         if (INSTANCE == null)
@@ -34,11 +37,11 @@ public class FSStructure {
         return tree;
     }
 
-    public void setTree(FSTreeNode tree) {
-        FSStructure.tree = tree;
-    }
 
     public void generateJson(FSTreeNode tree) {
+
+        //update the tree reference
+        this.tree = tree;
 
         Queue<FSTreeNode> queue = new LinkedList<>();
 
@@ -159,6 +162,7 @@ public class FSStructure {
             //generate the tree with only the root
             tree = new FSTreeNode();
             tree.setParent(null);
+            //TODO: change UUID
             tree.setUFID(UUID.randomUUID().toString());
             tree.setNameNode("root");
         }

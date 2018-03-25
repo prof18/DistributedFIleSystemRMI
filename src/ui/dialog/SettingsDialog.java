@@ -136,38 +136,6 @@ public class SettingsDialog extends JDialog {
             new MainUI();
         });
 
-      /*  //connect button
-        JButton connectBtn = new JButton("Connect to FS");
-        connectBtn.addActionListener((ActionListener) -> {
-            this.ipHost = portTextField.getText();
-            if (ipHost.equals(""))
-                showErrorMessage();
-            else {
-                System.out.println("Selected ipHost = " + ipHost);
-                PropertiesHelper.getInstance().writeConfig(Constants.IP_HOST_CONFIG, ipHost);
-                //load connect dialog
-                dispose();
-                ConnectDialog connectDialog = new ConnectDialog();
-                connectDialog.setVisible(true);
-            }
-        });
-
-        //create button
-        JButton createBtn = new JButton("Create a FS");
-        createBtn.addActionListener((ActionListener) -> {
-            this.ipHost = portTextField.getText();
-            if (ipHost.equals(""))
-                showErrorMessage();
-            else {
-                System.out.println("Selected ipHost = " + ipHost);
-                PropertiesHelper.getInstance().writeConfig(Constants.IP_HOST_CONFIG, ipHost);
-                //load create dialog
-                dispose();
-                CreateDialog createDialog = new CreateDialog();
-                createDialog.setVisible(true);
-            }
-        });*/
-
         JPanel bp = new JPanel();
         bp.add(okBtn);
 
