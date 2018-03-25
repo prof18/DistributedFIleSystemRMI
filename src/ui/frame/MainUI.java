@@ -49,7 +49,7 @@ public class MainUI extends JFrame {
         int portRet=Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
         String nameRet=PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
         NetNodeLocation location=new NetNodeLocation(ipRet,portRet,nameRet);
-        FlatServiceUtil.create(path,ipHost,nameServiceHost,location);
+       // FlatServiceUtil.create(path,ipHost,nameServiceHost,location);
 
         //Loading file system structure
         System.out.println("Loading structure");

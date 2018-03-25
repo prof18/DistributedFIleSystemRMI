@@ -8,6 +8,7 @@ import utils.Constants;
 import utils.GSONHelper;
 import utils.PropertiesHelper;
 
+import javax.swing.tree.TreeNode;
 import java.util.*;
 
 public class FSStructure {
@@ -33,6 +34,58 @@ public class FSStructure {
         return tree;
     }
 
+    public void setTree(FSTreeNode tree) {
+        FSStructure.tree = tree;
+    }
+
+    public void generateJson(FSTreeNode tree) {
+
+        Queue<FSTreeNode> queue = new LinkedList<>();
+
+        queue.add(tree);
+
+        HashMap<String, JsonFolder> folderMap = new HashMap<>();
+
+        while (!queue.isEmpty()) {
+            FSTreeNode node = queue.poll();
+            JsonFolder jsonFolder = new JsonFolder();
+            jsonFolder.setRoot(node.isRoot());
+            jsonFolder.setUFID(node.getUFID());
+            jsonFolder.setFolderName(node.getNameNode());
+            if (!node.isRoot())
+                jsonFolder.setParentUFID(node.getParent().getUFID());
+
+            ArrayList<String> sons = new ArrayList<>();
+            ArrayList<JsonFile> files = new ArrayList<>();
+            //set root sons
+            for (FSTreeNode child : node.getChildrens()) {
+                queue.add(child);
+                sons.add(child.getUFID());
+            }
+            jsonFolder.setChildren(sons);
+            for (FileWrapper fileWrapper : node.getFiles()) {
+                JsonFile file = new JsonFile();
+                file.setUFID(fileWrapper.getUFID());
+                file.setFileName(fileWrapper.getFileName());
+                file.setAttribute(fileWrapper.getAttribute());
+                file.setPath(fileWrapper.getPath());
+                files.add(file);
+            }
+            jsonFolder.setFiles(files);
+
+            folderMap.put(jsonFolder.getUFID(), jsonFolder);
+
+        }
+
+        String json = GSONHelper.getInstance().foldersToJson(folderMap);
+        //System.out.println("json generated = " + json);
+
+        PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+        System.out.println("Wrote new json structure");
+
+
+
+    }
 
     public void generateTreeStructure() {
 
