@@ -36,6 +36,11 @@ public class MainUI extends JFrame {
     private FSTreeNode currentNode;
     private FSTreeNode directoryTree;
 
+    private JMenuItem rename, delete;
+    private FileViewTableModel model;
+
+    private FsOperation fsOperation;
+
     public MainUI() {
         super("LR18 File System");
 
@@ -60,6 +65,7 @@ public class MainUI extends JFrame {
         //Loading file system structure
         System.out.println("Loading structure");
         fsStructure = FSStructure.getInstance();
+        fsOperation = FsOperation.getInstance();
         fsStructure.generateTreeStructure();
         //Get the structure of the File System
         directoryTree = fsStructure.getTree();
@@ -112,7 +118,7 @@ public class MainUI extends JFrame {
         JScrollPane treeScroll = new JScrollPane(tree);
 
         //Table UI
-        FileViewTableModel model = new FileViewTableModel();
+        model = new FileViewTableModel();
         final JTable table = new JTable();
         this.table = table;
         table.setFillsViewportHeight(true);
@@ -135,10 +141,15 @@ public class MainUI extends JFrame {
         //table listener with double click
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
+                //enable rename
+                rename.setEnabled(true);
+                //enable delete
+
                 JTable table = (JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && row != -1) {
+                    rename.setEnabled(false);
                     changeTableView(false, null);
                 }
             }
@@ -426,16 +437,16 @@ public class MainUI extends JFrame {
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New Folder");
             String folderName = JOptionPane.showInputDialog("New Folder Name: ");
-            FsOperation.getInstance().createDirectory(currentNode, folderName, (treeNode) -> {
+            fsOperation.createDirectory(currentNode, folderName, (treeNode) -> {
 
-                    FileViewTableModel model = (FileViewTableModel) table.getModel();
-                    model.setNode(treeNode);
-                    //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-                    FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-                    tree.setModel(treeModel);
-                    FSStructure.getInstance().generateJson(directoryTree);
-                    System.out.println("Callback");
-                });
+                FileViewTableModel model = (FileViewTableModel) table.getModel();
+                model.setNode(treeNode);
+                //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                tree.setModel(treeModel);
+                fsStructure.generateJson(directoryTree);
+                System.out.println("Callback");
+            });
 
         });
         menu.add(menuItem);
@@ -459,17 +470,32 @@ public class MainUI extends JFrame {
         //Edit Menu
         menu = new JMenu("Edit");
         //Rename
-        menuItem = new JMenuItem("Rename");
-        menuItem.addActionListener((ActionListener) -> {
+        rename = new JMenuItem("Rename");
+        rename.setEnabled(false);
+        rename.addActionListener((ActionListener) -> {
+            int row = table.getSelectedRow();
+            TableItem item = model.getItems().get(row);
+            if (!item.isFile()) {
+                String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
+                fsOperation.renameDirectory(item.getTreeNode(), newName, (fsTreeNode -> {
+                    FileViewTableModel model = (FileViewTableModel) table.getModel();
+                    model.setNode(currentNode);
+                    //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                    FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                    tree.setModel(treeModel);
+                    fsStructure.generateJson(directoryTree);
+                    System.out.println("Callback");
+                }));
+            }
             System.out.println("Clicked Rename");
         });
-        menu.add(menuItem);
+        menu.add(rename);
         //Delete
-        menuItem = new JMenuItem("Delete");
-        menuItem.addActionListener((ActionListener) -> {
+        delete = new JMenuItem("Delete");
+        delete.addActionListener((ActionListener) -> {
             System.out.println("Clicked Delete");
         });
-        menu.add(menuItem);
+        menu.add(delete);
         //Move
         menuItem = new JMenuItem("Move");
         menuItem.addActionListener((ActionListener) -> {

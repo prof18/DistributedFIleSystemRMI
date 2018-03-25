@@ -5,9 +5,7 @@ import fs.objects.structure.FSTreeNode;
 import utils.Constants;
 import utils.PropertiesHelper;
 
-import java.rmi.server.UID;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -45,15 +43,21 @@ public class FsOperation implements FSOperationI {
         node.setChildrens(new ArrayList<>());
         node.setFiles(new ArrayList<>());
         currentNode.addChild(node);
+        callback.onItemChanged(currentNode);
+    }
 
+    @Override
+    public void renameDirectory(FSTreeNode nodeToRename, String newName, NewItemCallback callback) {
+        nodeToRename.setNameNode(newName);
+        callback.onItemChanged(nodeToRename);
+    }
 
-        callback.onItemCreated(currentNode);
-
+    @Override
+    public void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback) {
 
     }
 
-
-   /* public void setRoot(FSTreeNode rootDir){
+    /* public void setRoot(FSTreeNode rootDir){
         if (dirFile != null){
             root = rootDir;
         }
