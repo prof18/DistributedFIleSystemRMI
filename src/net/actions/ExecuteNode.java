@@ -1,5 +1,6 @@
 package net.actions;
 
+import net.objects.JoinWrap;
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
@@ -17,6 +18,7 @@ import java.util.Scanner;
 
 public class ExecuteNode {
     private static String ownIP="localhost";
+    //TODO DA CORREGGERE
     private static String nameService="host";
     private static String path="/zigio/Desktop/";
     public static void main(String[] args){
@@ -27,10 +29,18 @@ public class ExecuteNode {
         int port=rw.getPort();
         try {
             //TODO: da correggere
-            node = new NetNodeImpl(path,ownIP,port,nameService,null);
+            node = new NetNodeImpl(path,ownIP,port,null);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+
+        try {
+            nameService = node.getHostName();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+
         String connectPath = "rmi://" + ownIP + ":" + port + "/" + nameService;
         System.out.println(connectPath);
         System.out.println(registry);
@@ -55,15 +65,15 @@ public class ExecuteNode {
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
                 System.out.println("[AGGIORNAMENTO NODI]");
-                HashMap<Integer,NetNodeLocation> retMap= node1.join(ownIP,port,nome);
+                JoinWrap retMap= node1.join(ownIP,port,nome);
                 System.out.println();
                 System.out.println("[MAPPA RITORNATA]");
                 System.out.println();
-                Util.plot(retMap);
-                node.setConnectedNodes(retMap);
+                Util.plot(retMap.getCoNodesJoin());
+                node.setConnectedNodes(retMap.getCoNodesJoin());
 
                 //Se i nodi sono solo 2 le Map saranno già aggiornate
-                if (!(retMap.size() == 2)) {
+                if (!(retMap.getCoNodesJoin().size() == 2)) {
                     System.out.println();
                     System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
                     System.out.println();
