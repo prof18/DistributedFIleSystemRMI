@@ -7,6 +7,8 @@ import utils.PropertiesHelper;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
 
 /**
@@ -41,34 +43,44 @@ public class FsOperation implements FSOperationI {
         node.setNameNode(dirName);
         //TODO; change UUID
         node.setUFID(UUID.randomUUID().toString());
-        node.setChildrens(new ArrayList<>());
+        node.setChildren(new ArrayList<>());
         node.setFiles(new ArrayList<>());
         currentNode.addChild(node);
+        //long editTime = System.currentTimeMillis();
+        node.setLastEditTime(System.currentTimeMillis());
+        node.updateAncestorTime();
+
         callback.onItemChanged(currentNode);
     }
 
     @Override
     public void renameDirectory(FSTreeNode nodeToRename, String newName, NewItemCallback callback) {
         nodeToRename.setNameNode(newName);
+        nodeToRename.setLastEditTime(System.currentTimeMillis());
+        nodeToRename.updateAncestorTime();
         callback.onItemChanged(nodeToRename);
     }
 
     @Override
     public void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback) {
 
-        if (!nodeToDelete.getFiles().isEmpty() || !nodeToDelete.getChildrens().isEmpty()) {
+        if (!nodeToDelete.getFiles().isEmpty() || !nodeToDelete.getChildren().isEmpty()) {
             int dialogResult = JOptionPane.showConfirmDialog(null,
                     "The folder is not empty. Would you like to delete all?", "Warning", JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
                 // Saving code here
                 System.out.println("Delete");
                 FSTreeNode parent = nodeToDelete.getParent();
-                parent.getChildrens().remove(nodeToDelete);
+                nodeToDelete.setLastEditTime(System.currentTimeMillis());
+                nodeToDelete.updateAncestorTime();
+                parent.getChildren().remove(nodeToDelete);
                 callback.onItemChanged(parent);
             }
         } else {
             FSTreeNode parent = nodeToDelete.getParent();
-            parent.getChildrens().remove(nodeToDelete);
+            nodeToDelete.setLastEditTime(System.currentTimeMillis());
+            nodeToDelete.updateAncestorTime();
+            parent.getChildren().remove(nodeToDelete);
             callback.onItemChanged(parent);
         }
 

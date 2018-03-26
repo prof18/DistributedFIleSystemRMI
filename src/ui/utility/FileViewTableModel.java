@@ -29,8 +29,8 @@ public class FileViewTableModel extends AbstractTableModel {
         items = new ArrayList<>();
         this.currentTreeNode = node;
         //add children
-        if (node.getChildrens() != null && !node.getChildrens().isEmpty()) {
-            for (FSTreeNode child : node.getChildrens()) {
+        if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+            for (FSTreeNode child : node.getChildren()) {
                 TableItem tableItem = new TableItem();
                 tableItem.setTreeNode(child);
                 tableItem.setFile(false);

@@ -75,6 +75,7 @@ public class Util {
         root.setUFID(rootUFID);
         root.setRoot(true);
         root.setFolderName("root");
+        root.setLastEditTime(System.currentTimeMillis());
 
         //folder1
         JsonFolder folder1 = new JsonFolder();
@@ -83,6 +84,7 @@ public class Util {
         folder1.setRoot(false);
         folder1.setFolderName("Folder 1");
         folder1.setParentUFID(rootUFID);
+        folder1.setLastEditTime(System.currentTimeMillis());
 
         //folder2
         JsonFolder folder2 = new JsonFolder();
@@ -91,6 +93,7 @@ public class Util {
         folder2.setRoot(false);
         folder2.setFolderName("Folder 2");
         folder2.setParentUFID(folder1UFID);
+        folder2.setLastEditTime(1519167600000L);
 
         //folder3
         JsonFolder folder3 = new JsonFolder();
@@ -99,6 +102,10 @@ public class Util {
         folder3.setRoot(false);
         folder3.setFolderName("Folder 3");
         folder3.setParentUFID(folder1UFID);
+        long folder3Time = System.currentTimeMillis();
+        folder3.setLastEditTime(folder3Time);
+        folder1.setLastEditTime(folder3Time);
+        root.setLastEditTime(folder3Time);
 
         //set root children
         ArrayList<String> childrenRoot = new ArrayList<>();
@@ -134,9 +141,11 @@ public class Util {
         attribute2.setFileLength(10556L);
         attribute2.setOwner("lr");
         attribute2.setType("pdf");
-        attribute2.setCreationTime(new Date(System.currentTimeMillis()));
-        attribute2.setLastModifiedTime(new Date(System.currentTimeMillis()));
+        long file2Time = System.currentTimeMillis();
+        attribute2.setCreationTime(new Date(file2Time));
+        attribute2.setLastModifiedTime(new Date(file2Time));
         file2.setAttribute(attribute2);
+        root.setLastEditTime(file2Time);
 
         JsonFile file3 = new JsonFile();
         String UFIDFile3 = UUID.randomUUID().toString();

@@ -219,7 +219,7 @@ public class MainUI extends JFrame {
             typeVLabel.setText("folder");
             pathVLabel.setText(node.getPath());
             fileSizeVLabel.setText("<to compute>");
-            lastEditVLabel.setText("<to compute>");
+            lastEditVLabel.setText(sdf.format(node.getLastEditTime()));
         }
     }
 

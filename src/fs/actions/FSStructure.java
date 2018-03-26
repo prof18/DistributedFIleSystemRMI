@@ -8,7 +8,6 @@ import utils.Constants;
 import utils.GSONHelper;
 import utils.PropertiesHelper;
 
-import javax.swing.tree.TreeNode;
 import java.util.*;
 
 /**
@@ -55,13 +54,14 @@ public class FSStructure {
             jsonFolder.setRoot(node.isRoot());
             jsonFolder.setUFID(node.getUFID());
             jsonFolder.setFolderName(node.getNameNode());
+            jsonFolder.setLastEditTime(node.getLastEditTime());
             if (!node.isRoot())
                 jsonFolder.setParentUFID(node.getParent().getUFID());
 
             ArrayList<String> sons = new ArrayList<>();
             ArrayList<JsonFile> files = new ArrayList<>();
             //set root sons
-            for (FSTreeNode child : node.getChildrens()) {
+            for (FSTreeNode child : node.getChildren()) {
                 queue.add(child);
                 sons.add(child.getUFID());
             }
@@ -119,6 +119,7 @@ public class FSStructure {
                 tree.setParent(null);
                 tree.setUFID(jsonFolderRoot.getUFID());
                 tree.setNameNode(jsonFolderRoot.getFolderName());
+                tree.setLastEditTime(jsonFolderRoot.getLastEditTime());
                 queue.add(tree);
                 while (!queue.isEmpty()) {
                     FSTreeNode node = queue.remove();
@@ -133,11 +134,12 @@ public class FSStructure {
                             child.setUFID(childFolder.getUFID());
                             child.setNameNode(childFolder.getFolderName());
                             child.setParent(node);
+                            child.setLastEditTime(childFolder.getLastEditTime());
                             nodeChildren.add(child);
                             queue.add(child);
                         }
                     }
-                    node.setChildrens(nodeChildren);
+                    node.setChildren(nodeChildren);
 
                     //Files
                     ArrayList<FileWrapper> files = new ArrayList<>();

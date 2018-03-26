@@ -26,8 +26,8 @@ public class FileViewTreeModel implements TreeModel {
 
     private ArrayList<Object> getChildAndFile(FSTreeNode node) {
         ArrayList<Object> children = new ArrayList<>();
-        if (node.getChildrens() != null)
-            children.addAll(node.getChildrens());
+        if (node.getChildren() != null)
+            children.addAll(node.getChildren());
         if (node.getFiles() != null)
             children.addAll(node.getFiles());
         return children;
