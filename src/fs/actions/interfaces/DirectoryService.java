@@ -9,7 +9,7 @@ public interface DirectoryService {
     void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback);
 
     String lookup(String dir, String name);
-    void addName(String dir, String name, String fileID);
+    void addName(FSTreeNode currentNode, String name, String fileID);
     void unName(String dir, String name);
     String getNames(String dir, String pattern);
 

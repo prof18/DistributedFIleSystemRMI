@@ -109,6 +109,9 @@ public class SettingsDialog extends JDialog {
             chooser.setAcceptAllFileFilterUsed(false);
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 this.fsDir = chooser.getSelectedFile().toString();
+                if (!fsDir.endsWith("/")) {
+                    fsDir = fsDir + "/";
+                }
                 System.out.println("Selected Directory : " + chooser.getSelectedFile());
                 folderChooserTF.setText(fsDir);
             } else {

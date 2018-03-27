@@ -2,6 +2,10 @@ package ui.frame;
 
 import fs.actions.FSStructure;
 import fs.actions.DirectoryServiceImpl;
+import fs.actions.FileServiceUtil;
+import fs.actions.interfaces.DirectoryService;
+import fs.actions.interfaces.FileService;
+import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
@@ -16,6 +20,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 public class MainUI extends JFrame {
@@ -34,7 +39,9 @@ public class MainUI extends JFrame {
     private JMenuItem rename, delete;
     private FileViewTableModel model;
 
-    private DirectoryServiceImpl fsOperationImpl;
+    private DirectoryService directoryService;
+    private FileService fileService;
+    private NetNodeLocation netNodeLocation;
 
     public MainUI() {
         super("LR18 File System");
@@ -53,14 +60,16 @@ public class MainUI extends JFrame {
         String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
         String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         int portRet = Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
-        String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
-        NetNodeLocation location = new NetNodeLocation(ipRet, portRet, nameRet);
-        // FileServiceUtil.create(path,ipHost,nameServiceHost,location);
+        //String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
+        NetNodeLocation location = new NetNodeLocation(ipRet, portRet);
+        WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path,ipHost,location);
+        fileService = wrapperFS.getService();
+        netNodeLocation = wrapperFS.getOwnLocation();
 
         //Loading file system structure
         System.out.println("Loading structure");
         fsStructure = FSStructure.getInstance();
-        fsOperationImpl = DirectoryServiceImpl.getInstance();
+        directoryService = DirectoryServiceImpl.getInstance();
         fsStructure.generateTreeStructure();
         //Get the structure of the File System
         directoryTree = fsStructure.getTree();
@@ -426,6 +435,17 @@ public class MainUI extends JFrame {
         menuItem = new JMenuItem("New File");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New File");
+            String fileName = JOptionPane.showInputDialog("New File Name: ");
+            if (!fileName.equals("")) {
+                try {
+                    String ufid = fileService.create(netNodeLocation.getName());
+                    directoryService.addName(currentNode, fileName, ufid);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "File not created. An error has occurred");
+                }
+            }
+
         });
         menu.add(menuItem);
         //New JsonFolder
@@ -433,7 +453,7 @@ public class MainUI extends JFrame {
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New Folder");
             String folderName = JOptionPane.showInputDialog("New Folder Name: ");
-            fsOperationImpl.createDirectory(currentNode, folderName, (treeNode) -> {
+            directoryService.createDirectory(currentNode, folderName, (treeNode) -> {
 
                 FileViewTableModel model = (FileViewTableModel) table.getModel();
                 model.setNode(treeNode);
@@ -465,7 +485,7 @@ public class MainUI extends JFrame {
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
-                fsOperationImpl.renameDirectory(item.getTreeNode(), newName, (fsTreeNode -> {
+                directoryService.renameDirectory(item.getTreeNode(), newName, (fsTreeNode -> {
                     FileViewTableModel model = (FileViewTableModel) table.getModel();
                     model.setNode(currentNode);
                     //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
@@ -486,7 +506,7 @@ public class MainUI extends JFrame {
             int row = table.getSelectedRow();
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
-                fsOperationImpl.deleteDirectory(item.getTreeNode(), (fsTreeNode -> {
+                directoryService.deleteDirectory(item.getTreeNode(), (fsTreeNode -> {
                     FileViewTableModel model = (FileViewTableModel) table.getModel();
                     model.setNode(fsTreeNode);
                     //TODO: find a better way to update the tree view, maybe with a TreeModel Listener

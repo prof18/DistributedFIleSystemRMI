@@ -1,9 +1,11 @@
 package fs.actions.interfaces;
 
 import fs.actions.object.CacheFileWrapper;
+import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.Remote;
 
@@ -15,9 +17,8 @@ public interface FileService extends Remote, Serializable {
 
     void write(String fileID, int i, int count, byte[] data) throws FileNotFoundException;
 
-    String create(String host,FileAttribute attribute) throws Exception;
 
-    String create(String host) throws Exception;
+    String create(String host) throws IOException;
 
     CacheFileWrapper getFileAndAttribute(String UFID);
 
@@ -26,4 +27,5 @@ public interface FileService extends Remote, Serializable {
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
     void setAttributes(String fileID, FileAttribute attr);
+
 }

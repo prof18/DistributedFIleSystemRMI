@@ -5,12 +5,12 @@ import net.objects.NetNodeLocation;
 
 import java.util.HashMap;
 
-public class WrapperFlatServiceUtil {
+public class WrapperFileServiceUtil {
     private NetNodeLocation ownLocation;
     private HashMap<Integer, NetNodeLocation> locationHashMap;
     private FileService service;
 
-    public WrapperFlatServiceUtil(NetNodeLocation ownLocation, HashMap<Integer, NetNodeLocation> locationHashMap, FileService service) {
+    public WrapperFileServiceUtil(NetNodeLocation ownLocation, HashMap<Integer, NetNodeLocation> locationHashMap, FileService service) {
         this.ownLocation = ownLocation;
         this.locationHashMap = locationHashMap;
         this.service = service;

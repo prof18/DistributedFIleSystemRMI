@@ -44,5 +44,5 @@ public interface NetNode extends Remote, Serializable {
 
     String checkHostName(String name) throws RemoteException;
 
-    void setNameLocation(String name);
+    void setNameLocation(String name) throws RemoteException;
 }

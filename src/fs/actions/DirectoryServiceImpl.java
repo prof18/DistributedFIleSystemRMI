@@ -2,6 +2,7 @@ package fs.actions;
 
 import fs.actions.interfaces.DirectoryService;
 import fs.objects.structure.FSTreeNode;
+import fs.objects.structure.FileWrapper;
 import utils.Constants;
 import utils.PropertiesHelper;
 
@@ -90,7 +91,8 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public void addName(String dir, String name, String fileID) {
+    public void addName(FSTreeNode currentNode, String name, String fileID) {
+        FileWrapper wrapper = new FileWrapper();
 
     }
 

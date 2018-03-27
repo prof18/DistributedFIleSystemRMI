@@ -1,7 +1,7 @@
 package fs.actions;
 
 import fs.actions.interfaces.FileService;
-import fs.actions.object.WrapperFlatServiceUtil;
+import fs.actions.object.WrapperFileServiceUtil;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeImpl;
@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FileServiceUtil {
-    public static WrapperFlatServiceUtil create(String path, String ownIP, String nameService, NetNodeLocation locationRet) {
+    private static String hostName;
+
+    public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         HashMap<Integer, NetNodeLocation> ret = null;
         MediatorFsNet mediatorFsNet = new MediatorFsNet();
@@ -30,15 +32,18 @@ public class FileServiceUtil {
         try {
             //node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
             node = new NetNodeImpl(path, ownIP, port, mediatorFsNet);
+            hostName = node.getHostName();
+            locationRet.setName(hostName);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
         FileService service = new FileServiceImpl(path, mediatorFsNet);
         mediatorFsNet.addNetService(node);
         mediatorFsNet.addService(service);
-        String connectPath = "rmi://" + ownIP + ":" + port + "/" + nameService;
-        System.out.println("connectPath = " + connectPath);
         try {
+            String connectPath = "rmi://" + ownIP + ":" + port + "/" + hostName;
+            System.out.println("connectPath = " + connectPath);
+
             registry.bind(connectPath, node);
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -46,9 +51,11 @@ public class FileServiceUtil {
             e.printStackTrace();
         }
         if (locationRet != null) {
+            locationRet.setPort(port);
             String recPat = locationRet.toUrl();
             try {
                 Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
+                System.out.println("recPat = " + recPat);
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
                 System.out.println("[AGGIORNAMENTO NODI]");
@@ -92,7 +99,7 @@ public class FileServiceUtil {
                 e.printStackTrace();
             }
         }
-        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP, port, nameService), ret, service);
+        return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service);
 
     }
 }

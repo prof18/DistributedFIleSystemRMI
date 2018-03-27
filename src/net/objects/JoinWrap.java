@@ -1,8 +1,9 @@
 package net.objects;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class JoinWrap {
+public class JoinWrap implements Serializable {
 
     private String name;
     private HashMap<Integer, NetNodeLocation> coNodes;
