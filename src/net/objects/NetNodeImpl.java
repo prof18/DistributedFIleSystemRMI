@@ -2,6 +2,8 @@ package net.objects;
 
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.structure.FileAttribute;
+import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
@@ -79,7 +81,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         System.out.println("[JOIN]");
         Util.plot(connectedNodes);
 
-        return new JoinWrap(newName,connectedNodes);
+        return new JoinWrap(newName, connectedNodes);
     }
 
     @Override
@@ -287,6 +289,31 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
 
+    }
+
+    public boolean saveFileReplica(FileWrapper fw) {
+        File fileAtt = new File(path + fw.getUFID() + ".attr");
+        File f = new File(path + fw.getUFID());
+        try {
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(fw.getContent());
+            fos.close();
+
+            fos = new FileOutputStream(fileAtt);
+            ObjectOutputStream oot = new ObjectOutputStream(fos);
+            oot.writeObject(fw.getAttribute());
+            oot.flush();
+            fos.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
 }

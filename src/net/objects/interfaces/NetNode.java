@@ -2,10 +2,12 @@ package net.objects.interfaces;
 
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.structure.FileWrapper;
 import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
 import net.objects.NetNodeWrap;
 
+import java.io.File;
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -45,4 +47,6 @@ public interface NetNode extends Remote, Serializable {
     String checkHostName(String name) throws RemoteException;
 
     void setNameLocation(String name);
+
+    boolean saveFileReplica(FileWrapper fileWra);
 }

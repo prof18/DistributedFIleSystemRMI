@@ -37,4 +37,14 @@ public class WrapperFlatServiceUtil {
     public void setNetNodeList(HashMap<String, ArrayList<NetNodeLocation>> netNodeList) {
         this.netNodeList = netNodeList;
     }
+
+    public void nodeFileAssociation(String UFID, NetNodeLocation netNode){
+        if(!netNodeList.containsKey(UFID)){
+            ArrayList<NetNodeLocation> a = new ArrayList<>();
+            a.add(netNode);
+            netNodeList.put(UFID, a);
+        }else{
+            netNodeList.get(UFID).add(netNode);
+        }
+    }
 }

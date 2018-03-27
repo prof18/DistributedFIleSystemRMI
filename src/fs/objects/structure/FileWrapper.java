@@ -1,6 +1,8 @@
 package fs.objects.structure;
 
-public class FileWrapper {
+import java.io.Serializable;
+
+public class FileWrapper implements Serializable {
 
     private String fileName;
     private String UFID;

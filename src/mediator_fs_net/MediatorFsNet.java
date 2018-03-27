@@ -4,8 +4,10 @@ import fs.actions.FlatServiceImpl;
 import fs.actions.interfaces.FlatService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.structure.FileWrapper;
 import net.objects.interfaces.NetNode;
 
+import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
@@ -50,4 +52,13 @@ public class MediatorFsNet {
             e.printStackTrace();
         }
     }
+
+    /*public void fileReplication(FileWrapper file){ //Probabile che sia da sistemare
+        System.out.println("[MEDIATOR] entrato in fileReplication");
+        boolean check;
+        do {
+            check = node.saveFileReplica(file);
+        }while(!check);
+
+    }*/
 }

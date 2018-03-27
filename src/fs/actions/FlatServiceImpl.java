@@ -11,11 +11,16 @@ import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WrapperFlatServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
+import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
 import java.io.*;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.sql.SQLOutput;
 import java.time.Instant;
 import java.util.*;
@@ -185,7 +190,15 @@ public class FlatServiceImpl implements FlatService {
         oout.writeObject(attribute);
         oout.flush();
         //in questo punto deve essere aggiunta la replicazione
-        replication(file, wfsu);
+        String UFID = host + new Date().getTime();
+        byte[] ftb = fileToBytes(file);
+
+        FileWrapper fw = new FileWrapper(UFID, file.getName());
+        fw.setPath(path + pathName);
+        fw.setAttribute(new FileAttribute());
+        fw.setContent(ftb);
+
+        replication(fw, wfsu);
 
         return pathName;
     }
@@ -366,31 +379,46 @@ public class FlatServiceImpl implements FlatService {
         return null;
     }
 
-    private void replication(File file, WrapperFlatServiceUtil wfsu){ //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+    private void replication(FileWrapper fileWr, WrapperFlatServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
         HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
 
-        if (!hm.containsKey(file.getName())){
+        if (!hm.containsKey(fileWr.getUFID())) {
             System.out.println("File not found");
             return;
         }
 
-        ArrayList<NetNodeLocation> nodeList = hm.get(file.getName());
+        ArrayList<NetNodeLocation> nodeList = hm.get(fileWr.getUFID());
         ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
         NetNodeLocation selectedNode = selectedNode(nodeBiggerTime);
 
-        if(selectedNode == null){
+        if (selectedNode == null) {
             System.out.println("Disastro!!! Siamo rovinati!!!");
-            System.out.println(" Nessun nodo trovato per la replicazione");
+            System.out.println(" Nessun nodo trovato per la replicazione :( ");
             return;
         }
 
+        //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
+        //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
+        Registry registry = null;
+        CacheFileWrapper fileWrapper = null;
+        try {
+            registry = LocateRegistry.getRegistry(selectedNode.getIp(), selectedNode.getPort());
+            NetNode node = (NetNode) registry.lookup(selectedNode.toUrl());
+            node.saveFileReplica(fileWr);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        }
+        //wfsu.nodeFileAssociation(fileWr.getUFID(), selectedNode);
+
     }
 
-    private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list){
+    private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
         long maxConnectedTime = maxTimeConnection(list);
         ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
-        for(NetNodeLocation node: list){
-            if(node.getTimeStamp() == maxConnectedTime){
+        for (NetNodeLocation node : list) {
+            if (node.getTimeStamp() == maxConnectedTime) {
                 nodeList.add(node);
             }
         }
@@ -398,12 +426,12 @@ public class FlatServiceImpl implements FlatService {
         return nodeList;
     }
 
-    private long maxTimeConnection(ArrayList<NetNodeLocation> list){
+    private long maxTimeConnection(ArrayList<NetNodeLocation> list) {
         long connectedTime = 0;
         long selectedTimeStamp = 0;
         long currentTime = new Date().getTime();
-        for (NetNodeLocation dn: list){
-            if(currentTime - dn.getTimeStamp() > connectedTime){
+        for (NetNodeLocation dn : list) {
+            if (currentTime - dn.getTimeStamp() > connectedTime) {
                 selectedTimeStamp = dn.getTimeStamp();
                 connectedTime = currentTime - dn.getTimeStamp();
             }
@@ -412,17 +440,48 @@ public class FlatServiceImpl implements FlatService {
         return selectedTimeStamp;
     }
 
-    private NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list){
+    private NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
         NetNodeLocation selectedNode = null;
-        int occupedSpace = Integer.MAX_VALUE;
-        for (NetNodeLocation node: list){
-            if(node.getTotalByte() < occupedSpace){
-                occupedSpace = node.getTotalByte();
+        int occupiedSpace = Integer.MAX_VALUE;
+        for (NetNodeLocation node : list) {
+            if (node.getTotalByte() < occupiedSpace) {
+                occupiedSpace = node.getTotalByte();
                 selectedNode = node;
             }
         }
 
         return selectedNode;
+    }
+
+    private static byte[] fileToBytes(File f) {
+
+        FileInputStream fileInputStream = null;
+        byte[] bytesArray = null;
+
+        try {
+
+            File file = f;
+            bytesArray = new byte[(int) file.length()];
+
+            //read file into bytes[]
+            fileInputStream = new FileInputStream(file);
+            fileInputStream.read(bytesArray);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+        return bytesArray;
+
     }
 
 }
