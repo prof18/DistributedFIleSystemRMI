@@ -242,7 +242,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
 
-            if ((ownIP + port).hashCode() == entry.getKey()) {
+            if ((ownIP + port).hashCode() != entry.getKey()) {
 
                 System.out.println("[ CHECKNODES ]");
 

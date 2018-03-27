@@ -31,7 +31,7 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
         while (true) {
             String path = null;
             try {
-                Thread.sleep(60000);
+                Thread.sleep(6000);
 
                 Registry registry = null;
                 registry = LocateRegistry.getRegistry(ipNode, portNode);
@@ -47,6 +47,9 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
 //                    System.out.println(tmp);
 //                }
 
+                System.out.println();
+                System.out.println("GARBAGE : "+path);
+                System.out.println();
                 NetNode node = (NetNode) registry.lookup(path);
                 // Chiamo il metodo check solamente se sono presenti altri nodi
                 if (!(node.getHashMap().size() == 1)) {
