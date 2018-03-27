@@ -1,13 +1,10 @@
 package ui.frame;
 
 import fs.actions.FSStructure;
-import fs.actions.FlatServiceUtil;
-import fs.actions.FsOperation;
-import fs.actions.interfaces.FSOperationI;
+import fs.actions.DirectoryServiceImpl;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
-import ui.dialog.SettingsDialog;
 import ui.utility.*;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -37,7 +34,7 @@ public class MainUI extends JFrame {
     private JMenuItem rename, delete;
     private FileViewTableModel model;
 
-    private FsOperation fsOperation;
+    private DirectoryServiceImpl fsOperationImpl;
 
     public MainUI() {
         super("LR18 File System");
@@ -58,12 +55,12 @@ public class MainUI extends JFrame {
         int portRet = Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
         String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
         NetNodeLocation location = new NetNodeLocation(ipRet, portRet, nameRet);
-        // FlatServiceUtil.create(path,ipHost,nameServiceHost,location);
+        // FileServiceUtil.create(path,ipHost,nameServiceHost,location);
 
         //Loading file system structure
         System.out.println("Loading structure");
         fsStructure = FSStructure.getInstance();
-        fsOperation = FsOperation.getInstance();
+        fsOperationImpl = DirectoryServiceImpl.getInstance();
         fsStructure.generateTreeStructure();
         //Get the structure of the File System
         directoryTree = fsStructure.getTree();
@@ -436,7 +433,7 @@ public class MainUI extends JFrame {
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New Folder");
             String folderName = JOptionPane.showInputDialog("New Folder Name: ");
-            fsOperation.createDirectory(currentNode, folderName, (treeNode) -> {
+            fsOperationImpl.createDirectory(currentNode, folderName, (treeNode) -> {
 
                 FileViewTableModel model = (FileViewTableModel) table.getModel();
                 model.setNode(treeNode);
@@ -468,7 +465,7 @@ public class MainUI extends JFrame {
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
-                fsOperation.renameDirectory(item.getTreeNode(), newName, (fsTreeNode -> {
+                fsOperationImpl.renameDirectory(item.getTreeNode(), newName, (fsTreeNode -> {
                     FileViewTableModel model = (FileViewTableModel) table.getModel();
                     model.setNode(currentNode);
                     //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
@@ -489,7 +486,7 @@ public class MainUI extends JFrame {
             int row = table.getSelectedRow();
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
-                fsOperation.deleteDirectory(item.getTreeNode(), (fsTreeNode -> {
+                fsOperationImpl.deleteDirectory(item.getTreeNode(), (fsTreeNode -> {
                     FileViewTableModel model = (FileViewTableModel) table.getModel();
                     model.setNode(fsTreeNode);
                     //TODO: find a better way to update the tree view, maybe with a TreeModel Listener

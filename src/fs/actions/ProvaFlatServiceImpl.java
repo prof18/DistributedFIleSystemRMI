@@ -1,6 +1,6 @@
 package fs.actions;
 
-import fs.actions.interfaces.FlatService;
+import fs.actions.interfaces.FileService;
 import fs.actions.object.WrapperFlatServiceUtil;
 import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
@@ -28,8 +28,8 @@ public class ProvaFlatServiceImpl {
             String name = console.next();
             location = new NetNodeLocation(host, port, name);
         }
-        WrapperFlatServiceUtil flatServiceUtil = FlatServiceUtil.create(path, "localhost", "host", location);
-        FlatService fs = flatServiceUtil.getService();
+        WrapperFlatServiceUtil flatServiceUtil = FileServiceUtil.create(path, "localhost", "host", location);
+        FileService fs = flatServiceUtil.getService();
         String serviceName = flatServiceUtil.getOwnLocation().getName();
 
         while (true) {

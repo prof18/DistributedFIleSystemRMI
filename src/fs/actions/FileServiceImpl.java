@@ -1,39 +1,30 @@
 package fs.actions;
 
 /*
-FlatServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
+FileServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
  */
 
 import fs.actions.cache.ReadingNodeCache;
 import fs.actions.cache.WritingNodeCache;
-import fs.actions.interfaces.FlatService;
+import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
-import fs.actions.object.WrapperFlatServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
-import net.objects.NetNodeLocation;
-import net.objects.interfaces.NetNode;
-import utils.Util;
 
 import java.io.*;
-import java.rmi.AccessException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.time.Instant;
 import java.util.*;
 
 
-public class FlatServiceImpl implements FlatService {
+public class FileServiceImpl implements FileService {
 
     private MediatorFsNet mediator;
     private final String path;
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-    public FlatServiceImpl(String path, MediatorFsNet mediatorFsNet) {
+    public FileServiceImpl(String path, MediatorFsNet mediatorFsNet) {
         mediator = mediatorFsNet;
         this.path = path;
         System.out.println("sono tornato al costruttore");

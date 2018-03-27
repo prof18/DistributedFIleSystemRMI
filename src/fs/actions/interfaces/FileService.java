@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.rmi.Remote;
 
-public interface FlatService extends Remote, Serializable {
+public interface FileService extends Remote, Serializable {
 
     byte[] read(String fileID, int i, int n) throws FileNotFoundException;
 

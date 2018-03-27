@@ -1,7 +1,6 @@
 package mediator_fs_net;
 
-import fs.actions.FlatServiceImpl;
-import fs.actions.interfaces.FlatService;
+import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import net.objects.interfaces.NetNode;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 
 public class MediatorFsNet {
     private NetNode node;
-    private FlatService service;
+    private FileService service;
 
     public MediatorFsNet() {
 
@@ -22,7 +21,7 @@ public class MediatorFsNet {
         node = node1;
     }
 
-    public void addService(FlatService service1) {
+    public void addService(FileService service1) {
         service = service1;
     }
 

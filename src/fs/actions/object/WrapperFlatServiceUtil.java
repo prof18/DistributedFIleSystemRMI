@@ -1,7 +1,6 @@
 package fs.actions.object;
 
-import fs.actions.FlatServiceImpl;
-import fs.actions.interfaces.FlatService;
+import fs.actions.interfaces.FileService;
 import net.objects.NetNodeLocation;
 
 import java.util.HashMap;
@@ -9,15 +8,15 @@ import java.util.HashMap;
 public class WrapperFlatServiceUtil {
     private NetNodeLocation ownLocation;
     private HashMap<Integer, NetNodeLocation> locationHashMap;
-    private FlatService service;
+    private FileService service;
 
-    public WrapperFlatServiceUtil(NetNodeLocation ownLocation, HashMap<Integer, NetNodeLocation> locationHashMap, FlatService service) {
+    public WrapperFlatServiceUtil(NetNodeLocation ownLocation, HashMap<Integer, NetNodeLocation> locationHashMap, FileService service) {
         this.ownLocation = ownLocation;
         this.locationHashMap = locationHashMap;
         this.service = service;
     }
 
-    public FlatService getService() {
+    public FileService getService() {
         return service;
     }
 
