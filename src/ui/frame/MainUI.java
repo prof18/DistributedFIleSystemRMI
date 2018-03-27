@@ -2,6 +2,8 @@ package ui.frame;
 
 import fs.actions.FSStructure;
 import fs.actions.FlatServiceUtil;
+import fs.actions.FsOperation;
+import fs.actions.interfaces.FSOperationI;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
@@ -21,14 +23,21 @@ import java.text.SimpleDateFormat;
 
 public class MainUI extends JFrame {
 
-    private LogUI logUI;
-
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
     private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
     private FSStructure fsStructure;
     private JButton navigateUpBtn;
     private JTable table;
+    private JTree tree;
     private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
+    private String currentPath = "/";
+    private FSTreeNode currentNode;
+    private FSTreeNode directoryTree;
+
+    private JMenuItem rename, delete;
+    private FileViewTableModel model;
+
+    private FsOperation fsOperation;
 
     public MainUI() {
         super("LR18 File System");
@@ -42,20 +51,23 @@ public class MainUI extends JFrame {
         this.setJMenuBar(createMenuBar());
 
         //connect netStuff
-        String ipHost=PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
-        String nameServiceHost=PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
-        String ipRet=PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
-        String path=PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-        int portRet=Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
-        String nameRet=PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
-        NetNodeLocation location=new NetNodeLocation(ipRet,portRet,nameRet);
-        FlatServiceUtil.create(path,ipHost,nameServiceHost,location);
+        String ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
+        String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
+        String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
+        String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
+        int portRet = Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
+        String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
+        NetNodeLocation location = new NetNodeLocation(ipRet, portRet, nameRet);
+        // FlatServiceUtil.create(path,ipHost,nameServiceHost,location);
 
         //Loading file system structure
         System.out.println("Loading structure");
         fsStructure = FSStructure.getInstance();
+        fsOperation = FsOperation.getInstance();
         fsStructure.generateTreeStructure();
-        FSTreeNode directoryTree = fsStructure.getTree();
+        //Get the structure of the File System
+        directoryTree = fsStructure.getTree();
+        currentNode = directoryTree;
         System.out.println(directoryTree.printTree());
         //if root, disable the navigate up button
         if (directoryTree.isRoot())
@@ -75,7 +87,7 @@ public class MainUI extends JFrame {
 
         //Tree View
         FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-        JTree tree = new JTree();
+        tree = new JTree();
         tree.setModel(treeModel);
         //Only One Selection
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -104,7 +116,7 @@ public class MainUI extends JFrame {
         JScrollPane treeScroll = new JScrollPane(tree);
 
         //Table UI
-        FileViewTableModel model = new FileViewTableModel();
+        model = new FileViewTableModel();
         final JTable table = new JTable();
         this.table = table;
         table.setFillsViewportHeight(true);
@@ -127,10 +139,16 @@ public class MainUI extends JFrame {
         //table listener with double click
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
+                //enable rename
+                rename.setEnabled(true);
+                //enable delete
+                delete.setEnabled(true);
                 JTable table = (JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && row != -1) {
+                    rename.setEnabled(false);
+                    delete.setEnabled(false);
                     changeTableView(false, null);
                 }
             }
@@ -201,7 +219,7 @@ public class MainUI extends JFrame {
             typeVLabel.setText("folder");
             pathVLabel.setText(node.getPath());
             fileSizeVLabel.setText("<to compute>");
-            lastEditVLabel.setText("<to compute>");
+            lastEditVLabel.setText(sdf.format(node.getLastEditTime()));
         }
     }
 
@@ -224,6 +242,7 @@ public class MainUI extends JFrame {
     private void changeTableView(boolean goingUp, TableItem item) {
         clearInfo();
         FileViewTableModel model = (FileViewTableModel) table.getModel();
+
         if (!goingUp) {
             int row = table.getSelectedRow();
             //selected table item
@@ -235,16 +254,19 @@ public class MainUI extends JFrame {
             } else {
                 //update the table with the new directory
                 FSTreeNode node = item.getTreeNode();
+                currentNode = node;
                 if (!node.isRoot())
                     navigateUpBtn.setEnabled(true);
                 model.setNode(node);
             }
         } else {
             FSTreeNode node = model.getCurrentTreeNode();
+            currentNode = node;
             if (node.getParent().isRoot())
                 navigateUpBtn.setEnabled(false);
             model.setNode(node.getParent());
         }
+
     }
 
     private void openFile(FileWrapper fileWrapper) {
@@ -413,17 +435,21 @@ public class MainUI extends JFrame {
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New Folder");
-        });
-        menu.add(menuItem);
-        menu.addSeparator();
-        //Settings
-        menuItem = new JMenuItem("Settings");
-        menuItem.addActionListener((ActionListener) -> {
-            SettingsDialog settingsDialog = new SettingsDialog(false);
-            settingsDialog.setVisible(true);
+            String folderName = JOptionPane.showInputDialog("New Folder Name: ");
+            fsOperation.createDirectory(currentNode, folderName, (treeNode) -> {
+
+                FileViewTableModel model = (FileViewTableModel) table.getModel();
+                model.setNode(treeNode);
+                //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                tree.setModel(treeModel);
+                fsStructure.generateJson(directoryTree);
+                System.out.println("Callback");
+            });
 
         });
         menu.add(menuItem);
+        menu.addSeparator();
         //About
         menuItem = new JMenuItem("About");
         menuItem.addActionListener((ActionListener) -> {
@@ -435,50 +461,49 @@ public class MainUI extends JFrame {
         //Edit Menu
         menu = new JMenu("Edit");
         //Rename
-        menuItem = new JMenuItem("Rename");
-        menuItem.addActionListener((ActionListener) -> {
+        rename = new JMenuItem("Rename");
+        rename.setEnabled(false);
+        rename.addActionListener((ActionListener) -> {
+            int row = table.getSelectedRow();
+            TableItem item = model.getItems().get(row);
+            if (!item.isFile()) {
+                String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
+                fsOperation.renameDirectory(item.getTreeNode(), newName, (fsTreeNode -> {
+                    FileViewTableModel model = (FileViewTableModel) table.getModel();
+                    model.setNode(currentNode);
+                    //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                    FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                    tree.setModel(treeModel);
+                    fsStructure.generateJson(directoryTree);
+                    System.out.println("Callback");
+                }));
+            }
             System.out.println("Clicked Rename");
         });
-        menu.add(menuItem);
+        menu.add(rename);
         //Delete
-        menuItem = new JMenuItem("Delete");
-        menuItem.addActionListener((ActionListener) -> {
+        delete = new JMenuItem("Delete");
+        delete.setEnabled(false);
+        delete.addActionListener((ActionListener) -> {
             System.out.println("Clicked Delete");
-        });
-        menu.add(menuItem);
-        //Move
-        menuItem = new JMenuItem("Move");
-        menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Move");
-        });
-        menu.add(menuItem);
-        menuBar.add(menu);
-
-        //Tools Menu
-        menu = new JMenu("Tools");
-        //Show Log
-        JCheckBoxMenuItem cbMenuItem = new JCheckBoxMenuItem("Show Log");
-        cbMenuItem.setState(true);
-        cbMenuItem.addActionListener((ActionListener) -> {
-            if (cbMenuItem.getState()) {
-                logUI.setVisible(true);
-                System.out.println("Log enabled");
-            } else {
-                logUI.setVisible(false);
-                System.out.println("Log disabled");
+            int row = table.getSelectedRow();
+            TableItem item = model.getItems().get(row);
+            if (!item.isFile()) {
+                fsOperation.deleteDirectory(item.getTreeNode(), (fsTreeNode -> {
+                    FileViewTableModel model = (FileViewTableModel) table.getModel();
+                    model.setNode(fsTreeNode);
+                    //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                    FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                    tree.setModel(treeModel);
+                    fsStructure.generateJson(directoryTree);
+                    System.out.println("Callback");
+                }));
             }
-            System.out.println("Clicked Show Log");
         });
-        menu.add(cbMenuItem);
-        //Say Hello
-        menuItem = new JMenuItem("Say Hello");
-        menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Say Hello");
-        });
-        menu.add(menuItem);
+        menu.add(delete);
         menuBar.add(menu);
 
-        //Navigate JsonFolder Up
+        //Navigate Folder Up
         menuBar.add(Box.createHorizontalGlue());
         navigateUpBtn = new JButton("Navigate Up");
         navigateUpBtn.addActionListener((ActionListener) -> {

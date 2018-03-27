@@ -10,10 +10,13 @@ import utils.PropertiesHelper;
 
 import java.util.*;
 
+/**
+ * In this class there is ALWAYS a reference of the File System Tree
+ */
 public class FSStructure {
 
     private static FSStructure INSTANCE = null;
-    private static FSTreeNode tree;
+    private FSTreeNode tree;
 
     public static FSStructure getInstance() {
         if (INSTANCE == null)
@@ -33,6 +36,60 @@ public class FSStructure {
         return tree;
     }
 
+
+    public void generateJson(FSTreeNode tree) {
+
+        //update the tree reference
+        this.tree = tree;
+
+        Queue<FSTreeNode> queue = new LinkedList<>();
+
+        queue.add(tree);
+
+        HashMap<String, JsonFolder> folderMap = new HashMap<>();
+
+        while (!queue.isEmpty()) {
+            FSTreeNode node = queue.poll();
+            JsonFolder jsonFolder = new JsonFolder();
+            jsonFolder.setRoot(node.isRoot());
+            jsonFolder.setUFID(node.getUFID());
+            jsonFolder.setFolderName(node.getNameNode());
+            jsonFolder.setLastEditTime(node.getLastEditTime());
+            if (!node.isRoot())
+                jsonFolder.setParentUFID(node.getParent().getUFID());
+
+            ArrayList<String> sons = new ArrayList<>();
+            ArrayList<JsonFile> files = new ArrayList<>();
+            //set root sons
+            for (FSTreeNode child : node.getChildren()) {
+                queue.add(child);
+                sons.add(child.getUFID());
+            }
+            jsonFolder.setChildren(sons);
+            for (FileWrapper fileWrapper : node.getFiles()) {
+                JsonFile file = new JsonFile();
+                file.setUFID(fileWrapper.getUFID());
+                file.setFileName(fileWrapper.getFileName());
+                file.setAttribute(fileWrapper.getAttribute());
+                file.setPath(fileWrapper.getPath());
+                files.add(file);
+            }
+            jsonFolder.setFiles(files);
+
+            folderMap.put(jsonFolder.getUFID(), jsonFolder);
+
+        }
+
+        String json = GSONHelper.getInstance().foldersToJson(folderMap);
+        //System.out.println("json generated = " + json);
+
+        PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+        //TODO: Send the json to the other nodes
+        System.out.println("Wrote new json structure");
+
+
+
+    }
 
     public void generateTreeStructure() {
 
@@ -63,6 +120,7 @@ public class FSStructure {
                 tree.setParent(null);
                 tree.setUFID(jsonFolderRoot.getUFID());
                 tree.setNameNode(jsonFolderRoot.getFolderName());
+                tree.setLastEditTime(jsonFolderRoot.getLastEditTime());
                 queue.add(tree);
                 while (!queue.isEmpty()) {
                     FSTreeNode node = queue.remove();
@@ -77,11 +135,12 @@ public class FSStructure {
                             child.setUFID(childFolder.getUFID());
                             child.setNameNode(childFolder.getFolderName());
                             child.setParent(node);
+                            child.setLastEditTime(childFolder.getLastEditTime());
                             nodeChildren.add(child);
                             queue.add(child);
                         }
                     }
-                    node.setChildrens(nodeChildren);
+                    node.setChildren(nodeChildren);
 
                     //Files
                     ArrayList<FileWrapper> files = new ArrayList<>();
@@ -106,6 +165,7 @@ public class FSStructure {
             //generate the tree with only the root
             tree = new FSTreeNode();
             tree.setParent(null);
+            //TODO: change UUID
             tree.setUFID(UUID.randomUUID().toString());
             tree.setNameNode("root");
         }

@@ -9,20 +9,32 @@ public class FSTreeNode {
 
     private String UFID;
     private String nameNode;
-    private ArrayList<FSTreeNode> childrens;
+    private ArrayList<FSTreeNode> children;
     private FSTreeNode parent;
     private ArrayList<FileWrapper> files;
-
-    public FSTreeNode(String UFID, String nameNode, ArrayList<FSTreeNode> childrens, FSTreeNode parent, ArrayList<FileWrapper> files) {
-        this.UFID = UFID;
-        this.nameNode = nameNode;
-        this.childrens = childrens;
-        this.parent = parent;
-        this.files = files;
-    }
+    private long lastEditTime;
 
     public FSTreeNode() {
 
+    }
+
+    public long getLastEditTime() {
+        return lastEditTime;
+    }
+
+    public void setLastEditTime(long lastEditTime) {
+        this.lastEditTime = lastEditTime;
+    }
+
+    public void updateAncestorTime() {
+        Queue<FSTreeNode> queue = new LinkedList<>();
+        queue.add(this.getParent());
+        while (!queue.isEmpty()) {
+            FSTreeNode node = queue.poll();
+            node.setLastEditTime(this.getLastEditTime());
+            if (node.getParent() != null)
+                queue.add(node.getParent());
+        }
     }
 
     public String getUFID() {
@@ -33,8 +45,8 @@ public class FSTreeNode {
         return nameNode;
     }
 
-    public ArrayList<FSTreeNode> getChildrens() {
-        return childrens;
+    public ArrayList<FSTreeNode> getChildren() {
+        return children;
     }
 
     public FSTreeNode getParent() {
@@ -53,8 +65,8 @@ public class FSTreeNode {
         this.nameNode = nameNode;
     }
 
-    public void setChildrens(ArrayList<FSTreeNode> childrens) {
-        this.childrens = childrens;
+    public void setChildren(ArrayList<FSTreeNode> children) {
+        this.children = children;
     }
 
     public void setParent(FSTreeNode parent) {
@@ -65,11 +77,11 @@ public class FSTreeNode {
         this.files = files;
     }
 
-    public void addChild(FSTreeNode child){
-        childrens.add(child);
+    public void addChild(FSTreeNode child) {
+        children.add(child);
     }
 
-    public void addFile(FileWrapper file){
+    public void addFile(FileWrapper file) {
         this.files.add(file);
     }
 
@@ -85,10 +97,10 @@ public class FSTreeNode {
         return file;
     }*/
 
-    private int findFilePos(String fileName){
+    private int findFilePos(String fileName) {
         int pos = 0;
-        for(FileWrapper fw: this.files){
-            if(!(fw.getFileName().compareTo(fileName) == 0)) {
+        for (FileWrapper fw : this.files) {
+            if (!(fw.getFileName().compareTo(fileName) == 0)) {
                 pos++;
                 break;
             }
@@ -97,34 +109,34 @@ public class FSTreeNode {
         return pos;
     }
 
-    public void removeOneFile(String fileName){
+    public void removeOneFile(String fileName) {
 
         int pos = findFilePos(fileName);
         files.remove(pos);
     }
 
-    public void removeParent(){
-        if (!isRoot()){
+    public void removeParent() {
+        if (!isRoot()) {
             parent = null;
         }
     }
 
-    public boolean isRoot(){
+    public boolean isRoot() {
         return (parent == null);
     }
 
-    public boolean hasChild(){
-        return childrens != null && childrens.size() != 0;
+    public boolean hasChild() {
+        return children != null && children.size() != 0;
     }
 
-    public boolean hasChild(FSTreeNode node){
+    public boolean hasChild(FSTreeNode node) {
         return node.hasChild();
     }
 
-    public boolean hasChild(String nodeName){
-        if(hasChild()){
-            for(FSTreeNode node: childrens){
-                if(node.getNameNode().compareTo(nodeName) == 0){
+    public boolean hasChild(String nodeName) {
+        if (hasChild()) {
+            for (FSTreeNode node : children) {
+                if (node.getNameNode().compareTo(nodeName) == 0) {
                     return true;
                 }
             }
@@ -133,11 +145,11 @@ public class FSTreeNode {
         return false;
     }
 
-    public FSTreeNode getChild(String nodeName){
+    public FSTreeNode getChild(String nodeName) {
         FSTreeNode findNode = null;
-        if (hasChild()){
-            for(FSTreeNode node: childrens){
-                if(node.hasChild(nodeName)){
+        if (hasChild()) {
+            for (FSTreeNode node : children) {
+                if (node.hasChild(nodeName)) {
                     findNode = node;
                     break;
                 }
@@ -147,24 +159,24 @@ public class FSTreeNode {
         return findNode;
     }
 
-    public boolean hasFile(String fileName){
+    public boolean hasFile(String fileName) {
 
 
-            for(FileWrapper fw : files){
-                if(fw.getFileName().compareTo(fileName) == 0){
-                    return true;
-                }
+        for (FileWrapper fw : files) {
+            if (fw.getFileName().compareTo(fileName) == 0) {
+                return true;
             }
+        }
 
 
         return false;
     }
 
-    public FileWrapper getFile(String fileName){
+    public FileWrapper getFile(String fileName) {
         FileWrapper fileFound = null;
-        if(hasFile(fileName)){
-            for(FileWrapper fw : files){
-                if (fw.getFileName().compareTo(fileName) == 0){
+        if (hasFile(fileName)) {
+            for (FileWrapper fw : files) {
+                if (fw.getFileName().compareTo(fileName) == 0) {
                     fileFound = fw;
                 }
             }
@@ -172,11 +184,11 @@ public class FSTreeNode {
         return fileFound;
     }
 
-    public String getPath(){
+    public String getPath() {
         String path = "/";
-        if(!isRoot()){
+        if (!isRoot()) {
             FSTreeNode node = parent;
-            while(!node.isRoot()){
+            while (!node.isRoot()) {
                 path = "/" + node.getNameNode() + path;
                 node = node.getParent();
             }
@@ -185,13 +197,13 @@ public class FSTreeNode {
         return path;
     }
 
-    public FSTreeNode findRoot(){
+    public FSTreeNode findRoot() {
         FSTreeNode root = null;
-        if (isRoot()){
+        if (isRoot()) {
             System.out.println("E' la radice");
-        }else{
+        } else {
             FSTreeNode node = parent;
-            while(!node.isRoot()){
+            while (!node.isRoot()) {
                 root = node.getParent();
             }
         }
@@ -199,29 +211,29 @@ public class FSTreeNode {
         return root;
     }
 
-    public String printAll(){
+    public String printAll() {
         String stringTree = "";
         ArrayList<String> tree = T_BFS(findRoot());
 
-        for(String n: tree){
+        for (String n : tree) {
             stringTree = stringTree + " " + n;
         }
         return stringTree;
     }
 
-    public ArrayList<String> T_BFS(FSTreeNode root){
+    public ArrayList<String> T_BFS(FSTreeNode root) {
         ArrayList<String> tree = new ArrayList<>();
         Queue<FSTreeNode> nodeQueue = new LinkedList<>();
-        if (root == null){
+        if (root == null) {
             tree = null;
         } else {
             nodeQueue.add(root);
-            while(!nodeQueue.isEmpty()){
+            while (!nodeQueue.isEmpty()) {
                 FSTreeNode node = nodeQueue.remove();
                 tree.add(node.getNameNode());
 
-                if(node.hasChild()){
-                    for(FSTreeNode n: node.getChildrens()){
+                if (node.hasChild()) {
+                    for (FSTreeNode n : node.getChildren()) {
                         nodeQueue.add(n);
                     }
                 }
@@ -237,7 +249,7 @@ public class FSTreeNode {
         Queue<FSTreeNode> queue = new LinkedList<>();
         queue.add(this);
 
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
 
             FSTreeNode node = queue.remove();
             if (node.getParent() == null) {
@@ -250,10 +262,10 @@ public class FSTreeNode {
             }
             sb.append("UFID: ").append(node.getUFID());
 
-            if (node.getChildrens() != null && !node.getChildrens().isEmpty()) {
+            if (node.getChildren() != null && !node.getChildren().isEmpty()) {
 
                 sb.append("\n\tChildren: ");
-                for (FSTreeNode child : node.getChildrens()) {
+                for (FSTreeNode child : node.getChildren()) {
                     sb.append("\n\t\t***").append(child.getNameNode())
                             .append("\n\t\tUFID: ").append(node.getUFID());
                     queue.add(child);
@@ -262,7 +274,7 @@ public class FSTreeNode {
 
             if (node.getFiles() != null && !node.getFiles().isEmpty()) {
                 sb.append("\n\tFiles:");
-                for (FileWrapper file: node.getFiles()) {
+                for (FileWrapper file : node.getFiles()) {
                     sb.append("\n\t\t***").append(file.getFileName())
                             .append("\n\t\tUFID: ").append(file.getUFID());
                 }
