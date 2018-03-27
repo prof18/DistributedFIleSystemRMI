@@ -2,8 +2,8 @@ package fs.actions;
 
 import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
-import fs.objects.structure.FileWrapper;
 import fs.objects.structure.FSTreeNode;
+import fs.objects.structure.FileWrapper;
 import utils.Constants;
 import utils.GSONHelper;
 import utils.PropertiesHelper;
@@ -88,7 +88,6 @@ public class FSStructure {
         System.out.println("Wrote new json structure");
 
 
-
     }
 
     public void generateTreeStructure() {
@@ -168,6 +167,8 @@ public class FSStructure {
             //TODO: change UUID
             tree.setUFID(UUID.randomUUID().toString());
             tree.setNameNode("root");
+            tree.setChildren(new ArrayList<>());
+            tree.setFiles(new ArrayList<>());
         }
 
 
