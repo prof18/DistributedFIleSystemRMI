@@ -53,7 +53,11 @@ public class NetNodeLocation implements Serializable {
 
     @Override
     public String toString() {
-        return "ip= " + ip + " " + "port= " + port;
+        return "NetNodeLocation{" +
+                "ip='" + ip + '\'' +
+                ", port=" + port +
+                ", name='" + name + '\'' +
+                '}';
     }
 
     public String toUrl() {

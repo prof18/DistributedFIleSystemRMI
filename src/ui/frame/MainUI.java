@@ -59,9 +59,22 @@ public class MainUI extends JFrame {
         String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
         String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
         String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-        int portRet = Integer.parseInt(PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG));
+        String portRetConfig=PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
+        int portRet=-1;
+        if(!portRetConfig.equals("")) {
+            portRet = Integer.parseInt(portRetConfig);
+        }
         //String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
-        NetNodeLocation location = new NetNodeLocation(ipRet, portRet);
+        NetNodeLocation location;
+        if(portRet==-1){
+            System.out.println("primo nodo non si deve connettere a nessuno");
+            location=null;
+        }
+        else{
+
+            location = new NetNodeLocation(ipRet, portRet,nameServiceHost);
+            System.out.println("[MAIN] connessione a location = " + location);
+        }
         WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path,ipHost,location);
         fileService = wrapperFS.getService();
         netNodeLocation = wrapperFS.getOwnLocation();

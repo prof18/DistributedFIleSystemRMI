@@ -23,6 +23,7 @@ public class FileServiceUtil {
 
     public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet) {
         System.setProperty("java.rmi.server.hostname", ownIP);
+        System.out.println("locationRet = " + locationRet);
         HashMap<Integer, NetNodeLocation> ret = null;
         MediatorFsNet mediatorFsNet = new MediatorFsNet();
         RegistryWrapper rw = Util.getNextFreePort();
@@ -33,7 +34,6 @@ public class FileServiceUtil {
             //node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
             node = new NetNodeImpl(path, ownIP, port, mediatorFsNet);
             hostName = node.getHostName();
-            locationRet.setName(hostName);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -51,7 +51,6 @@ public class FileServiceUtil {
             e.printStackTrace();
         }
         if (locationRet != null) {
-            locationRet.setPort(port);
             String recPat = locationRet.toUrl();
             try {
                 Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
@@ -61,7 +60,7 @@ public class FileServiceUtil {
                 System.out.println("[AGGIORNAMENTO NODI]");
 
                 //Modifiche per il nome Host random
-                JoinWrap jWrap = node1.join(ownIP, port, locationRet.getName());
+                JoinWrap jWrap = node1.join(ownIP, port, hostName);
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
 
@@ -99,6 +98,7 @@ public class FileServiceUtil {
                 e.printStackTrace();
             }
         }
+
         return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service);
 
     }
