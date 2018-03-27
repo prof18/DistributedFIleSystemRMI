@@ -27,7 +27,7 @@ public class MainUI extends JFrame {
 
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
     private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
-    private FSStructure fsStructure;
+
     private JButton navigateUpBtn;
     private JTable table;
     private JTree tree;
@@ -41,6 +41,7 @@ public class MainUI extends JFrame {
 
     private DirectoryService directoryService;
     private FileService fileService;
+    private FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
 
     public MainUI() {
@@ -70,6 +71,7 @@ public class MainUI extends JFrame {
         System.out.println("Loading structure");
         fsStructure = FSStructure.getInstance();
         directoryService = DirectoryServiceImpl.getInstance();
+        directoryService.setFileService(fileService);
         fsStructure.generateTreeStructure();
         //Get the structure of the File System
         directoryTree = fsStructure.getTree();
@@ -439,7 +441,15 @@ public class MainUI extends JFrame {
             if (!fileName.equals("")) {
                 try {
                     String ufid = fileService.create(netNodeLocation.getName());
-                    directoryService.addName(currentNode, fileName, ufid);
+                    directoryService.addName(currentNode, fileName, ufid, (fsTreeNode -> {
+                        FileViewTableModel model = (FileViewTableModel) table.getModel();
+                        model.setNode(fsTreeNode);
+                        //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                        tree.setModel(treeModel);
+                        fsStructure.generateJson(directoryTree);
+                        System.out.println("Callback");
+                    }));
                 } catch (IOException e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(null, "File not created. An error has occurred");

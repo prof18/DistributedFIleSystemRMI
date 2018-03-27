@@ -4,12 +4,13 @@ import fs.objects.structure.FSTreeNode;
 
 public interface DirectoryService {
 
+    void setFileService(FileService fileService);
     void createDirectory(FSTreeNode currentNode, String dirName, NewItemCallback callback);
     void renameDirectory(FSTreeNode nodeToRename, String newName, NewItemCallback callback);
     void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback);
 
     String lookup(String dir, String name);
-    void addName(FSTreeNode currentNode, String name, String fileID);
+    void addName(FSTreeNode currentNode, String name, String fileID, NewItemCallback callback);
     void unName(String dir, String name);
     String getNames(String dir, String pattern);
 

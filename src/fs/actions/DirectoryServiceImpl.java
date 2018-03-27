@@ -1,12 +1,16 @@
 package fs.actions;
 
 import fs.actions.interfaces.DirectoryService;
+import fs.actions.interfaces.FileService;
 import fs.objects.structure.FSTreeNode;
+import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
 import utils.Constants;
 import utils.PropertiesHelper;
 
 import javax.swing.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -17,9 +21,10 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     //A reference to the File System in the host PC
     private String hostFSPath;
-/*    private FSTreeNode root = null; //directory root
-    private File dirFile = null; // json file
-    private FSTreeNode currentDir = root; //current UI directory*/
+    /*    private FSTreeNode root = null; //directory root
+        private File dirFile = null; // json file
+        private FSTreeNode currentDir = root; //current UI directory*/
+    private FileService fileService;
 
     private static DirectoryServiceImpl INSTANCE = null;
 
@@ -27,6 +32,15 @@ public class DirectoryServiceImpl implements DirectoryService {
         if (INSTANCE == null)
             INSTANCE = new DirectoryServiceImpl();
         return INSTANCE;
+    }
+
+    public FileService getFileService() {
+        return fileService;
+    }
+
+    @Override
+    public void setFileService(FileService fileService) {
+        this.fileService = fileService;
     }
 
     private DirectoryServiceImpl() {
@@ -91,9 +105,20 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public void addName(FSTreeNode currentNode, String name, String fileID) {
+    public void addName(FSTreeNode currentNode, String name, String fileID, NewItemCallback callback) {
         FileWrapper wrapper = new FileWrapper();
-
+        //get attribute
+        try {
+            FileAttribute fileAttribute = fileService.getAttributes(fileID);
+            wrapper.setAttribute(fileAttribute);
+            wrapper.setFileName(name);
+            wrapper.setUFID(fileID);
+            wrapper.setPath(currentNode.getPath() + "/" + name);
+            currentNode.addFile(wrapper);
+            callback.onItemChanged(currentNode);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
