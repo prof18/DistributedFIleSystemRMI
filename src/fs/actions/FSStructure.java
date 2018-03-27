@@ -84,6 +84,7 @@ public class FSStructure {
         //System.out.println("json generated = " + json);
 
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+        //TODO: Send the json to the other nodes
         System.out.println("Wrote new json structure");
 
 
