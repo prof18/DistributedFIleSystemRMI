@@ -295,8 +295,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         File fileAtt = new File(path + fw.getUFID() + ".attr");
         File f = new File(path + fw.getUFID());
         try {
+
             FileOutputStream fos = new FileOutputStream(f);
             fos.write(fw.getContent());
+            fos.flush();
             fos.close();
 
             fos = new FileOutputStream(fileAtt);

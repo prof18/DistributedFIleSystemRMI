@@ -17,6 +17,9 @@ import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -180,7 +183,8 @@ public class FlatServiceImpl implements FlatService {
     public String create(String host, FileAttribute attribute, WrapperFlatServiceUtil wfsu) throws Exception { //TO DO: scegliere politica di replicazione del file nel nodo da più tempo connesso + minore spazio occupato.
         HashMap<Integer, NetNodeLocation> nodesLocation = wfsu.getLocationHashMap();
         String pathName = host + "_" + Date.from(Instant.now()).hashCode();
-        File file = new File(path + pathName);
+        String filePath = path + pathName;
+        File file = new File(filePath);
         if (file.exists()) {
             throw new FileNotFoundException();
         }
@@ -191,7 +195,7 @@ public class FlatServiceImpl implements FlatService {
         oout.flush();
         //in questo punto deve essere aggiunta la replicazione
         String UFID = host + new Date().getTime();
-        byte[] ftb = fileToBytes(file);
+        byte[] ftb = fileToBytes(filePath);
 
         FileWrapper fw = new FileWrapper(UFID, file.getName());
         fw.setPath(path + pathName);
@@ -399,19 +403,20 @@ public class FlatServiceImpl implements FlatService {
 
         //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
         //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
-        Registry registry = null;
-        CacheFileWrapper fileWrapper = null;
+        Registry registry;
         try {
             registry = LocateRegistry.getRegistry(selectedNode.getIp(), selectedNode.getPort());
             NetNode node = (NetNode) registry.lookup(selectedNode.toUrl());
-            node.saveFileReplica(fileWr);
+            if (node.saveFileReplica(fileWr)) {
+                wfsu.nodeFileAssociation(fileWr.getUFID(), selectedNode);
+            } else {
+                System.out.println("File non replicato");
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {
             e.printStackTrace();
         }
-        //wfsu.nodeFileAssociation(fileWr.getUFID(), selectedNode);
-
     }
 
     private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
@@ -453,32 +458,39 @@ public class FlatServiceImpl implements FlatService {
         return selectedNode;
     }
 
-    private static byte[] fileToBytes(File f) {
+    private static byte[] fileToBytes(String pathFile) {
 
-        FileInputStream fileInputStream = null;
         byte[] bytesArray = null;
+        Path path = Paths.get(pathFile);
 
         try {
+            bytesArray = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            File file = f;
-            bytesArray = new byte[(int) file.length()];
+        /*FileInputStream fis = null;
+
+        try {
+            bytesArray = new byte[(int) f.length()];
 
             //read file into bytes[]
-            fileInputStream = new FileInputStream(file);
-            fileInputStream.read(bytesArray);
+            fis = new FileInputStream(f);
+            fis.read(bytesArray);
+
 
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (fileInputStream != null) {
+            if (fis != null) {
                 try {
-                    fileInputStream.close();
+                    fis.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
 
-        }
+        }*/
 
         return bytesArray;
 
