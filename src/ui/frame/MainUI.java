@@ -46,7 +46,6 @@ public class MainUI extends JFrame {
 
     public MainUI() {
         super("LR18 File System");
-
         //Create and show the main UI block
         setLocationRelativeTo(null);
         setSize(1050, 700);
@@ -160,17 +159,19 @@ public class MainUI extends JFrame {
         //table listener with double click
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
-                //enable rename
-                rename.setEnabled(true);
-                //enable delete
-                delete.setEnabled(true);
                 JTable table = (JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
-                if (mouseEvent.getClickCount() == 2 && row != -1) {
-                    rename.setEnabled(false);
-                    delete.setEnabled(false);
-                    changeTableView(false, null);
+                if (row != -1) {
+                    //enable rename
+                    rename.setEnabled(true);
+                    //enable delete
+                    delete.setEnabled(true);
+                    if (mouseEvent.getClickCount() == 2) {
+                        rename.setEnabled(false);
+                        delete.setEnabled(false);
+                        changeTableView(false, null);
+                    }
                 }
             }
         });
