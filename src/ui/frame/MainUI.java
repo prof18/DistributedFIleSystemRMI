@@ -20,6 +20,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
@@ -445,6 +446,18 @@ public class MainUI extends JFrame {
         JMenuItem menuItem = new JMenuItem("Open");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked Open");
+            int row = table.getSelectedRow();
+            TableItem item = model.getItems().get(row);
+            if (item.isFile()) {
+                try {
+                    String id = item.getFileWrapper().getUFID();
+                    byte[] content = fileService.read(id, 0);
+                    String contentS = new String(content);
+                    new EditFileUI(this, contentS, fileService, id);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
         });
         menu.add(menuItem);
         //New FileWrapper

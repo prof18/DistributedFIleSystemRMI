@@ -1,14 +1,21 @@
 package ui.frame;
 
-import ui.frame.MainUI;
+import fs.actions.interfaces.FileService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileNotFoundException;
 
 public class EditFileUI extends JFrame {
 
-    public EditFileUI(MainUI mainUI) {
+    private FileService fileService;
+    private String fileID;
+    private JTextArea textArea;
+
+    public EditFileUI(MainUI mainUI, String text, FileService fileService, String fileID) {
         super("Edit File");
+        this.fileService = fileService;
+        this.fileID = fileID;
 
         setSize(600, 600);
         setLocationRelativeTo(mainUI);
@@ -16,12 +23,13 @@ public class EditFileUI extends JFrame {
 
         setJMenuBar(createMenuBar());
 
-        JTextArea textArea = new JTextArea();
+        textArea = new JTextArea();
         textArea.setColumns(20);
         textArea.setLineWrap(true);
         textArea.setRows(5);
         textArea.setWrapStyleWord(true);
         textArea.setMargin(new Insets(10, 10, 10, 10));
+        textArea.setText(text);
         JScrollPane jScrollPane1 = new JScrollPane(textArea);
 
         add(jScrollPane1);
@@ -43,6 +51,13 @@ public class EditFileUI extends JFrame {
         JMenuItem menuItem = new JMenuItem("Save");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked Save");
+            byte[] content = textArea.getText().getBytes();
+            try {
+                fileService.write(fileID, 0, content.length, content);
+                dispose();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         });
         menu.add(menuItem);
         //Exit
