@@ -1,5 +1,7 @@
 package fs.objects.structure;
 
+import utils.Util;
+
 import java.io.Serializable;
 
 public class FileWrapper implements Serializable {
@@ -8,12 +10,13 @@ public class FileWrapper implements Serializable {
     private String UFID;
     private String path;
     private FileAttribute attribute;
-    private byte[] content; //fare checksum per verificare correttezza messaggio
+    private byte[] content;
+    private String checksum;
 
     public FileWrapper() {
     }
 
-    public FileWrapper(String UFID, String fileName){
+    public FileWrapper(String UFID, String fileName) {
         this.UFID = UFID;
         this.fileName = fileName;
     }
@@ -48,6 +51,7 @@ public class FileWrapper implements Serializable {
 
     public void setContent(byte[] content) {
         this.content = content;
+        checksum = Util.getChecksum(content); //compute checksum
     }
 
     public String getPath() {
@@ -61,5 +65,9 @@ public class FileWrapper implements Serializable {
     @Override
     public String toString() {
         return fileName;
+    }
+
+    public String getChecksum() {
+        return checksum;
     }
 }

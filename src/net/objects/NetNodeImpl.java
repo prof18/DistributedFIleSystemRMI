@@ -1,5 +1,6 @@
 package net.objects;
 
+import fs.actions.FlatServiceUtil;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
@@ -10,6 +11,9 @@ import net.objects.interfaces.NetNode;
 import utils.Util;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -292,8 +296,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public boolean saveFileReplica(FileWrapper fw) {
-        File fileAtt = new File(path + fw.getUFID() + ".attr");
-        File f = new File(path + fw.getUFID());
+        File fileAtt = new File(fw.getPath() + fw.getUFID() + ".attr");
+        File f = new File(fw.getPath() + fw.getUFID());
         try {
 
             FileOutputStream fos = new FileOutputStream(f);
@@ -315,6 +319,19 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             return false;
         }
 
+        byte[] bytesArray = null;
+        Path path = Paths.get(f.getPath());
+
+        try {
+            bytesArray = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String checksum = Util.getChecksum(bytesArray);
+        if (checksum.compareTo(fw.getChecksum()) != 0) {
+            return false;
+        }
         return true;
     }
 
