@@ -6,7 +6,7 @@ public class FileWrapper {
     private String UFID;
     private String path;
     private FileAttribute attribute;
-    private byte[] content; //fare checksum per verificare correttezza messaggio
+    private byte[] content;
 
     public FileWrapper() {
     }

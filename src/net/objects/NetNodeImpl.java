@@ -59,16 +59,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public String getHost() {
-        return ownIP;
-    }
-
-    @Override
-    public int getPort() {
-        return port;
-    }
-
-    @Override
     public synchronized JoinWrap join(String ipNode, int port, String name) {
         System.out.println("si è connesso un nuovo nodo: " + ipNode + " " + port + " " + name);
 
@@ -110,9 +100,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return newName;
     }
 
-    public NetNodeWrap add(String ip, int port) {
-        return null;
-    }
 
     @Override
     public String getHostName() {
