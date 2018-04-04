@@ -297,16 +297,20 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public boolean saveFileReplica(ReplicationWrapper rw) {
-        String filesPath = rw.getPath();
 
-        File directory = new File(filesPath);
+        String filePath = rw.getPath();
 
-        if (!directory.exists()) {//verifica esistenza della directory, se non esiste la crea.
-            directory.mkdirs();
+        if (filePath.length() > 1) { //non è la radice
+            String directoryPath = filePath.substring(0, filePath.length() - 1);
+            File directory = new File(directoryPath);
+
+            if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
+                directory.mkdirs();
+            }
         }
 
-        File fileAtt = new File(filesPath + rw.getUFID() + ".attr");
-        File f = new File(filesPath + rw.getUFID());
+        File fileAtt = new File(filePath +  rw.getUFID() + ".attr");
+        File f = new File(filePath + rw.getUFID());
 
         try {
 
