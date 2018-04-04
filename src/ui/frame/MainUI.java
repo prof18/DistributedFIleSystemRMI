@@ -9,6 +9,7 @@ import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
+import net.objects.interfaces.NetNode;
 import ui.utility.*;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -22,12 +23,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 
 public class MainUI extends JFrame {
 
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
-    private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
+    //private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
 
     private JButton navigateUpBtn;
     private JTable table;
@@ -44,6 +46,7 @@ public class MainUI extends JFrame {
     private FileService fileService;
     private FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
+    private NetNode netNode;
 
     public MainUI() {
         super("Distributed File System");
@@ -103,12 +106,16 @@ public class MainUI extends JFrame {
         //Generate details view
 
         JPanel rightWrapper = new JPanel(new GridBagLayout());
+        JPanel rightDownWrapper = new JPanel(new GridBagLayout());
 
         //FileWrapper UI
         JPanel filesUI = new JPanel(new GridLayout());
         //FileWrapper Details
         JPanel filesDetail = createDetailsUI();
+        JPanel connectedStatus = createConnectedStatus();
         setLayout(new GridBagLayout());
+
+
 
         //Tree View
         FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
@@ -195,6 +202,7 @@ public class MainUI extends JFrame {
         //Constraints for the main UI
         GridBagConstraints globalCS = new GridBagConstraints();
         GridBagConstraints rwCS = new GridBagConstraints();
+        GridBagConstraints rdwCS = new GridBagConstraints();
 
         rwCS.weightx = 1;
         rwCS.weighty = 0.95;
@@ -203,22 +211,54 @@ public class MainUI extends JFrame {
         rwCS.fill = GridBagConstraints.BOTH;
         rightWrapper.add(filesUI, rwCS);
 
+        /*
         rwCS.weightx = 1;
         rwCS.weighty = 0.05;
         rwCS.gridx = 0;
         rwCS.gridy = 1;
         rwCS.fill = GridBagConstraints.BOTH;
         rightWrapper.add(filesDetail, rwCS);
+        */
+
+        rdwCS.weightx = 0.45;
+        rdwCS.weighty = 1;
+        rdwCS.gridx = 0;
+        rdwCS.gridy = 0;
+        rdwCS.fill = GridBagConstraints.BOTH;
+        rightDownWrapper.add(filesDetail, rdwCS);
+
+        rdwCS.weightx = 0.55;
+        rdwCS.weighty = 1;
+        rdwCS.gridx = 1;
+        rdwCS.gridy = 0;
+        rdwCS.fill = GridBagConstraints.BOTH;
+        rightDownWrapper.add(connectedStatus, rdwCS);
+
+        rwCS.weightx = 1;
+        rwCS.weighty = 0.05;
+        rwCS.gridx = 0;
+        rwCS.gridy = 1;
+        rwCS.fill = GridBagConstraints.BOTH;
+        rightWrapper.add(rightDownWrapper, rwCS);
+
+        /*
+        rwCS.weightx = 1;
+        rwCS.weighty = 0.05;
+        rwCS.gridx = 1;
+        rwCS.gridy = 1;
+        rwCS.fill = GridBagConstraints.BOTH;
+        rightWrapper.add(console, rwCS);
+        */
 
         globalCS.weighty = 1;
-        globalCS.weightx = 0.05;
+        globalCS.weightx = 0.15;
         globalCS.gridx = 0;
         globalCS.gridy = 0;
         globalCS.fill = GridBagConstraints.BOTH;
         add(treeScroll, globalCS);
 
         globalCS.weighty = 1;
-        globalCS.weightx = 0.95;
+        globalCS.weightx = 0.85;
         globalCS.gridx = 1;
         globalCS.gridy = 0;
         globalCS.fill = GridBagConstraints.BOTH;
@@ -258,12 +298,46 @@ public class MainUI extends JFrame {
         ownerVLabel.setText("-");
         lastEditVLabel.setText("-");
 
+        /*
         info1VLabel.setText("-");
         info2VLabel.setText("-");
         info3VLabel.setText("-");
         info4VLabel.setText("-");
         info5VLabel.setText("-");
         info6VLabel.setText("-");
+        */
+    }
+
+    private String getConnectedNodeString(){
+        String nodeStatus = "";
+
+
+
+        return nodeStatus;
+    }
+
+    private JPanel createConnectedStatus() {
+        JPanel panel = new JPanel();
+
+        JTextArea textArea = new JTextArea();
+        JLabel label = new JLabel("Node in the system");
+        textArea.setEditable(false);
+        textArea.setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+        JScrollPane pane = new JScrollPane(textArea);
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.weighty = 0.1;
+        gbc.weightx = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        textArea.setMargin(new Insets(10, 10, 10, 10));
+        panel.add(label, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weighty = 0.9;
+        gbc.fill = GridBagConstraints.BOTH;
+        panel.add(pane, gbc);
+        return panel;
     }
 
     private void changeTableView(boolean goingUp, TableItem item) {
@@ -304,7 +378,7 @@ public class MainUI extends JFrame {
 
         JPanel filesDetail = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
-        cs.insets = new Insets(5, 10, 5, 70);
+        cs.insets = new Insets(5, 10, 5, 10);
 
         //FileWrapper Name
         JLabel fileNameLabel = new JLabel("Name: ");
@@ -368,8 +442,10 @@ public class MainUI extends JFrame {
         cs.gridy = 5;
         filesDetail.add(lastEditVLabel, cs);
 
-        //Second Column
 
+
+        //Second Column
+        /*
         //FileWrapper Name
         JLabel info1Label = new JLabel("Info1: ");
         cs.gridx = 2;
@@ -428,7 +504,7 @@ public class MainUI extends JFrame {
         info6VLabel = new JLabel("-");
         cs.gridx = 3;
         cs.gridy = 5;
-        filesDetail.add(info6VLabel, cs);
+        filesDetail.add(info6VLabel, cs); */
 
         return filesDetail;
 

@@ -119,7 +119,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return ownLocation.getName();
     }
 
-
+    @Override
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
     }
