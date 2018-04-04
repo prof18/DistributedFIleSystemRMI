@@ -46,7 +46,7 @@ public class MainUI extends JFrame {
     private NetNodeLocation netNodeLocation;
 
     public MainUI() {
-        super("LR18 File System");
+        super("Distributed File System");
         //Create and show the main UI block
         setLocationRelativeTo(null);
         setSize(1050, 700);
@@ -57,28 +57,32 @@ public class MainUI extends JFrame {
 
         //connect netStuff
         String ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
-        String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
+        String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
         String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
         String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-        String portRetConfig=PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
-        int portRet=-1;
-        if(!portRetConfig.equals("")) {
+        String portRetConfig = PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
+        int portRet = -1;
+        if (!portRetConfig.equals("")) {
             portRet = Integer.parseInt(portRetConfig);
         }
-        //String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.DFS_NAME_CONFIG);
+        //String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
         NetNodeLocation location;
-        if(portRet==-1){
+        if (portRet == -1) {
             System.out.println("primo nodo non si deve connettere a nessuno");
-            location=null;
-        }
-        else{
+            location = null;
+        } else {
 
-            location = new NetNodeLocation(ipRet, portRet,nameServiceHost);
+            location = new NetNodeLocation(ipRet, portRet, nameServiceHost);
             System.out.println("[MAIN] connessione a location = " + location);
+            //Set the UI title
         }
-        WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path,ipHost,location);
+        WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location);
         fileService = wrapperFS.getService();
         netNodeLocation = wrapperFS.getOwnLocation();
+
+        this.setTitle(this.getTitle() + " - Address: " + netNodeLocation.getIp() + " | Port: " + netNodeLocation.getPort()
+                + " | Hostname: " + netNodeLocation.getName());
+
 
         //Loading file system structure
         System.out.println("Loading structure");
@@ -568,8 +572,6 @@ public class MainUI extends JFrame {
 
         return menuBar;
     }
-
-
 }
 
 
