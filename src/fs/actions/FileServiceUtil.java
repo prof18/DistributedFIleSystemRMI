@@ -99,7 +99,7 @@ public class FileServiceUtil {
             }
         }
 
-        return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service);
+        return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service, node);
 
     }
 }
