@@ -1,6 +1,7 @@
 package net.objects;
 
 import fs.actions.FlatServiceUtil;
+import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
@@ -295,19 +296,28 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
-    public boolean saveFileReplica(FileWrapper fw) {
-        File fileAtt = new File(fw.getPath() + fw.getUFID() + ".attr");
-        File f = new File(fw.getPath() + fw.getUFID());
+    public boolean saveFileReplica(ReplicationWrapper rw) {
+        String filesPath = rw.getPath();
+
+        File directory = new File(filesPath);
+
+        if(!directory.exists()){//verifica esistenza della directory, se non esiste la crea.
+            directory.mkdirs();
+        }
+
+        File fileAtt = new File(filesPath + rw.getUFID() + ".attr");
+        File f = new File(filesPath + rw.getUFID());
+
         try {
 
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(fw.getContent());
+            FileOutputStream fos = new FileOutputStream(f, false);
+            fos.write(rw.getContent());
             fos.flush();
             fos.close();
 
             fos = new FileOutputStream(fileAtt);
             ObjectOutputStream oot = new ObjectOutputStream(fos);
-            oot.writeObject(fw.getAttribute());
+            oot.writeObject(rw.getAttribute());
             oot.flush();
             fos.close();
 
@@ -329,10 +339,25 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         String checksum = Util.getChecksum(bytesArray);
-        if (checksum.compareTo(fw.getChecksum()) != 0) {
+        if (checksum.compareTo(rw.getChecksum()) != 0) {
             return false;
         }
         return true;
     }
+
+    /*public static Object deepClone(Object object) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(object);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return ois.readObject();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }*/
 
 }

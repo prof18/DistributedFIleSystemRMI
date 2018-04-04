@@ -1,5 +1,6 @@
 package mediator_fs_net;
 
+import fs.actions.FSStructure;
 import fs.actions.FlatServiceImpl;
 import fs.actions.interfaces.FlatService;
 import fs.actions.object.CacheFileWrapper;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 public class MediatorFsNet {
     private NetNode node;
     private FlatService service;
+    private FSStructure fsStructure;
 
     public MediatorFsNet() {
 
@@ -26,6 +28,10 @@ public class MediatorFsNet {
 
     public void addService(FlatService service1) {
         service = service1;
+    }
+
+    public void setFsStructure() {
+        this.fsStructure = FSStructure.getInstance();
     }
 
     public CacheFileWrapper getFile(String UFID) { //ricerca nella "rete" del file
@@ -51,6 +57,10 @@ public class MediatorFsNet {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public FSStructure getFsStructure() {
+        return fsStructure;
     }
 
     /*public void fileReplication(FileWrapper file){ //Probabile che sia da sistemare

@@ -1,5 +1,6 @@
 package net.objects.interfaces;
 
+import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileWrapper;
@@ -48,5 +49,5 @@ public interface NetNode extends Remote, Serializable {
 
     void setNameLocation(String name);
 
-    boolean saveFileReplica(FileWrapper fileWra);
+    boolean saveFileReplica(ReplicationWrapper fileWra);
 }

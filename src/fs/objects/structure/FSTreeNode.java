@@ -149,7 +149,6 @@ public class FSTreeNode {
 
     public boolean hasFile(String fileName){
 
-
             for(FileWrapper fw : files){
                 if(fw.getFileName().compareTo(fileName) == 0){
                     return true;

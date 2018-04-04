@@ -11,7 +11,6 @@ import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WrapperFlatServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
-import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
@@ -24,9 +23,10 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.sql.SQLOutput;
 import java.time.Instant;
 import java.util.*;
+
+import utils.Util;
 
 
 public class FlatServiceImpl implements FlatService {
@@ -38,6 +38,7 @@ public class FlatServiceImpl implements FlatService {
 
     public FlatServiceImpl(String path, MediatorFsNet mediatorFsNet) {
         mediator = mediatorFsNet;
+        mediator.setFsStructure();
         this.path = path;
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
@@ -193,15 +194,17 @@ public class FlatServiceImpl implements FlatService {
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
-        //in questo punto deve essere aggiunta la replicazione
+        //la replicazione
         String UFID = host + new Date().getTime();
         byte[] ftb = fileToBytes(filePath);
 
-        FileWrapper fw = new FileWrapper(UFID, file.getName());
-        fw.setPath(path + pathName);
+        mediator.setFsStructure();
+
+        ReplicationWrapper fw = new ReplicationWrapper(UFID, file.getName());
+        fw.setPath(mediator.getFsStructure().getTree().getPath());
         fw.setAttribute(new FileAttribute());
         fw.setContent(ftb);
-
+        fw.setChecksum(Util.getChecksum(ftb));
         replication(fw, wfsu);
 
         return pathName;
@@ -383,15 +386,15 @@ public class FlatServiceImpl implements FlatService {
         return null;
     }
 
-    private void replication(FileWrapper fileWr, WrapperFlatServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+    private void replication(ReplicationWrapper repWr, WrapperFlatServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
         HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
 
-        if (!hm.containsKey(fileWr.getUFID())) {
+        if (!hm.containsKey(repWr.getUFID())) {
             System.out.println("File not found");
             return;
         }
 
-        ArrayList<NetNodeLocation> nodeList = hm.get(fileWr.getUFID());
+        ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID());
         ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
         NetNodeLocation selectedNode = selectedNode(nodeBiggerTime);
 
@@ -407,11 +410,22 @@ public class FlatServiceImpl implements FlatService {
         try {
             registry = LocateRegistry.getRegistry(selectedNode.getIp(), selectedNode.getPort());
             NetNode node = (NetNode) registry.lookup(selectedNode.toUrl());
-            if (node.saveFileReplica(fileWr)) {
-                wfsu.nodeFileAssociation(fileWr.getUFID(), selectedNode);
+            boolean rep;
+            do {
+                rep = node.saveFileReplica(repWr);
+
+                if (rep) {
+                    System.out.printf("Replicazione file " + repWr.getUFID() + " riuscita.");
+                } else {
+                    System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
+                }
+            } while (!rep);
+
+            /*if (node.saveFileReplica(repWr)) {
+                wfsu.nodeFileAssociation(repWr.getUFID(), selectedNode);
             } else {
                 System.out.println("File non replicato");
-            }
+            }*/
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {
