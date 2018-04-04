@@ -301,7 +301,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         File directory = new File(filesPath);
 
-        if(!directory.exists()){//verifica esistenza della directory, se non esiste la crea.
+        if (!directory.exists()) {//verifica esistenza della directory, se non esiste la crea.
             directory.mkdirs();
         }
 

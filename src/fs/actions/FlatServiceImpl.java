@@ -207,7 +207,7 @@ public class FlatServiceImpl implements FlatService {
         fw.setChecksum(Util.getChecksum(ftb));
         replication(fw, wfsu);
 
-        return pathName;
+        return UFID;
     }
 
     /**
