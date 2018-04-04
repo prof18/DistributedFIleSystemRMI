@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 
 public class MainUI extends JFrame {
@@ -47,6 +48,7 @@ public class MainUI extends JFrame {
     private FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
     private NetNode netNode;
+    private JTextArea textArea;
 
     public MainUI() {
         super("Distributed File System");
@@ -82,7 +84,7 @@ public class MainUI extends JFrame {
         WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location);
         fileService = wrapperFS.getService();
         netNodeLocation = wrapperFS.getOwnLocation();
-
+        netNode = wrapperFS.getNetNode();
         this.setTitle(this.getTitle() + " - Address: " + netNodeLocation.getIp() + " | Port: " + netNodeLocation.getPort()
                 + " | Hostname: " + netNodeLocation.getName());
 
@@ -114,7 +116,6 @@ public class MainUI extends JFrame {
         JPanel filesDetail = createDetailsUI();
         JPanel connectedStatus = createConnectedStatus();
         setLayout(new GridBagLayout());
-
 
 
         //Tree View
@@ -322,7 +323,7 @@ public class MainUI extends JFrame {
         JTextArea textArea = new JTextArea();
         JLabel label = new JLabel("Node in the system");
         textArea.setEditable(false);
-        textArea.setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+        getConnectedNodeString();
         JScrollPane pane = new JScrollPane(textArea);
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -441,7 +442,6 @@ public class MainUI extends JFrame {
         cs.gridx = 1;
         cs.gridy = 5;
         filesDetail.add(lastEditVLabel, cs);
-
 
 
         //Second Column

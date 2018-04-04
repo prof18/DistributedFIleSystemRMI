@@ -151,9 +151,6 @@ public class SettingsDialog extends JDialog {
 
         PropertiesHelper helper = PropertiesHelper.getInstance();
         ipHostTextField.setText(helper.loadConfig(Constants.IP_HOST_CONFIG));
-        ipToConnectTextField.setText(helper.loadConfig(Constants.IP_FS_CONFIG));
-        portTextField.setText(helper.loadConfig(Constants.PORT_RET_CONFIG));
-        nameFSTextField.setText(helper.loadConfig(Constants.HOST_NAME_CONFIG));
         folderChooserTF.setText(helper.loadConfig(Constants.WORKING_DIR_CONFIG));
 
         //TODO: uncomment this to generate a fake fs
