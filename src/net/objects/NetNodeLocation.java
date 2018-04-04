@@ -127,6 +127,8 @@ public class NetNodeLocation implements Serializable {
     }
 
     /**
+     * This method is used to compute the hash function of the object
+     *
      * @return the hash code of the object
      */
     @Override
@@ -135,14 +137,29 @@ public class NetNodeLocation implements Serializable {
         return Objects.hash(getIp(), getPort(), getName());
     }
 
+    /**
+     * This method is used to get the timestamp of the node creation
+     *
+     * @return a long value that corresponds to the timestamp of the creation
+     */
     public long getTimeStamp() {
         return timeStamp;
     }
 
+    /**
+     * This method is used to get the number of bytes occupied in the own node by the files
+     *
+     * @return an int that correspond to the number of bytes occupied
+     */
     public int getTotalByte() {
         return totalByte;
     }
 
+    /**
+     * This method is used to update the number of bytes occupied in the own node by the files
+     *
+     * @param tb is the new number of byte
+     */
     public void setTotalByte(int tb) {
         totalByte = tb;
     }
