@@ -71,7 +71,7 @@ public class MediatorFsNet {
      * @param list is a list of file to replace
      */
     public void replaceFile(ArrayList<WritingCacheFileWrapper> list) {
-        
+
         try {
             node.replaceFileFromFS(list);
         } catch (RemoteException e) {
