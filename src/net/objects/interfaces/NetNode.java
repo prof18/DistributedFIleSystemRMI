@@ -123,7 +123,7 @@ public interface NetNode extends Remote, Serializable {
 
     /**
      * This method is called to modify a file in the own node and if there is not this file call through
-     * the mediatore replaceFileFromFS
+     * the mediator replaceFileFromFS
      *
      * @param newFile      is an instance of an object that contain the edit file and its attribute
      * @param lastModified is the time of the lastModified
