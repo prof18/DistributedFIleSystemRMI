@@ -40,6 +40,7 @@ public class NetNodeLocation implements Serializable {
     public void setTotalByte(int tb){
         totalByte = tb;
     }
+
     public void addOccupiedSpace(int i){
         totalByte += i;
     }

@@ -415,14 +415,18 @@ public class FlatServiceImpl implements FlatService {
                 rep = node.saveFileReplica(repWr);
 
                 if (rep) {
+                    wfsu.nodeFileAssociation(repWr.getUFID(), selectedNode);
+                    selectedNode.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
                     System.out.printf("Replicazione file " + repWr.getUFID() + " riuscita.");
                 } else {
                     System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
                 }
             } while (!rep);
 
+
+
             /*if (node.saveFileReplica(repWr)) {
-                wfsu.nodeFileAssociation(repWr.getUFID(), selectedNode);
+
             } else {
                 System.out.println("File non replicato");
             }*/
