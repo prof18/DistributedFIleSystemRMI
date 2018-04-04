@@ -3,12 +3,10 @@ package ui.dialog;
 import ui.frame.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
-import utils.Util;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -70,21 +68,34 @@ public class SettingsDialog extends JDialog {
         cs.gridy = 2;
         panel.add(portTextField, cs);
 
+        //fs name
+        //file system name
+        JLabel nameFSLabel = new JLabel("Hostname to Connect:");
+        cs.gridx = 0;
+        cs.gridy = 3;
+        panel.add(nameFSLabel, cs);
+
+        JTextField nameFSTextField = new JTextField(20);
+        cs.gridx = 1;
+        cs.gridy = 3;
+        panel.add(nameFSTextField, cs);
+        panel.setBorder(new LineBorder(Color.GRAY));
+
         //fs folder
         JLabel folderChooserLabel = new JLabel("Working directory:");
         cs.gridx = 0;
-        cs.gridy = 3;
+        cs.gridy = 4;
         panel.add(folderChooserLabel, cs);
 
         JTextField folderChooserTF = new JTextField(20);
         cs.gridx = 1;
-        cs.gridy = 3;
+        cs.gridy = 4;
         panel.add(folderChooserTF, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
         JButton chooseFolderBtn = new JButton("Choose");
         cs.gridx = 3;
-        cs.gridy = 3;
+        cs.gridy = 4;
         cs.gridwidth = 2;
         panel.add(chooseFolderBtn, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
@@ -111,12 +122,14 @@ public class SettingsDialog extends JDialog {
             this.ipHost = ipHostTextField.getText();
             this.ipToConnect = ipToConnectTextField.getText();
             this.portToConnect = portTextField.getText();
+            this.fsName = nameFSTextField.getText();
             this.fsDir = folderChooserTF.getText();
 
             PropertiesHelper helper = PropertiesHelper.getInstance();
             helper.writeConfig(Constants.IP_HOST_CONFIG, ipHost);
             helper.writeConfig(Constants.IP_FS_CONFIG, ipToConnect);
             helper.writeConfig(Constants.PORT_RET_CONFIG, portToConnect);
+            helper.writeConfig(Constants.HOST_NAME_CONFIG, fsName);
             helper.writeConfig(Constants.WORKING_DIR_CONFIG, fsDir);
 
             dispose();
@@ -140,6 +153,7 @@ public class SettingsDialog extends JDialog {
         ipHostTextField.setText(helper.loadConfig(Constants.IP_HOST_CONFIG));
         ipToConnectTextField.setText(helper.loadConfig(Constants.IP_FS_CONFIG));
         portTextField.setText(helper.loadConfig(Constants.PORT_RET_CONFIG));
+        nameFSTextField.setText(helper.loadConfig(Constants.HOST_NAME_CONFIG));
         folderChooserTF.setText(helper.loadConfig(Constants.WORKING_DIR_CONFIG));
 
         //TODO: uncomment this to generate a fake fs
