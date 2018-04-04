@@ -151,7 +151,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public CacheFileWrapper getFile(String UFID) {
-        return mediatorFsNet.getFilefromFS(UFID);
+        return mediatorFsNet.getFileFromFS(UFID);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
