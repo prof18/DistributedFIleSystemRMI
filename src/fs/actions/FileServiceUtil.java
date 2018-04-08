@@ -8,6 +8,7 @@ import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
 import net.objects.interfaces.NetNode;
+import ui.frame.MainUI;
 import utils.Util;
 
 import java.rmi.AlreadyBoundException;
@@ -21,7 +22,7 @@ import java.util.Map;
 public class FileServiceUtil {
     private static String hostName;
 
-    public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet) {
+    public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) {
         System.setProperty("java.rmi.server.hostname", ownIP);
         System.out.println("locationRet = " + locationRet);
         HashMap<Integer, NetNodeLocation> ret = null;
@@ -32,7 +33,7 @@ public class FileServiceUtil {
         NetNode node = null;
         try {
             //node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
-            node = new NetNodeImpl(path, ownIP, port, mediatorFsNet);
+            node = new NetNodeImpl(path, ownIP, port, mediatorFsNet, mainUI);
             hostName = node.getHostName();
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -69,6 +70,7 @@ public class FileServiceUtil {
                 System.out.println();
                 Util.plot(retMap);
                 node.setConnectedNodes(retMap);
+                mainUI.updateConnectedNode(retMap);
                 ret = retMap;
 
                 //Se i nodi sono solo 2 le Map saranno già aggiornate
@@ -87,6 +89,7 @@ public class FileServiceUtil {
                             NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
                             tmpNode.setConnectedNodes(node.getHashMap());
                             ret = node.getHashMap();
+                            mainUI.updateConnectedNode(node.getHashMap());
                         }
                     }
                 }

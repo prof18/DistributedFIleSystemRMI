@@ -23,9 +23,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainUI extends JFrame {
 
@@ -60,6 +60,18 @@ public class MainUI extends JFrame {
         setVisible(true);
         this.setJMenuBar(createMenuBar());
 
+        //Generate details view
+
+        JPanel rightWrapper = new JPanel(new GridBagLayout());
+        JPanel rightDownWrapper = new JPanel(new GridBagLayout());
+
+        //FileWrapper UI
+        JPanel filesUI = new JPanel(new GridLayout());
+        //FileWrapper Details
+        JPanel filesDetail = createDetailsUI();
+        JPanel connectedStatus = createConnectedStatus();
+        setLayout(new GridBagLayout());
+
         //connect netStuff
         String ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
         String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
@@ -81,7 +93,7 @@ public class MainUI extends JFrame {
             System.out.println("[MAIN] connessione a location = " + location);
             //Set the UI title
         }
-        WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location);
+        WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
         fileService = wrapperFS.getService();
         netNodeLocation = wrapperFS.getOwnLocation();
         netNode = wrapperFS.getNetNode();
@@ -98,24 +110,13 @@ public class MainUI extends JFrame {
         //Get the structure of the File System
         directoryTree = fsStructure.getTree();
         currentNode = directoryTree;
-        System.out.println(directoryTree.printTree());
         //if root, disable the navigate up button
         if (directoryTree.isRoot())
             navigateUpBtn.setEnabled(false);
 
         //Generate Tree View
 
-        //Generate details view
 
-        JPanel rightWrapper = new JPanel(new GridBagLayout());
-        JPanel rightDownWrapper = new JPanel(new GridBagLayout());
-
-        //FileWrapper UI
-        JPanel filesUI = new JPanel(new GridLayout());
-        //FileWrapper Details
-        JPanel filesDetail = createDetailsUI();
-        JPanel connectedStatus = createConnectedStatus();
-        setLayout(new GridBagLayout());
 
 
         //Tree View
@@ -309,21 +310,26 @@ public class MainUI extends JFrame {
         */
     }
 
-    private String getConnectedNodeString(){
-        String nodeStatus = "";
+    public void updateConnectedNode(HashMap<Integer, NetNodeLocation> connectedNodes) {
 
+        StringBuilder sb = new StringBuilder();
 
+        for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
+            NetNodeLocation node = entry.getValue();
+            sb.append(node.toString());
+            sb.append('\n');
+        }
 
-        return nodeStatus;
+        textArea.setText(sb.toString());
     }
 
     private JPanel createConnectedStatus() {
         JPanel panel = new JPanel();
 
-        JTextArea textArea = new JTextArea();
+        textArea = new JTextArea();
         JLabel label = new JLabel("Node in the system");
         textArea.setEditable(false);
-        getConnectedNodeString();
+
         JScrollPane pane = new JScrollPane(textArea);
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();

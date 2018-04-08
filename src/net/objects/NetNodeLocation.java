@@ -94,11 +94,9 @@ public class NetNodeLocation implements Serializable {
      */
     @Override
     public String toString() {
-        return "NetNodeLocation{" +
-                "ip='" + ip + '\'' +
-                ", port=" + port +
-                ", name='" + name + '\'' +
-                '}';
+        return "Address='" + ip + '\'' +
+                " | Port=" + port +
+                " | Hostname='" + name + '\'';
     }
 
     /**

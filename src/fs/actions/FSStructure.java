@@ -104,7 +104,6 @@ public class FSStructure {
 
                 JsonFolder folder = entry.getValue();
                 if (folder.isRoot()) {
-                    System.out.println("Root found");
                     jsonFolderRoot = folder;
                     break;
                 }

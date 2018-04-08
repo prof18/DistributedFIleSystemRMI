@@ -5,6 +5,7 @@ import fs.actions.object.WritingCacheFileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
+import ui.frame.MainUI;
 import utils.Util;
 
 import java.io.File;
@@ -30,12 +31,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private MediatorFsNet mediatorFsNet;
 
     private HashMap<Integer, NetNodeLocation> connectedNodes;
+    private MainUI mainUI;
 
-    public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1) throws RemoteException {
+    public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
         super();
 
         this.path = path;
         mediatorFsNet = mediatorFsNet1;
+        this.mainUI = mainUI;
 
         //creation of a random name for the new nodes
         String name = "host" + new Random().nextInt(1000);
@@ -45,6 +48,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
 
         Util.plot(connectedNodes);
+
+        mainUI.updateConnectedNode(connectedNodes);
 
         //starting the service that controls the reachable nodes
         GarbageService v;
@@ -68,6 +73,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, newName));
 
         Util.plot(connectedNodes);
+
+        mainUI.updateConnectedNode(connectedNodes);
+
+       // HashMap<Integer, NetNodeLocation> connectedNodes
 
         return new JoinWrap(newName, connectedNodes);
     }
@@ -228,6 +237,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             if (connectedNodes.containsKey(entry.getKey())) {
                 //System.out.println("REMOVED NODE, port: " + entry.getValue().getPort() + "; Ip: " + entry.getValue().getIp());
                 connectedNodes.remove(entry.getKey());
+                mainUI.updateConnectedNode(connectedNodes);
             }
         }
     }
