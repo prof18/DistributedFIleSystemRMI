@@ -30,13 +30,11 @@ import java.util.Map;
 public class MainUI extends JFrame {
 
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
-    //private JLabel info1VLabel, info2VLabel, info3VLabel, info4VLabel, info5VLabel, info6VLabel;
 
     private JButton navigateUpBtn;
     private JTable table;
     private JTree tree;
     private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
-    private String currentPath = "/";
     private FSTreeNode currentNode;
     private FSTreeNode directoryTree;
 
@@ -48,7 +46,11 @@ public class MainUI extends JFrame {
     private FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
     private NetNode netNode;
-    private JTextArea textArea;
+    private JTextArea connectedNodeTextArea;
+
+    private JPanel rightWrapper, rightDownWrapper, filesUI, filesDetail, connectedStatus;
+
+    JScrollPane treeScroll;
 
     public MainUI() {
         super("Distributed File System");
@@ -60,46 +62,22 @@ public class MainUI extends JFrame {
         setVisible(true);
         this.setJMenuBar(createMenuBar());
 
-        //Generate details view
+        rightWrapper = new JPanel(new GridBagLayout());
+        rightDownWrapper = new JPanel(new GridBagLayout());
 
-        JPanel rightWrapper = new JPanel(new GridBagLayout());
-        JPanel rightDownWrapper = new JPanel(new GridBagLayout());
-
-        //FileWrapper UI
-        JPanel filesUI = new JPanel(new GridLayout());
-        //FileWrapper Details
-        JPanel filesDetail = createDetailsUI();
-        JPanel connectedStatus = createConnectedStatus();
+        //File UI
+        filesUI = new JPanel(new GridLayout());
+        //File Details
+        filesDetail = createDetailsUI();
+        connectedStatus = createConnectedStatus();
         setLayout(new GridBagLayout());
 
-        //connect netStuff
-        String ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
-        String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
-        String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
-        String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-        String portRetConfig = PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
-        int portRet = -1;
-        if (!portRetConfig.equals("")) {
-            portRet = Integer.parseInt(portRetConfig);
-        }
-        //String nameRet = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
-        NetNodeLocation location;
-        if (portRet == -1) {
-            System.out.println("primo nodo non si deve connettere a nessuno");
-            location = null;
-        } else {
+        //connect the node
+        connect();
 
-            location = new NetNodeLocation(ipRet, portRet, nameServiceHost);
-            System.out.println("[MAIN] connessione a location = " + location);
-            //Set the UI title
-        }
-        WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
-        fileService = wrapperFS.getService();
-        netNodeLocation = wrapperFS.getOwnLocation();
-        netNode = wrapperFS.getNetNode();
+        //set Window Title
         this.setTitle(this.getTitle() + " - Address: " + netNodeLocation.getIp() + " | Port: " + netNodeLocation.getPort()
                 + " | Hostname: " + netNodeLocation.getName());
-
 
         //Loading file system structure
         System.out.println("Loading structure");
@@ -115,10 +93,93 @@ public class MainUI extends JFrame {
             navigateUpBtn.setEnabled(false);
 
         //Generate Tree View
+        drawTreeView();
 
+        //Generate Table View
+        drawTableView();
 
+        //Finalize UI
+        setUIConstraints();
+    }
 
+    private void setUIConstraints() {
 
+        //Constraints for the main UI
+        GridBagConstraints globalCS = new GridBagConstraints();
+        GridBagConstraints rwCS = new GridBagConstraints();
+        GridBagConstraints rdwCS = new GridBagConstraints();
+
+        rwCS.weightx = 1;
+        rwCS.weighty = 0.95;
+        rwCS.gridx = 0;
+        rwCS.gridy = 0;
+        rwCS.fill = GridBagConstraints.BOTH;
+        rightWrapper.add(filesUI, rwCS);
+
+        rdwCS.weightx = 0.45;
+        rdwCS.weighty = 1;
+        rdwCS.gridx = 0;
+        rdwCS.gridy = 0;
+        rdwCS.fill = GridBagConstraints.BOTH;
+        rightDownWrapper.add(filesDetail, rdwCS);
+
+        rdwCS.weightx = 0.55;
+        rdwCS.weighty = 1;
+        rdwCS.gridx = 1;
+        rdwCS.gridy = 0;
+        rdwCS.fill = GridBagConstraints.BOTH;
+        rightDownWrapper.add(connectedStatus, rdwCS);
+
+        rwCS.weightx = 1;
+        rwCS.weighty = 0.05;
+        rwCS.gridx = 0;
+        rwCS.gridy = 1;
+        rwCS.fill = GridBagConstraints.BOTH;
+        rightWrapper.add(rightDownWrapper, rwCS);
+
+        globalCS.weighty = 1;
+        globalCS.weightx = 0.15;
+        globalCS.gridx = 0;
+        globalCS.gridy = 0;
+        globalCS.fill = GridBagConstraints.BOTH;
+        add(treeScroll, globalCS);
+
+        globalCS.weighty = 1;
+        globalCS.weightx = 0.85;
+        globalCS.gridx = 1;
+        globalCS.gridy = 0;
+        globalCS.fill = GridBagConstraints.BOTH;
+        add(rightWrapper, globalCS);
+
+        GridBagConstraints cs = new GridBagConstraints();
+        cs.fill = GridBagConstraints.BOTH;
+    }
+
+    private void connect() {
+        String ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
+        String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
+        String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
+        String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
+        String portRetConfig = PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
+        int portRet = -1;
+        if (!portRetConfig.equals("")) {
+            portRet = Integer.parseInt(portRetConfig);
+        }
+        NetNodeLocation location;
+        if (portRet == -1) {
+            System.out.println("primo nodo non si deve connettere a nessuno");
+            location = null;
+        } else {
+            location = new NetNodeLocation(ipRet, portRet, nameServiceHost);
+            System.out.println("[MAIN] connessione a location = " + location);
+        }
+        WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
+        fileService = wrapperFS.getService();
+        netNodeLocation = wrapperFS.getOwnLocation();
+        netNode = wrapperFS.getNetNode();
+    }
+
+    private void drawTreeView() {
         //Tree View
         FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
         tree = new JTree();
@@ -147,8 +208,10 @@ public class MainUI extends JFrame {
         tree.setCellRenderer(new TreeCellRenderer());
 
         tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        JScrollPane treeScroll = new JScrollPane(tree);
+        treeScroll = new JScrollPane(tree);
+    }
 
+    private void drawTableView() {
         //Table UI
         model = new FileViewTableModel();
         final JTable table = new JTable();
@@ -200,74 +263,6 @@ public class MainUI extends JFrame {
                 }
             }
         });
-
-        //Constraints for the main UI
-        GridBagConstraints globalCS = new GridBagConstraints();
-        GridBagConstraints rwCS = new GridBagConstraints();
-        GridBagConstraints rdwCS = new GridBagConstraints();
-
-        rwCS.weightx = 1;
-        rwCS.weighty = 0.95;
-        rwCS.gridx = 0;
-        rwCS.gridy = 0;
-        rwCS.fill = GridBagConstraints.BOTH;
-        rightWrapper.add(filesUI, rwCS);
-
-        /*
-        rwCS.weightx = 1;
-        rwCS.weighty = 0.05;
-        rwCS.gridx = 0;
-        rwCS.gridy = 1;
-        rwCS.fill = GridBagConstraints.BOTH;
-        rightWrapper.add(filesDetail, rwCS);
-        */
-
-        rdwCS.weightx = 0.45;
-        rdwCS.weighty = 1;
-        rdwCS.gridx = 0;
-        rdwCS.gridy = 0;
-        rdwCS.fill = GridBagConstraints.BOTH;
-        rightDownWrapper.add(filesDetail, rdwCS);
-
-        rdwCS.weightx = 0.55;
-        rdwCS.weighty = 1;
-        rdwCS.gridx = 1;
-        rdwCS.gridy = 0;
-        rdwCS.fill = GridBagConstraints.BOTH;
-        rightDownWrapper.add(connectedStatus, rdwCS);
-
-        rwCS.weightx = 1;
-        rwCS.weighty = 0.05;
-        rwCS.gridx = 0;
-        rwCS.gridy = 1;
-        rwCS.fill = GridBagConstraints.BOTH;
-        rightWrapper.add(rightDownWrapper, rwCS);
-
-        /*
-        rwCS.weightx = 1;
-        rwCS.weighty = 0.05;
-        rwCS.gridx = 1;
-        rwCS.gridy = 1;
-        rwCS.fill = GridBagConstraints.BOTH;
-        rightWrapper.add(console, rwCS);
-        */
-
-        globalCS.weighty = 1;
-        globalCS.weightx = 0.15;
-        globalCS.gridx = 0;
-        globalCS.gridy = 0;
-        globalCS.fill = GridBagConstraints.BOTH;
-        add(treeScroll, globalCS);
-
-        globalCS.weighty = 1;
-        globalCS.weightx = 0.85;
-        globalCS.gridx = 1;
-        globalCS.gridy = 0;
-        globalCS.fill = GridBagConstraints.BOTH;
-        add(rightWrapper, globalCS);
-
-        GridBagConstraints cs = new GridBagConstraints();
-        cs.fill = GridBagConstraints.BOTH;
     }
 
     private void setFileInfo(FileWrapper fileWrapper) {
@@ -299,45 +294,34 @@ public class MainUI extends JFrame {
         pathVLabel.setText("-");
         ownerVLabel.setText("-");
         lastEditVLabel.setText("-");
-
-        /*
-        info1VLabel.setText("-");
-        info2VLabel.setText("-");
-        info3VLabel.setText("-");
-        info4VLabel.setText("-");
-        info5VLabel.setText("-");
-        info6VLabel.setText("-");
-        */
     }
 
     public void updateConnectedNode(HashMap<Integer, NetNodeLocation> connectedNodes) {
 
         StringBuilder sb = new StringBuilder();
-
         for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
             NetNodeLocation node = entry.getValue();
             sb.append(node.toString());
             sb.append('\n');
         }
-
-        textArea.setText(sb.toString());
+        connectedNodeTextArea.setText(sb.toString());
     }
 
     private JPanel createConnectedStatus() {
         JPanel panel = new JPanel();
 
-        textArea = new JTextArea();
+        connectedNodeTextArea = new JTextArea();
         JLabel label = new JLabel("Node in the system");
-        textArea.setEditable(false);
+        connectedNodeTextArea.setEditable(false);
 
-        JScrollPane pane = new JScrollPane(textArea);
+        JScrollPane pane = new JScrollPane(connectedNodeTextArea);
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weighty = 0.1;
         gbc.weightx = 1;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        textArea.setMargin(new Insets(10, 10, 10, 10));
+        connectedNodeTextArea.setMargin(new Insets(10, 10, 10, 10));
         panel.add(label, gbc);
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -375,10 +359,6 @@ public class MainUI extends JFrame {
             model.setNode(node.getParent());
         }
 
-    }
-
-    private void openFile(FileWrapper fileWrapper) {
-        System.out.println("Opening file");
     }
 
     private JPanel createDetailsUI() {
@@ -449,71 +429,50 @@ public class MainUI extends JFrame {
         cs.gridy = 5;
         filesDetail.add(lastEditVLabel, cs);
 
-
-        //Second Column
-        /*
-        //FileWrapper Name
-        JLabel info1Label = new JLabel("Info1: ");
-        cs.gridx = 2;
-        cs.gridy = 0;
-        filesDetail.add(info1Label, cs);
-        info1VLabel = new JLabel("-");
-        cs.gridx = 3;
-        cs.gridy = 0;
-        filesDetail.add(info1VLabel, cs);
-
-        //Type
-        JLabel info2Label = new JLabel("Info2: ");
-        cs.gridx = 2;
-        cs.gridy = 1;
-        filesDetail.add(info2Label, cs);
-        info2VLabel = new JLabel("-");
-        cs.gridx = 3;
-        cs.gridy = 1;
-        filesDetail.add(info2VLabel, cs);
-
-        //Path
-        JLabel info3Label = new JLabel("Info3: ");
-        cs.gridx = 2;
-        cs.gridy = 2;
-        filesDetail.add(info3Label, cs);
-        info3VLabel = new JLabel("-");
-        cs.gridx = 3;
-        cs.gridy = 2;
-        filesDetail.add(info3VLabel, cs);
-
-        //FileWrapper Size
-        JLabel info4Label = new JLabel("Info4: ");
-        cs.gridx = 2;
-        cs.gridy = 3;
-        filesDetail.add(info4Label, cs);
-        info4VLabel = new JLabel("-");
-        cs.gridx = 3;
-        cs.gridy = 3;
-        filesDetail.add(info4VLabel, cs);
-
-        //Owner
-        JLabel info5Label = new JLabel("Info5: ");
-        cs.gridx = 2;
-        cs.gridy = 4;
-        filesDetail.add(info5Label, cs);
-        info5VLabel = new JLabel("-");
-        cs.gridx = 3;
-        cs.gridy = 4;
-        filesDetail.add(info5VLabel, cs);
-
-        //Last Edit
-        JLabel info6Label = new JLabel("Info6: ");
-        cs.gridx = 2;
-        cs.gridy = 5;
-        filesDetail.add(info6Label, cs);
-        info6VLabel = new JLabel("-");
-        cs.gridx = 3;
-        cs.gridy = 5;
-        filesDetail.add(info6VLabel, cs); */
-
         return filesDetail;
+    }
 
+    private boolean openFile(FileWrapper fileWrapper) {
+        boolean isOpen = false;
+
+        return isOpen;
+    }
+
+
+    private boolean newFile(String fileName) {
+        boolean isCreated = false;
+
+        return isCreated;
+    }
+
+    private boolean newFolder(String folderName) {
+        boolean isCreated = false;
+
+        return isCreated;
+    }
+
+    private boolean renameFile(FileWrapper fileWrapper) {
+        boolean isRenamed = false;
+
+        return isRenamed;
+    }
+
+    private boolean renameFolder(FSTreeNode node) {
+        boolean isRenamed = false;
+
+        return isRenamed;
+    }
+
+    private boolean deleteFile(FileWrapper fileWrapper) {
+        boolean isDeleted = false;
+
+        return isDeleted;
+    }
+
+    private boolean deleteFolder(FSTreeNode node) {
+        boolean isDeleted = false;
+
+        return isDeleted;
     }
 
 
@@ -546,7 +505,7 @@ public class MainUI extends JFrame {
             }
         });
         menu.add(menuItem);
-        //New FileWrapper
+        //New File
         menuItem = new JMenuItem("New File");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New File");
@@ -571,7 +530,7 @@ public class MainUI extends JFrame {
 
         });
         menu.add(menuItem);
-        //New JsonFolder
+        //New Folder
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
             System.out.println("Clicked New Folder");
