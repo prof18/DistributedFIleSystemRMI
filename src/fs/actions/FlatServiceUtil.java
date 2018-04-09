@@ -92,7 +92,10 @@ public class FlatServiceUtil {
                 e.printStackTrace();
             }
         }
-        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP, port, nameService), ret, service);
+
+        WrapperFlatServiceUtil wfsu = new WrapperFlatServiceUtil(new NetNodeLocation(ownIP, port, nameService), ret, service);
+        mediatorFsNet.setWrapperFlatServiceUtil(wfsu);
+        return wfsu;
 
     }
 }

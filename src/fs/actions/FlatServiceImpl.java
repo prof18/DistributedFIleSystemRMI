@@ -91,6 +91,7 @@ public class FlatServiceImpl implements FlatService {
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
+        byte[] repContent = null;
         if (cacheFileWrapper == null) throw new FileNotFoundException();
         if (cacheFileWrapper.isLocal()) {
             System.out.println("il file che si vuole sovrascrivere è locale");
@@ -109,7 +110,7 @@ public class FlatServiceImpl implements FlatService {
                 e.printStackTrace();
                 System.exit(-1);
             }
-            newContent = joinArray(content, data, offset, count);
+            repContent = newContent = joinArray(content, data, offset, count);
             System.out.println("[WRITE] nuovo contenuto da sovrascrivere : " + new String(newContent));
             ObjectInputStream ois = null;
             Date lastModified = null;
@@ -159,6 +160,7 @@ public class FlatServiceImpl implements FlatService {
             File newFile = new File(cacheFileWrapper.getUFID());
             FileOutputStream fos = new FileOutputStream(newFile);
             byte[] newctx = joinArray(context, data, offset, count);
+            repContent = newctx;
             System.out.println("contenuto da scrivere : " + new String(newctx));
             try {
                 fos.write(newctx);
@@ -175,14 +177,65 @@ public class FlatServiceImpl implements FlatService {
             writingNodeCache.add(wcfw);
         }
 
+        if(cacheFileWrapper.getAttribute().getLastModifiedTime().getTime()- Date.from(Instant.now()).getTime() > 60000){
+            ArrayList<NetNodeLocation> nodeList = mediator.getWrapperFlatServiceUtil().getNetNodeList().get(fileID);
+            String localHost = null;
+            try {
+                localHost = mediator.getNode().getHost();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            int j = 0;
+            if (localHost != null){
+                for(int i = 0; i < nodeList.size(); i++){
+                    if(nodeList.get(i).getIp().compareTo(localHost) == 0){
+                        j=i;
+                        break;
+                    }
+                }
+            }
+
+            nodeList.remove(j);
+
+            ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
+            rw.setAttribute(cacheFileWrapper.getAttribute());
+            rw.setContent(repContent);
+            rw.setPath(mediator.getFsStructure().getTree().getPath());
+            System.out.println("Set path file:" + rw.getPath());
+            for (NetNodeLocation ndl: nodeList) {
+                Registry registry;
+                try {
+                    registry = LocateRegistry.getRegistry(ndl.getIp(), ndl.getPort());
+                    NetNode node = (NetNode) registry.lookup(ndl.toUrl());
+                    boolean rep;
+                    do {
+                        rep = node.saveFileReplica(rw);
+
+                        if (rep) {
+                            mediator.getWrapperFlatServiceUtil().nodeFileAssociation(rw.getUFID(), ndl);
+                            ndl.addOccupiedSpace((int) rw.getAttribute().getFileLength());
+                            System.out.printf("Replicazione file " + rw.getUFID() + " riuscita.");
+                        } else {
+                            System.out.println("Replicazione file " + rw.getUFID() + " fallita.");
+                        }
+                    } while (!rep);
+
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                } catch (NotBoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
 
     }
 
 
     //utilizzo replicazione
 
-    public String create(String host, FileAttribute attribute, WrapperFlatServiceUtil wfsu) throws Exception { //TO DO: scegliere politica di replicazione del file nel nodo da più tempo connesso + minore spazio occupato.
-        HashMap<Integer, NetNodeLocation> nodesLocation = wfsu.getLocationHashMap();
+    public String create(String host, FileAttribute attribute) throws Exception { //TO DO: scegliere politica di replicazione del file nel nodo da più tempo connesso + minore spazio occupato.
         String pathName = host + "_" + Date.from(Instant.now()).hashCode();
         String filePath = path + pathName;
         File file = new File(filePath);
@@ -195,17 +248,19 @@ public class FlatServiceImpl implements FlatService {
         oout.writeObject(attribute);
         oout.flush();
         //la replicazione
-        String UFID = host + new Date().getTime();
+        Date creationDate = new Date().from(Instant.now());
+        String UFID = host + creationDate.getTime();
         byte[] ftb = fileToBytes(filePath);
 
         mediator.setFsStructure();
 
-        ReplicationWrapper fw = new ReplicationWrapper(UFID, file.getName());
-        fw.setPath(mediator.getFsStructure().getTree().getPath());
-        fw.setAttribute(new FileAttribute());
-        fw.setContent(ftb);
-        fw.setChecksum(Util.getChecksum(ftb));
-        replication(fw, wfsu);
+        ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
+        rw.setPath(mediator.getFsStructure().getTree().getPath());
+        System.out.println("Set path file:" + rw.getPath());
+        rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
+        rw.setContent(ftb);
+        rw.setChecksum(Util.getChecksum(ftb));
+        replication(rw, mediator.getWrapperFlatServiceUtil());
 
         return UFID;
     }
@@ -216,10 +271,10 @@ public class FlatServiceImpl implements FlatService {
      * @throws Exception
      */
     @Override
-    public String create(String host, WrapperFlatServiceUtil wfsu) throws Exception { //crea il file (nomehost+timestamp) in locale
+    public String create(String host) throws Exception { //crea il file (nomehost+timestamp) in locale
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
-        return create(host, attribute, wfsu);
+        return create(host, attribute);
 
     }
 

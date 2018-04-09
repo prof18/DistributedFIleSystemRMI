@@ -4,6 +4,7 @@ import fs.actions.FSStructure;
 import fs.actions.FlatServiceImpl;
 import fs.actions.interfaces.FlatService;
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.WrapperFlatServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileWrapper;
 import net.objects.interfaces.NetNode;
@@ -17,6 +18,7 @@ public class MediatorFsNet {
     private NetNode node;
     private FlatService service;
     private FSStructure fsStructure;
+    private WrapperFlatServiceUtil wfsu;
 
     public MediatorFsNet() {
 
@@ -32,6 +34,10 @@ public class MediatorFsNet {
 
     public void setFsStructure() {
         this.fsStructure = FSStructure.getInstance();
+    }
+
+    public void setWrapperFlatServiceUtil(WrapperFlatServiceUtil wfsu){
+        this.wfsu = wfsu;
     }
 
     public CacheFileWrapper getFile(String UFID) { //ricerca nella "rete" del file
@@ -61,6 +67,14 @@ public class MediatorFsNet {
 
     public FSStructure getFsStructure() {
         return fsStructure;
+    }
+
+    public WrapperFlatServiceUtil getWrapperFlatServiceUtil() {
+        return wfsu;
+    }
+
+    public NetNode getNode(){
+        return node;
     }
 
     /*public void fileReplication(FileWrapper file){ //Probabile che sia da sistemare

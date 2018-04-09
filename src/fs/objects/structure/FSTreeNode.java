@@ -171,6 +171,18 @@ public class FSTreeNode {
         return fileFound;
     }
 
+    public String getFileName(String UFID){
+        FileWrapper fileFound = null;
+        if(hasFile(UFID)){
+            for(FileWrapper fw : files){
+                if (fw.getUFID().compareTo(UFID) == 0){
+                    fileFound = fw;
+                }
+            }
+        }
+        return fileFound.getFileName();
+    }
+
     public String getPath(){
         String path = "/";
         if(!isRoot()){
