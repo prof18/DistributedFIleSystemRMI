@@ -45,6 +45,10 @@ public class NetNodeLocation implements Serializable {
         totalByte += i;
     }
 
+    public void reduceOccupiedSpace(int i){
+        totalByte -= i;
+    }
+
     @Override
     public String toString() {
         return "ip= " + ip + " " + "port= " + port;

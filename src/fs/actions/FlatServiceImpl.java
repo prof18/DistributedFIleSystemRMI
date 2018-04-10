@@ -13,16 +13,12 @@ import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
-import net.objects.interfaces.NetNode;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.time.Instant;
 import java.util.*;
 
@@ -91,6 +87,7 @@ public class FlatServiceImpl implements FlatService {
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
+        int oldLength = 0;
         byte[] repContent = null;
         if (cacheFileWrapper == null) throw new FileNotFoundException();
         if (cacheFileWrapper.isLocal()) {
@@ -120,6 +117,7 @@ public class FlatServiceImpl implements FlatService {
                 ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
                 fileAttribute = (FileAttribute) ois.readObject();
                 lastModified = fileAttribute.getLastModifiedTime();
+                oldLength = (int) fileAttribute.getFileLength();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
@@ -144,7 +142,8 @@ public class FlatServiceImpl implements FlatService {
         } else {
             System.out.println("il file che si vuole sovrascrivere non è locale");
             FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
-            byte[] context = new byte[(int) cacheFileWrapper.getFile().length()];
+            oldLength = (int) cacheFileWrapper.getFile().length();
+            byte[] context = new byte[oldLength];
             System.out.println("length " + context.length);
             try {
                 fis.read(context);
@@ -177,7 +176,7 @@ public class FlatServiceImpl implements FlatService {
             writingNodeCache.add(wcfw);
         }
 
-        if(cacheFileWrapper.getAttribute().getLastModifiedTime().getTime()- Date.from(Instant.now()).getTime() > 60000){
+        if (cacheFileWrapper.getAttribute().getLastModifiedTime().getTime() - Date.from(Instant.now()).getTime() > 60000) {
             ArrayList<NetNodeLocation> nodeList = mediator.getWrapperFlatServiceUtil().getNetNodeList().get(fileID);
             String localHost = null;
             try {
@@ -185,11 +184,13 @@ public class FlatServiceImpl implements FlatService {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
+
             int j = 0;
-            if (localHost != null){
-                for(int i = 0; i < nodeList.size(); i++){
-                    if(nodeList.get(i).getIp().compareTo(localHost) == 0){
-                        j=i;
+
+            if (localHost != null) {
+                for (int i = 0; i < nodeList.size(); i++) {
+                    if (nodeList.get(i).getIp().compareTo(localHost) == 0) {
+                        j = i;
                         break;
                     }
                 }
@@ -202,8 +203,11 @@ public class FlatServiceImpl implements FlatService {
             rw.setContent(repContent);
             rw.setPath(mediator.getFsStructure().getTree().getPath());
             System.out.println("Set path file:" + rw.getPath());
-            for (NetNodeLocation ndl: nodeList) {
-                Registry registry;
+
+            for (NetNodeLocation ndl : nodeList) {
+                ndl.reduceOccupiedSpace(oldLength);
+                new ReplicationTask(ndl, rw, mediator.getWrapperFlatServiceUtil()).run();
+                /*Registry registry;
                 try {
                     registry = LocateRegistry.getRegistry(ndl.getIp(), ndl.getPort());
                     NetNode node = (NetNode) registry.lookup(ndl.toUrl());
@@ -224,7 +228,7 @@ public class FlatServiceImpl implements FlatService {
                     e.printStackTrace();
                 } catch (NotBoundException e) {
                     e.printStackTrace();
-                }
+                }*/
             }
 
         }
@@ -461,35 +465,9 @@ public class FlatServiceImpl implements FlatService {
 
         //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
         //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
-        Registry registry;
-        try {
-            registry = LocateRegistry.getRegistry(selectedNode.getIp(), selectedNode.getPort());
-            NetNode node = (NetNode) registry.lookup(selectedNode.toUrl());
-            boolean rep;
-            do {
-                rep = node.saveFileReplica(repWr);
+        ReplicationTask rt = new ReplicationTask(selectedNode, repWr, wfsu);
+        rt.run();
 
-                if (rep) {
-                    wfsu.nodeFileAssociation(repWr.getUFID(), selectedNode);
-                    selectedNode.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
-                    System.out.printf("Replicazione file " + repWr.getUFID() + " riuscita.");
-                } else {
-                    System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
-                }
-            } while (!rep);
-
-
-
-            /*if (node.saveFileReplica(repWr)) {
-
-            } else {
-                System.out.println("File non replicato");
-            }*/
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
-            e.printStackTrace();
-        }
     }
 
     private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
