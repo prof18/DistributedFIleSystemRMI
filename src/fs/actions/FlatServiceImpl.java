@@ -87,7 +87,7 @@ public class FlatServiceImpl implements FlatService {
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
-        int oldLength = 0;
+        int oldLength = 0; //file length before write the new content
         byte[] repContent = null;
         if (cacheFileWrapper == null) throw new FileNotFoundException();
         if (cacheFileWrapper.isLocal()) {
@@ -176,63 +176,41 @@ public class FlatServiceImpl implements FlatService {
             writingNodeCache.add(wcfw);
         }
 
-        if (cacheFileWrapper.getAttribute().getLastModifiedTime().getTime() - Date.from(Instant.now()).getTime() > 60000) {
-            ArrayList<NetNodeLocation> nodeList = mediator.getWrapperFlatServiceUtil().getNetNodeList().get(fileID);
-            String localHost = null;
-            try {
-                localHost = mediator.getNode().getHost();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+        //La scrittura delle modifiche del file sono state savate in cache, procedo con la replicazione in tutti i nodi che possiedono una sua copia non aggiornata.
 
-            int j = 0;
-
-            if (localHost != null) {
-                for (int i = 0; i < nodeList.size(); i++) {
-                    if (nodeList.get(i).getIp().compareTo(localHost) == 0) {
-                        j = i;
-                        break;
-                    }
-                }
-            }
-
-            nodeList.remove(j);
-
-            ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
-            rw.setAttribute(cacheFileWrapper.getAttribute());
-            rw.setContent(repContent);
-            rw.setPath(mediator.getFsStructure().getTree().getPath());
-            System.out.println("Set path file:" + rw.getPath());
-
-            for (NetNodeLocation ndl : nodeList) {
-                ndl.reduceOccupiedSpace(oldLength);
-                new ReplicationTask(ndl, rw, mediator.getWrapperFlatServiceUtil()).run();
-                /*Registry registry;
-                try {
-                    registry = LocateRegistry.getRegistry(ndl.getIp(), ndl.getPort());
-                    NetNode node = (NetNode) registry.lookup(ndl.toUrl());
-                    boolean rep;
-                    do {
-                        rep = node.saveFileReplica(rw);
-
-                        if (rep) {
-                            mediator.getWrapperFlatServiceUtil().nodeFileAssociation(rw.getUFID(), ndl);
-                            ndl.addOccupiedSpace((int) rw.getAttribute().getFileLength());
-                            System.out.printf("Replicazione file " + rw.getUFID() + " riuscita.");
-                        } else {
-                            System.out.println("Replicazione file " + rw.getUFID() + " fallita.");
-                        }
-                    } while (!rep);
-
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                } catch (NotBoundException e) {
-                    e.printStackTrace();
-                }*/
-            }
-
+        ArrayList<NetNodeLocation> nodeList = mediator.getWrapperFlatServiceUtil().getNetNodeList().get(fileID);
+        ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList);
+        String localHost = null;
+        try {
+            localHost = mediator.getNode().getHost();
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
 
+        int j = 0;
+
+        if (localHost != null) {
+            for (int i = 0; i < nodeList.size(); i++) {
+                if (nodeList.get(i).getIp().compareTo(localHost) == 0) { //trovo il nodo locale
+                    j = i;
+                    nodeList.get(j).reduceOccupiedSpace(oldLength);
+                    nodeList.get(j).addOccupiedSpace((int)cacheFileWrapper.getAttribute().getFileLength());
+                    break;
+                }
+            }
+        }
+        tempNodeList.remove(j);
+
+        ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
+        rw.setAttribute(cacheFileWrapper.getAttribute());
+        rw.setContent(repContent);
+        rw.setPath(mediator.getFsStructure().getTree().getPath());
+        System.out.println("Set path file:" + rw.getPath());
+
+        for (NetNodeLocation ndl : tempNodeList) {
+            ndl.reduceOccupiedSpace(oldLength);
+            new ReplicationTask(ndl, rw, mediator.getWrapperFlatServiceUtil()).run();
+        }
 
     }
 
@@ -465,9 +443,7 @@ public class FlatServiceImpl implements FlatService {
 
         //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
         //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
-        ReplicationTask rt = new ReplicationTask(selectedNode, repWr, wfsu);
-        rt.run();
-
+        new ReplicationTask(selectedNode, repWr, wfsu).run();
     }
 
     private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
