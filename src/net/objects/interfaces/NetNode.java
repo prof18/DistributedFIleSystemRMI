@@ -4,6 +4,7 @@ import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileWrapper;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
 import net.objects.NetNodeWrap;
@@ -50,4 +51,8 @@ public interface NetNode extends Remote, Serializable {
     void setNameLocation(String name);
 
     boolean saveFileReplica(ReplicationWrapper fileWra);
+
+    MediatorFsNet getMediator();
+
+    boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList);
 }

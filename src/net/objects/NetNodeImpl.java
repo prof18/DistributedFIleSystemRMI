@@ -1,11 +1,8 @@
 package net.objects;
 
-import fs.actions.FlatServiceUtil;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
-import fs.objects.structure.FileAttribute;
-import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
@@ -309,7 +306,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }
 
-        File fileAtt = new File(filePath +  rw.getUFID() + ".attr");
+        File fileAtt = new File(filePath + rw.getUFID() + ".attr");
         File f = new File(filePath + rw.getUFID());
 
         try {
@@ -364,4 +361,21 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }*/
 
+    public MediatorFsNet getMediator() {
+        return mediatorFsNet;
+    }
+
+    @Override
+    public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
+        ArrayList<NetNodeLocation> nodeLocations = mediatorFsNet.getWrapperFlatServiceUtil().getNetNodeList().get(fileID);
+        for (NetNodeLocation nnl: nodeLocations) {
+            if(nodeList.get(nodeList.indexOf(nnl)).canWrite()){
+                nnl.lockWriting();
+            }else{
+                nnl.unlockWriting();
+            }
+        }
+
+        return true;
+    }
 }
