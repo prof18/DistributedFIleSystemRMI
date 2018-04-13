@@ -213,6 +213,13 @@ public class FlatServiceImpl implements FlatService {
                     ndl.reduceOccupiedSpace(oldLength);
                     new ReplicationTask(ndl, rw, mediator.getWrapperFlatServiceUtil()).run();
                 }
+
+                for (NetNodeLocation nnl : tempNodeList) {
+                    int pos = nodeList.indexOf(nnl);
+                    nodeList.get(pos).unlockWriting();
+                }
+                new MapUpdateTask(fileID, mediator.getWrapperFlatServiceUtil().getLocationHashMap().values(), nodeList);
+
             }else{
                 System.out.println("Impossibile scrivere sul file "+ fileID + ", qualcuno sta scrivendo.");
             }
