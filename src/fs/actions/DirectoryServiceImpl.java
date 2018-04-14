@@ -113,7 +113,11 @@ public class DirectoryServiceImpl implements DirectoryService {
             wrapper.setAttribute(fileAttribute);
             wrapper.setFileName(name);
             wrapper.setUFID(fileID);
-            wrapper.setPath(currentNode.getPath() + "/" + name);
+            String path = currentNode.getPath();
+            if (path.charAt(path.length() - 1) != '/')
+                wrapper.setPath(currentNode.getPath() + "/" + name);
+            else
+                wrapper.setPath(currentNode.getPath() + name);
             currentNode.addFile(wrapper);
             callback.onItemChanged(currentNode);
         } catch (FileNotFoundException e) {
