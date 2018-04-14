@@ -27,6 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import static javax.swing.JOptionPane.showMessageDialog;
+
 public class MainUI extends JFrame {
 
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
@@ -433,34 +435,74 @@ public class MainUI extends JFrame {
     }
 
     private boolean openFile(FileWrapper fileWrapper) {
-        boolean isOpen = false;
+        boolean isOpen = true;
+
+        try {
+            String id = fileWrapper.getUFID();
+            byte[] content = fileService.read(id, 0);
+            String contentS = new String(content);
+            new EditFileUI(this, contentS, fileService, id);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            isOpen = false;
+        }
 
         return isOpen;
     }
 
 
     private boolean newFile(String fileName) {
-        boolean isCreated = false;
+        boolean isCreated = true;
+
+        try {
+            String ufid = fileService.create(netNodeLocation.getName());
+            directoryService.addName(currentNode, fileName, ufid, (fsTreeNode -> {
+                FileViewTableModel model = (FileViewTableModel) table.getModel();
+                model.setNode(fsTreeNode);
+                //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+                FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+                tree.setModel(treeModel);
+                fsStructure.generateJson(directoryTree);
+            }));
+        } catch (IOException e) {
+            e.printStackTrace();
+            isCreated = false;
+        }
 
         return isCreated;
     }
 
-    private boolean newFolder(String folderName) {
-        boolean isCreated = false;
-
-        return isCreated;
+    private void newFolder(String folderName) {
+        directoryService.createDirectory(currentNode, folderName, (treeNode) -> {
+            FileViewTableModel model = (FileViewTableModel) table.getModel();
+            model.setNode(treeNode);
+            //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+            FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+            tree.setModel(treeModel);
+            fsStructure.generateJson(directoryTree);
+        });
     }
 
     private boolean renameFile(FileWrapper fileWrapper) {
         boolean isRenamed = false;
 
+
+
         return isRenamed;
     }
 
-    private boolean renameFolder(FSTreeNode node) {
-        boolean isRenamed = false;
+    private void renameFolder(FSTreeNode node,String newName) {
 
-        return isRenamed;
+        directoryService.renameDirectory(node, newName, (fsTreeNode -> {
+            FileViewTableModel model = (FileViewTableModel) table.getModel();
+            model.setNode(currentNode);
+            //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+            FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+            tree.setModel(treeModel);
+            fsStructure.generateJson(directoryTree);
+            System.out.println("Callback");
+        }));
+
     }
 
     private boolean deleteFile(FileWrapper fileWrapper) {
@@ -469,10 +511,16 @@ public class MainUI extends JFrame {
         return isDeleted;
     }
 
-    private boolean deleteFolder(FSTreeNode node) {
-        boolean isDeleted = false;
-
-        return isDeleted;
+    private void deleteFolder(FSTreeNode node) {
+        directoryService.deleteDirectory(node, (fsTreeNode -> {
+            FileViewTableModel model = (FileViewTableModel) table.getModel();
+            model.setNode(fsTreeNode);
+            //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
+            FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+            tree.setModel(treeModel);
+            fsStructure.generateJson(directoryTree);
+            System.out.println("Callback");
+        }));
     }
 
 
@@ -490,42 +538,22 @@ public class MainUI extends JFrame {
         //Open
         JMenuItem menuItem = new JMenuItem("Open");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Open");
             int row = table.getSelectedRow();
             TableItem item = model.getItems().get(row);
             if (item.isFile()) {
-                try {
-                    String id = item.getFileWrapper().getUFID();
-                    byte[] content = fileService.read(id, 0);
-                    String contentS = new String(content);
-                    new EditFileUI(this, contentS, fileService, id);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+                if (!openFile(item.getFileWrapper()))
+                    showMessageDialog(null, "An error has occurred during file opening!");
+
             }
         });
         menu.add(menuItem);
         //New File
         menuItem = new JMenuItem("New File");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New File");
             String fileName = JOptionPane.showInputDialog("New File Name: ");
             if (!fileName.equals("")) {
-                try {
-                    String ufid = fileService.create(netNodeLocation.getName());
-                    directoryService.addName(currentNode, fileName, ufid, (fsTreeNode -> {
-                        FileViewTableModel model = (FileViewTableModel) table.getModel();
-                        model.setNode(fsTreeNode);
-                        //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-                        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-                        tree.setModel(treeModel);
-                        fsStructure.generateJson(directoryTree);
-                        System.out.println("Callback");
-                    }));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "File not created. An error has occurred");
-                }
+                if (!newFile(fileName))
+                    showMessageDialog(null, "File not created. An error has occurred");
             }
 
         });
@@ -533,19 +561,8 @@ public class MainUI extends JFrame {
         //New Folder
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked New Folder");
             String folderName = JOptionPane.showInputDialog("New Folder Name: ");
-            directoryService.createDirectory(currentNode, folderName, (treeNode) -> {
-
-                FileViewTableModel model = (FileViewTableModel) table.getModel();
-                model.setNode(treeNode);
-                //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-                FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-                tree.setModel(treeModel);
-                fsStructure.generateJson(directoryTree);
-                System.out.println("Callback");
-            });
-
+            newFolder(folderName);
         });
         menu.add(menuItem);
         menu.addSeparator();
@@ -567,36 +584,18 @@ public class MainUI extends JFrame {
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
-                directoryService.renameDirectory(item.getTreeNode(), newName, (fsTreeNode -> {
-                    FileViewTableModel model = (FileViewTableModel) table.getModel();
-                    model.setNode(currentNode);
-                    //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-                    FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-                    tree.setModel(treeModel);
-                    fsStructure.generateJson(directoryTree);
-                    System.out.println("Callback");
-                }));
+                renameFolder(item.getTreeNode(), newName);
             }
-            System.out.println("Clicked Rename");
         });
         menu.add(rename);
         //Delete
         delete = new JMenuItem("Delete");
         delete.setEnabled(false);
         delete.addActionListener((ActionListener) -> {
-            System.out.println("Clicked Delete");
             int row = table.getSelectedRow();
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
-                directoryService.deleteDirectory(item.getTreeNode(), (fsTreeNode -> {
-                    FileViewTableModel model = (FileViewTableModel) table.getModel();
-                    model.setNode(fsTreeNode);
-                    //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-                    FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-                    tree.setModel(treeModel);
-                    fsStructure.generateJson(directoryTree);
-                    System.out.println("Callback");
-                }));
+               deleteFolder(item.getTreeNode());
             }
         });
         menu.add(delete);
