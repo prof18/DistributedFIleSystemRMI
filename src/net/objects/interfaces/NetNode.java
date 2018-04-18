@@ -48,9 +48,9 @@ public interface NetNode extends Remote, Serializable {
 
     String checkHostName(String name) throws RemoteException;
 
-    public boolean saveFileReplica(ReplicationWrapper rw) throws RemoteException;
+    boolean saveFileReplica(ReplicationWrapper rw) throws RemoteException;
 
     void setNameLocation(String name) throws RemoteException;
 
-    public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
+    boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
 }

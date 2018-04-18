@@ -9,6 +9,8 @@ public class ReplicationWrapper {
     private FileAttribute attribute;
     private byte[] content;
     private String checksum;
+    private String jSon;
+
 
     public ReplicationWrapper(String UFID, String fileName){
         this.UFID = UFID;
@@ -57,5 +59,13 @@ public class ReplicationWrapper {
 
     public void setChecksum(String checksum) {
         this.checksum = checksum;
+    }
+
+    public String getjSon() {
+        return jSon;
+    }
+
+    public void setjSon(String jSon) {
+        this.jSon = jSon;
     }
 }

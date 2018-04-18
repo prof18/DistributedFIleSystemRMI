@@ -17,6 +17,9 @@ import net.objects.interfaces.NetNode;
 import utils.Util;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -35,6 +38,7 @@ public class FileServiceImpl implements FileService {
 
     public FileServiceImpl(String path, MediatorFsNet mediatorFsNet) {
         mediator = mediatorFsNet;
+        mediator.setFsStructure();
         this.path = path;
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
@@ -86,92 +90,141 @@ public class FileServiceImpl implements FileService {
 
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
+        ArrayList<NetNodeLocation> nodeList = mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+        ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList);
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
-        if (cacheFileWrapper == null) throw new FileNotFoundException();
-        if (cacheFileWrapper.isLocal()) {
-            System.out.println("il file che si vuole sovrascrivere è locale");
-            byte[] newContent = null;
-            byte[] content = null;
-            try {
-                System.out.println("[WRITE] lettura del file prima della modifica");
-                content = read(fileID, 0);
-                System.out.println("[WRITE] prima della modifica: " + new String(content));
-            } catch (NullPointerException e) {
-                System.out.println("il file ha qualche problema");
-            } catch (FileNotFoundException e) {
-                System.out.println("il file non è presente");
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("problema con gli indici");
-                e.printStackTrace();
-                System.exit(-1);
-            }
-            newContent = joinArray(content, data, offset, count);
-            System.out.println("[WRITE] nuovo contenuto da sovrascrivere : " + new String(newContent));
-            ObjectInputStream ois = null;
-            Date lastModified = null;
-            FileAttribute fileAttribute = null;
-            try {
-                System.out.println("[WRITE] " + path + fileID);
-                ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
-                fileAttribute = (FileAttribute) ois.readObject();
-                lastModified = fileAttribute.getLastModifiedTime();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            FileOutputStream fileOutputStream = null;
-            try {
-                File file = new File(path + fileID);
-                System.out.println(file.delete());
-                file = new File(path + fileID);
-                fileOutputStream = new FileOutputStream(file);
-                fileAttribute.setFileLength(file.length());
-                fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
-                setAttributes(fileID, fileAttribute);
-                writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, fileID, true));
-                System.out.println("newContent = " + new String(newContent));
-                fileOutputStream.write(newContent, 0, newContent.length);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("il file che si vuole sovrascrivere non è locale");
-            FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
-            byte[] context = new byte[(int) cacheFileWrapper.getFile().length()];
-            System.out.println("length " + context.length);
-            try {
-                fis.read(context);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.out.println("context = " + new String(context));
-            try {
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            File newFile = new File(cacheFileWrapper.getUFID());
-            FileOutputStream fos = new FileOutputStream(newFile);
-            byte[] newctx = joinArray(context, data, offset, count);
-            System.out.println("contenuto da scrivere : " + new String(newctx));
-            try {
-                fos.write(newctx);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
-            WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
-            writingNodeCache.add(wcfw);
+        byte[] repContent = null;
+        int oldLength = 0; //file length before write the new content
+        String localHost = null;
+        try {
+            localHost = mediator.getNode().getHost();
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
 
+        if (localHost != null) {
+            if (nodeList.get(nodeList.indexOf(localHost)).canWrite()) {
+                for (int i = 0; i < nodeList.size(); i++) {
+                    if (nodeList.get(i).getIp().compareTo(localHost) == 0) { //trovo il nodo locale
+                        tempNodeList.remove(i);
+                        nodeList.get(i).unlockWriting();
+                        break;
+                    }
+                }
 
+
+                for (NetNodeLocation nnl : tempNodeList) {
+                    int pos = nodeList.indexOf(nnl);
+                    nodeList.get(pos).lockWriting();
+                }
+                new MapUpdateTask(fileID, mediator.getWrapperFileServiceUtil().getLocationHashMap().values(), nodeList);
+
+
+                if (cacheFileWrapper == null) throw new FileNotFoundException();
+                if (cacheFileWrapper.isLocal()) {
+                    System.out.println("il file che si vuole sovrascrivere è locale");
+                    byte[] newContent = null;
+                    byte[] content = null;
+                    try {
+                        System.out.println("[WRITE] lettura del file prima della modifica");
+                        content = read(fileID, 0);
+                        System.out.println("[WRITE] prima della modifica: " + new String(content));
+                    } catch (NullPointerException e) {
+                        System.out.println("il file ha qualche problema");
+                    } catch (FileNotFoundException e) {
+                        System.out.println("il file non è presente");
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("problema con gli indici");
+                        e.printStackTrace();
+                        System.exit(-1);
+                    }
+                    repContent = newContent = joinArray(content, data, offset, count);
+                    System.out.println("[WRITE] nuovo contenuto da sovrascrivere : " + new String(newContent));
+                    ObjectInputStream ois = null;
+                    Date lastModified = null;
+                    FileAttribute fileAttribute = null;
+                    try {
+                        System.out.println("[WRITE] " + path + fileID);
+                        ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
+                        fileAttribute = (FileAttribute) ois.readObject();
+                        lastModified = fileAttribute.getLastModifiedTime();
+                        oldLength = (int) fileAttribute.getFileLength();
+                    } catch (IOException |ClassNotFoundException e) {
+                        e.printStackTrace();
+
+                    FileOutputStream fileOutputStream = null;
+                    try {
+                        File file = new File(path + fileID);
+                        System.out.println(file.delete());
+                        file = new File(path + fileID);
+                        fileOutputStream = new FileOutputStream(file);
+                        fileAttribute.setFileLength(file.length());
+                        fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
+                        setAttributes(fileID, fileAttribute);
+                        writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, fileID, true));
+                        System.out.println("newContent = " + new String(newContent));
+                        fileOutputStream.write(newContent, 0, newContent.length);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("il file che si vuole sovrascrivere non è locale");
+                    FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
+                    oldLength = (int) cacheFileWrapper.getFile().length();
+                    byte[] context = new byte[oldLength];
+                    System.out.println("length " + context.length);
+                    try {
+                        fis.read(context);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("context = " + new String(context));
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    File newFile = new File(cacheFileWrapper.getUFID());
+                    FileOutputStream fos = new FileOutputStream(newFile);
+                    byte[] newctx = joinArray(context, data, offset, count);
+                    repContent = newctx;
+                    System.out.println("contenuto da scrivere : " + new String(newctx));
+                    try {
+                        fos.write(newctx);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
+                    WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
+                    writingNodeCache.add(wcfw);
+                }
+                ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
+                rw.setAttribute(cacheFileWrapper.getAttribute());
+                rw.setContent(repContent);
+                rw.setPath(mediator.getFsStructure().getTree().getPath());
+                System.out.println("Set path file:" + rw.getPath());
+
+                for (NetNodeLocation ndl : nodeList) {
+                    ndl.reduceOccupiedSpace(oldLength);
+                    new ReplicationTask(ndl, rw, mediator.getWrapperFileServiceUtil()).run();
+                }
+
+                for (NetNodeLocation nnl : tempNodeList) {
+                    int pos = nodeList.indexOf(nnl);
+                    nodeList.get(pos).unlockWriting();
+                }
+                new MapUpdateTask(fileID, mediator.getWrapperFileServiceUtil().getLocationHashMap().values(), nodeList);
+
+            }else{
+                System.out.println("Impossibile scrivere sul file "+ fileID + ", qualcuno sta scrivendo.");
+            }
+
+        }
     }
 
 
@@ -179,7 +232,8 @@ public class FileServiceImpl implements FileService {
 
     public String create(String host, FileAttribute attribute) throws IOException {
         String pathName = host + "_" + Date.from(Instant.now()).hashCode();
-        File file = new File(path + pathName);
+        String filePath = path + pathName;
+        File file = new File(filePath);
         if (file.exists()) {
             throw new FileNotFoundException();
         }
@@ -188,8 +242,22 @@ public class FileServiceImpl implements FileService {
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
-        //in questo punto deve essere aggiunta la replicazione
-        return pathName;
+        //la replicazione
+        Date creationDate = new Date().from(Instant.now());
+        String UFID = host + creationDate.getTime();
+        byte[] ftb = fileToBytes(filePath);
+
+        mediator.setFsStructure();
+
+        ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
+        rw.setPath(mediator.getFsStructure().getTree().getPath());
+        System.out.println("Set path file:" + rw.getPath());
+        rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
+        rw.setContent(ftb);
+        rw.setChecksum(Util.getChecksum(ftb));
+        replication(rw, mediator.getWrapperFileServiceUtil());
+
+        return UFID;
     }
 
     /**
@@ -198,7 +266,7 @@ public class FileServiceImpl implements FileService {
      * @throws Exception
      */
     @Override
-    public String create(String host) throws IOException {
+    public String create(String host) throws IOException { //crea il file (nomehost+timestamp) in locale
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
         return create(host, attribute);
@@ -208,11 +276,37 @@ public class FileServiceImpl implements FileService {
     //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
 
     public void delete(String fileID) {
+        //eliminazione in locale
         File file = new File(path + fileID);
         File fileAttr = new File(path + fileID + ".attr");
         System.out.println(file.delete());
         System.out.println(fileAttr.delete());
+
+        ArrayList<NetNodeLocation> list = mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+
+        int j = 0;
+        for (int i = 0; i < list.size(); i++) {
+            try {
+                if(list.get(i).getIp().compareTo(mediator.getNode().getHost()) == 0){
+                    j = i;
+                    break;
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        list.remove(j);
+
+        //eliminazione totale
+
+        for (NetNodeLocation nnl: mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID)) {
+            new RemoveTask(fileID, nnl).run();
+        }
+
+        mediator.getWrapperFileServiceUtil().getNetNodeList().remove(fileID);
     }
+
 
     /**
      * Ritorna gli attributi di uno specifico file
@@ -366,6 +460,105 @@ public class FileServiceImpl implements FileService {
             return null;
         }
         return null;
+    }
+    private void replication(ReplicationWrapper repWr, WrapperFileServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+        HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
+
+        if (!hm.containsKey(repWr.getUFID())) {
+            System.out.println("File not found");
+            return;
+        }
+
+        ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID());
+        ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
+        NetNodeLocation selectedNode = selectedNode(nodeBiggerTime);
+
+        if (selectedNode == null) {
+            System.out.println("Disastro!!! Siamo rovinati!!!");
+            System.out.println(" Nessun nodo trovato per la replicazione :( ");
+            return;
+        }
+
+        //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
+        //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
+        new ReplicationTask(selectedNode, repWr, wfsu).run();
+    }
+
+    private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
+        long maxConnectedTime = maxTimeConnection(list);
+        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
+        for (NetNodeLocation node : list) {
+            if (node.getTimeStamp() == maxConnectedTime) {
+                nodeList.add(node);
+            }
+        }
+
+        return nodeList;
+    }
+
+    private long maxTimeConnection(ArrayList<NetNodeLocation> list) {
+        long connectedTime = 0;
+        long selectedTimeStamp = 0;
+        long currentTime = new Date().getTime();
+        for (NetNodeLocation dn : list) {
+            if (currentTime - dn.getTimeStamp() > connectedTime) {
+                selectedTimeStamp = dn.getTimeStamp();
+                connectedTime = currentTime - dn.getTimeStamp();
+            }
+        }
+
+        return selectedTimeStamp;
+    }
+
+    private NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
+        NetNodeLocation selectedNode = null;
+        int occupiedSpace = Integer.MAX_VALUE;
+        for (NetNodeLocation node : list) {
+            if (node.getTotalByte() < occupiedSpace) {
+                occupiedSpace = node.getTotalByte();
+                selectedNode = node;
+            }
+        }
+
+        return selectedNode;
+    }
+
+    private static byte[] fileToBytes(String pathFile) {
+
+        byte[] bytesArray = null;
+        Path path = Paths.get(pathFile);
+
+        try {
+            bytesArray = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*FileInputStream fis = null;
+
+        try {
+            bytesArray = new byte[(int) f.length()];
+
+            //read file into bytes[]
+            fis = new FileInputStream(f);
+            fis.read(bytesArray);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }*/
+
+        return bytesArray;
+
     }
 
 }

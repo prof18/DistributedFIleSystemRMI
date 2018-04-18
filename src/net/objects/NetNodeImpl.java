@@ -7,6 +7,8 @@ import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
 import ui.frame.MainUI;
+import utils.Constants;
+import utils.PropertiesHelper;
 import utils.Util;
 
 import java.io.*;
@@ -18,10 +20,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
@@ -349,6 +348,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         if (checksum.compareTo(rw.getChecksum()) != 0) {
             return false;
         }
+
+        PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, rw.getjSon());
+
         return true;
     }
 
