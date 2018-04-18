@@ -5,13 +5,9 @@ import fs.actions.object.WritingCacheFileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
-import ui.frame.MainUI;
 import utils.Util;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -24,61 +20,66 @@ import java.util.Random;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
-
+    private MediatorFsNet mediatorFsNet;
+    private String ownIP;
+    private int port;
+    //private String hostName = "host";
     private String path;
     private NetNodeLocation ownLocation;
-
-    private MediatorFsNet mediatorFsNet;
-
+    //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
-    private MainUI mainUI;
 
-    public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
+    public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1) throws RemoteException {
         super();
 
-        this.path = path;
         mediatorFsNet = mediatorFsNet1;
-        this.mainUI = mainUI;
 
-        //creation of a random name for the new nodes
+        this.path = path;
+        this.ownIP = ownIP;
+        this.port = port;
+
         String name = "host" + new Random().nextInt(1000);
 
         ownLocation = new NetNodeLocation(ownIP, port, name);
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
-
+        System.out.println("[COSTRUTTORE]");
         Util.plot(connectedNodes);
-
-        mainUI.updateConnectedNode(connectedNodes);
-
-        //starting the service that controls the reachable nodes
+        System.out.println("AVVIO THREAD");
         GarbageService v;
         try {
-            v = new GarbageService(ownLocation.getIp(), ownLocation.getName(), ownLocation.getPort());
+            v = new GarbageService(this.ownIP, ownLocation.getName(), this.port);
             Thread t = new Thread(v);
             t.start();
         } catch (RemoteException e) {
-            System.out.println("Error in the initialization of the garbage collector, please restart the program");
-            System.exit(-1);
+            System.out.println("Avvio Thread Remote Exc");
+            e.printStackTrace();
         }
 
     }
 
     @Override
+    public String getHost() {
+        return ownIP;
+    }
+
+    @Override
+    public int getPort() {
+        return port;
+    }
+
+    @Override
     public synchronized JoinWrap join(String ipNode, int port, String name) {
+        System.out.println("si è connesso un nuovo nodo: " + ipNode + " " + port + " " + name);
 
         //check if name is already used
         String newName = checkHostName(name);
 
         connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, newName));
-
+        System.out.println("[JOIN]");
         Util.plot(connectedNodes);
 
-        mainUI.updateConnectedNode(connectedNodes);
-
-       // HashMap<Integer, NetNodeLocation> connectedNodes
-
-        return new JoinWrap(newName, connectedNodes);
+        return new JoinWrap(newName,connectedNodes);
     }
 
     @Override
@@ -95,15 +96,22 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             boolean changed = false;
             for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
+
                 NetNodeLocation tmp = entry.getValue();
-                if (tmp.getName().equals(oldName)) {
+
+                if (tmp.getName() == oldName) {
                     newName = "host" + new Random().nextInt(1000);
                     changed = true;
                 }
             }
+
             validName = !changed;
         }
         return newName;
+    }
+
+    public NetNodeWrap add(String ip, int port) {
+        return null;
     }
 
     @Override
@@ -111,27 +119,29 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return ownLocation.getName();
     }
 
-    @Override
+
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
     }
 
-    @Override
     public CacheFileWrapper getFileOtherHost(String UFID) {
-        //searching for the file in each nodes of the distributed FS
+        System.out.println("getFileOtherHosts " + UFID + " del nodo : " + this.ownLocation.toUrl());
         for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
             NetNodeLocation location = entry.getValue();
-            Registry registry;
+            Registry registry = null;
             CacheFileWrapper fileWrapper = null;
             try {
                 registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
                 NetNode node = (NetNode) registry.lookup(location.toUrl());
                 fileWrapper = node.getFile(UFID);
-            } catch (RemoteException | NotBoundException e) {
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (NotBoundException e) {
                 e.printStackTrace();
             }
 
             if (fileWrapper != null) {
+                System.out.println("ritornato da getFileOtherHosts");
                 return fileWrapper;
             }
         }
@@ -140,17 +150,20 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) {
-        //searching a specific file in the distributed filesystem in order to update it
+        System.out.println("Entrato in replaceFileFromFS del nodo " + ownLocation.toUrl());
         for (WritingCacheFileWrapper fileWrapper : fileWrappers) {
             for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
                 if (!entry.getValue().equals(ownLocation)) {
                     NetNodeLocation location = entry.getValue();
-                    Registry registry;
+                    Registry registry = null;
                     try {
                         registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
+                        System.out.println("[replaceFileFromFS]visitando il nodo : " + location.toUrl());
                         NetNode node = (NetNode) registry.lookup(location.toUrl());
                         System.out.println(node.replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID()));
-                    } catch (RemoteException | NotBoundException e) {
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (NotBoundException e) {
                         e.printStackTrace();
                     }
                 }
@@ -160,85 +173,120 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public CacheFileWrapper getFile(String UFID) {
-        return mediatorFsNet.getFileFromFS(UFID);
+        System.out.println("getFile " + UFID + " del nodo : " + this.ownLocation.toUrl());
+        return mediatorFsNet.getFilefromFS(UFID);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Override
     public String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) {
-        //updating of a file in the own node
+        System.out.println("entrato in replaceFile del nodo : " + ownLocation.toUrl());
         CacheFileWrapper file = getFile(UFID);
+        try {
+            FileInputStream fis = new FileInputStream(UFID);
+            System.out.println("file obsoleto è" + new String(fis.readAllBytes()));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("UFID = " + UFID);
         if (file == null) {
-            return "In this host the file " + UFID + " is not present";
+            System.out.println("[REPLACE FILE] il file non è presente nel nodo " + ownLocation.toUrl());
+            return "In questo host il file " + UFID + " non è presente";
         } else {
-            // if the file in this host is not edited it will be updated
-            File file1 = new File(path + UFID);
-            file1.delete();
-            file1 = new File(path + UFID + ".attr");
-            file1.delete();
-            File fileToReplace = new File(path + UFID);
-            try {
-                FileOutputStream writer = new FileOutputStream(fileToReplace);
-                writer.write(newFile.getContent());
-                ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path + UFID + ".attr"));
-                ois.writeObject(newFile.getAttribute());
-                ois.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
+            System.out.println("lastModified : " + lastModified);
+            System.out.println("lastModified other : " + file.getAttribute().getLastModifiedTime().getTime());
+            // se il file in questo host non è stato modicato nel mentre si procede alla modifica
+            //TODO è stato tolto il check per fare delle prove lastModified == file.getAttribute().getLastModifiedTime().getTime()
+            //TODO è un errore da capire
+            if (true) {
+                System.out.println("[REPLACE FILE non è stato modificato]");
+                File file1 = new File(path + UFID);
+                System.out.println("eliminato il file " + file1.delete());
+                file1 = new File(path + UFID + ".attr");
+                System.out.println("eliminato il file attributi" + file1.delete());
+                File newFileh = new File(path + UFID);
+                try {
+                    FileOutputStream writer = new FileOutputStream(newFileh);
+                    System.out.println("FileOutputStream : " + newFile.getFile().toString());
+                    writer.write(newFile.getContent());
+                    ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path + UFID + ".attr"));
+                    ois.writeObject(newFile.getAttribute());
+                    ois.flush();
+                    System.out.println("[REPLACEFILE] scrittura conclusa");
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return "Il file " + UFID + " è stato modificato";
             }
-            return "The file " + UFID + " has been edited";
+            //altrimenti si lancia un'eccezione
+            return "impossibile";
         }
     }
 
 
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
         this.connectedNodes = connectedNodes;
+        Util.plot(this.connectedNodes);
     }
 
     @Override
     public String verify() {
-        return "Connection verified";
+        return "--COLLEGAMENTO VERIFICATO--";
     }
 
     public synchronized void checkNodes() {
 
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
 
-        //for each node in the list of connected nodes is verified the reachability
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
 
-            if ((ownLocation.getIp() + ownLocation.getPort()).hashCode() != entry.getKey()) {
+            if ((ownIP + port).hashCode() == entry.getKey()) {
 
-                Registry registry;
-                String tmpIp;
-                int tmpPort;
-                String tmpName;
+                System.out.println("[ CHECKNODES ]");
+
+                Registry registry = null;
+
+                String tmpIp = "-NOT UPDATE-";
+                int tmpPort = -1;
+                String tmpName = "-NOT UPDATE-";
+
                 try {
+
                     tmpIp = entry.getValue().getIp();
                     tmpPort = entry.getValue().getPort();
                     tmpName = entry.getValue().getName();
+
                     registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
                     String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
+
                     NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
                     System.out.println(nodeTemp.verify());
 
                 } catch (RemoteException e) {
+                    System.out.println("NODO non trovato alla porta: " + tmpPort + "; Ip: " + tmpIp);
                     downNodes.put(entry.getKey(), entry.getValue());
                     e.printStackTrace();
 
                 } catch (NotBoundException e) {
-                    System.out.println("[CheckNodes NotBoundException]");
+                    System.out.println("NotBoundException checkNodes2");
                     e.printStackTrace();
+
                 }
+
             }
         }
 
         for (Map.Entry<Integer, NetNodeLocation> entry : downNodes.entrySet()) {
             if (connectedNodes.containsKey(entry.getKey())) {
-                //System.out.println("REMOVED NODE, port: " + entry.getValue().getPort() + "; Ip: " + entry.getValue().getIp());
+                System.out.println("RIMOSSO NODO, porta: " + entry.getValue().getPort() + "; Ip: " + entry.getValue().getIp());
                 connectedNodes.remove(entry.getKey());
-                mainUI.updateConnectedNode(connectedNodes);
             }
         }
+
+
     }
+
 }

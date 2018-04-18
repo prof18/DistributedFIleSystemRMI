@@ -1,30 +1,39 @@
 package fs.actions;
 
 /*
-FileServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
+FlatServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
  */
 
 import fs.actions.cache.ReadingNodeCache;
 import fs.actions.cache.WritingNodeCache;
-import fs.actions.interfaces.FileService;
+import fs.actions.interfaces.FlatService;
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.WrapperFlatServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
+import net.objects.NetNodeLocation;
+import net.objects.interfaces.NetNode;
+import utils.Util;
 
 import java.io.*;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.time.Instant;
 import java.util.*;
 
 
-public class FileServiceImpl implements FileService {
+public class FlatServiceImpl implements FlatService {
 
     private MediatorFsNet mediator;
     private final String path;
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-    public FileServiceImpl(String path, MediatorFsNet mediatorFsNet) {
+    public FlatServiceImpl(String path, MediatorFsNet mediatorFsNet) {
         mediator = mediatorFsNet;
         this.path = path;
         System.out.println("sono tornato al costruttore");
@@ -168,7 +177,7 @@ public class FileServiceImpl implements FileService {
 
     //utilizzo replicazione
 
-    /*public String create(String host,FileAttribute attribute) throws  {
+    public String create(String host,FileAttribute attribute) throws Exception {
         String pathName = host+"_"+ Date.from(Instant.now()).hashCode();
         File file = new File(path+pathName);
         if (file.exists()) {
@@ -182,7 +191,7 @@ public class FileServiceImpl implements FileService {
         //in questo punto deve essere aggiunta la replicazione
         return pathName;
     }
-*/
+
     /**
      *
      * @param host è il nome del servizio
@@ -190,23 +199,10 @@ public class FileServiceImpl implements FileService {
      * @throws Exception
      */
     @Override
-    public String create(String host) throws IOException {
-        String pathName = host+"_"+ Date.from(Instant.now()).hashCode();
+    public String create(String host) throws Exception {
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
-        File file = new File(path+pathName);
-        System.out.println("File: " + file.toString());
-        boolean isCreated = file.createNewFile();
-        if (isCreated) {
-            FileOutputStream out = new FileOutputStream(path + pathName + ".attr");
-            ObjectOutputStream oout = new ObjectOutputStream(out);
-            oout.writeObject(attribute);
-            oout.flush();
-            //in questo punto deve essere aggiunta la replicazione
-            return pathName;
-        } else {
-            throw new IOException();
-        }
+        return create(host,attribute);
 
     }
 

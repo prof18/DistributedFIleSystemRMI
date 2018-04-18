@@ -1,27 +1,30 @@
-package fs.objects.structure;
+package fs.actions;
 
-public class FileWrapper {
+import fs.objects.structure.FileAttribute;
 
+public class ReplicationWrapper {
+    private String path;
     private String fileName;
     private String UFID;
-    private String path;
     private FileAttribute attribute;
-    private byte[] content; //fare checksum per verificare correttezza messaggio
+    private byte[] content;
+    private String checksum;
 
-    public FileWrapper() {
-    }
-
-    public FileWrapper(String UFID, String fileName){
+    public ReplicationWrapper(String UFID, String fileName){
         this.UFID = UFID;
         this.fileName = fileName;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getPath() {
+        return path;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     public String getUFID() {
@@ -48,16 +51,11 @@ public class FileWrapper {
         this.content = content;
     }
 
-    public String getPath() {
-        return path;
+    public String getChecksum() {
+        return checksum;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    @Override
-    public String toString() {
-        return fileName;
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
 }

@@ -9,12 +9,15 @@ import net.objects.RegistryWrapper;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import javax.xml.bind.DatatypeConverter;
 
 public class Util {
 
-    public static RegistryWrapper getNextFreePort(){
-        Registry registry=null;
+    public static RegistryWrapper getNextFreePort() {
+        Registry registry = null;
         int port = 1099;
         boolean notFound = true;
         while (notFound) {
@@ -26,26 +29,27 @@ public class Util {
                 port++;
             }
         }
-        return new RegistryWrapper(port,registry);
+        return new RegistryWrapper(port, registry);
     }
-    public static void plot(HashMap<Integer, NetNodeLocation> hashMap){
+
+    public static void plot(HashMap<Integer, NetNodeLocation> hashMap) {
         String leftAlignFormat = "| %-15d | %-10s | %-8d |  %-8s|%n";
 
         System.out.format("+-----------------+------------+----------+----------+%n");
         System.out.format("| NameHost        | Ip         | Port     |   Name   |%n");
         System.out.format("+-----------------+------------+----------+----------+%n");
 
-        for(Map.Entry<Integer,NetNodeLocation> entry:hashMap.entrySet()){
-            System.out.format(leftAlignFormat,entry.getKey(),entry.getValue().getIp(),entry.getValue().getPort(),entry.getValue().getName());
+        for (Map.Entry<Integer, NetNodeLocation> entry : hashMap.entrySet()) {
+            System.out.format(leftAlignFormat, entry.getKey(), entry.getValue().getIp(), entry.getValue().getPort(), entry.getValue().getName());
             System.out.format("+-----------------+------------+----------+----------+%n");
         }
 
     }
 
-    public static void plotService(Registry registry){
+    public static void plotService(Registry registry) {
         try {
-            String[] lista=registry.list();
-            for (String tmp:lista){
+            String[] lista = registry.list();
+            for (String tmp : lista) {
                 System.out.printf(tmp);
             }
         } catch (RemoteException e) {
@@ -178,4 +182,26 @@ public class Util {
         return folderMap;
 
     }
+
+    public static String getChecksum(byte[] ab) {
+        String result;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(ab);
+            byte[] hash = md.digest();
+            result = bytesToHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return "Checksum not calculated";
+        }
+
+        return result;
+    }
+
+    private static String bytesToHex(byte[] hash) {
+
+        return DatatypeConverter.printHexBinary(hash).toLowerCase();
+
+    }
+
 }
