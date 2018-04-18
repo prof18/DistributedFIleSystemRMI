@@ -9,7 +9,6 @@ import utils.Constants;
 import utils.PropertiesHelper;
 
 import javax.swing.*;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -56,7 +55,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         node.setNameNode(dirName);
         //TODO; change UUID
         node.setUFID(UUID.randomUUID().toString());
-        node.setChildren(new ArrayList<>());
+        node.setChildrens(new ArrayList<>());
         node.setFiles(new ArrayList<>());
         currentNode.addChild(node);
         //long editTime = System.currentTimeMillis();

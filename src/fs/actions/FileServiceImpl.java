@@ -14,6 +14,8 @@ import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
+import utils.Constants;
+import utils.PropertiesHelper;
 import utils.Util;
 
 import java.io.*;
@@ -149,8 +151,9 @@ public class FileServiceImpl implements FileService {
                         fileAttribute = (FileAttribute) ois.readObject();
                         lastModified = fileAttribute.getLastModifiedTime();
                         oldLength = (int) fileAttribute.getFileLength();
-                    } catch (IOException |ClassNotFoundException e) {
+                    } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
+                    }
 
                     FileOutputStream fileOutputStream = null;
                     try {
@@ -207,6 +210,8 @@ public class FileServiceImpl implements FileService {
                 rw.setAttribute(cacheFileWrapper.getAttribute());
                 rw.setContent(repContent);
                 rw.setPath(mediator.getFsStructure().getTree().getPath());
+                mediator.getFsStructure().generateTreeStructure();
+                rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
                 System.out.println("Set path file:" + rw.getPath());
 
                 for (NetNodeLocation ndl : nodeList) {
@@ -220,8 +225,8 @@ public class FileServiceImpl implements FileService {
                 }
                 new MapUpdateTask(fileID, mediator.getWrapperFileServiceUtil().getLocationHashMap().values(), nodeList);
 
-            }else{
-                System.out.println("Impossibile scrivere sul file "+ fileID + ", qualcuno sta scrivendo.");
+            } else {
+                System.out.println("Impossibile scrivere sul file " + fileID + ", qualcuno sta scrivendo.");
             }
 
         }
@@ -255,6 +260,8 @@ public class FileServiceImpl implements FileService {
         rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
         rw.setContent(ftb);
         rw.setChecksum(Util.getChecksum(ftb));
+        mediator.getFsStructure().generateTreeStructure();
+        rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
         replication(rw, mediator.getWrapperFileServiceUtil());
 
         return UFID;
@@ -287,7 +294,7 @@ public class FileServiceImpl implements FileService {
         int j = 0;
         for (int i = 0; i < list.size(); i++) {
             try {
-                if(list.get(i).getIp().compareTo(mediator.getNode().getHost()) == 0){
+                if (list.get(i).getIp().compareTo(mediator.getNode().getHost()) == 0) {
                     j = i;
                     break;
                 }
@@ -300,7 +307,7 @@ public class FileServiceImpl implements FileService {
 
         //eliminazione totale
 
-        for (NetNodeLocation nnl: mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID)) {
+        for (NetNodeLocation nnl : mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID)) {
             new RemoveTask(fileID, nnl).run();
         }
 
@@ -461,6 +468,7 @@ public class FileServiceImpl implements FileService {
         }
         return null;
     }
+
     private void replication(ReplicationWrapper repWr, WrapperFileServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
         HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
 

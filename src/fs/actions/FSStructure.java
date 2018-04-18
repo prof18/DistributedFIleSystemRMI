@@ -138,7 +138,7 @@ public class FSStructure {
                             queue.add(child);
                         }
                     }
-                    node.setChildren(nodeChildren);
+                    node.setChildrens(nodeChildren);
 
                     //Files
                     ArrayList<FileWrapper> files = new ArrayList<>();
@@ -166,7 +166,7 @@ public class FSStructure {
             //TODO: change UUID
             tree.setUFID(UUID.randomUUID().toString());
             tree.setNameNode("root");
-            tree.setChildren(new ArrayList<>());
+            tree.setChildrens(new ArrayList<>());
             tree.setFiles(new ArrayList<>());
             tree.setLastEditTime(System.currentTimeMillis());
 
