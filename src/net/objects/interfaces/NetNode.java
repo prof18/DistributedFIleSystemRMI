@@ -1,10 +1,12 @@
 package net.objects.interfaces;
 
+import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
-import net.objects.NetNodeWrap;
+//import net.objects.NetNodeWrap;
 
 import java.io.Serializable;
 import java.rmi.Remote;
@@ -18,6 +20,8 @@ public interface NetNode extends Remote, Serializable {
 
     int getPort() throws RemoteException;
 
+    public MediatorFsNet getMediator() throws RemoteException;
+
     JoinWrap join(String ipNode, int port, String name) throws RemoteException;
 
  //   int getAndSetNum() throws RemoteException;
@@ -26,7 +30,7 @@ public interface NetNode extends Remote, Serializable {
 
     void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) throws RemoteException;
 
-    NetNodeWrap add(String ip, int port) throws RemoteException;
+    //NetNodeWrap add(String ip, int port) throws RemoteException;
 
     String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
 
@@ -44,5 +48,9 @@ public interface NetNode extends Remote, Serializable {
 
     String checkHostName(String name) throws RemoteException;
 
-    void setNameLocation(String name);
+    public boolean saveFileReplica(ReplicationWrapper rw) throws RemoteException;
+
+    void setNameLocation(String name) throws RemoteException;
+
+    public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
 }

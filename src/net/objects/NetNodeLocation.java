@@ -10,6 +10,7 @@ public class NetNodeLocation implements Serializable {
     private String name;
     private long timeStamp = new Date().getTime();
     private int totalByte;
+    private boolean writingPermission = true;
 
     public NetNodeLocation(String ip, int port, String name) {
         this.ip = ip;
@@ -33,13 +34,6 @@ public class NetNodeLocation implements Serializable {
 
     public long getTimeStamp(){return timeStamp;}
 
-    public int getTotalByte(){return totalByte;}
-
-    public void setName(String name){this.name = name;}
-
-    public void setTotalByte(int tb){
-        totalByte = tb;
-    }
 
     @Override
     public String toString() {
@@ -65,4 +59,34 @@ public class NetNodeLocation implements Serializable {
 
         return Objects.hash(getIp(), getPort(), getName());
     }
+
+
+    public int getTotalByte(){return totalByte;}
+
+    public void setName(String name){this.name = name;}
+
+    public void setTotalByte(int tb){
+        totalByte = tb;
+    }
+
+    public void addOccupiedSpace(int i){
+        totalByte += i;
+    }
+
+    public void reduceOccupiedSpace(int i){
+        totalByte -= i;
+    }
+
+    public void unlockWriting(){
+        writingPermission = true;
+    }
+
+    public void lockWriting(){
+        writingPermission = false;
+    }
+
+    public boolean canWrite(){
+        return writingPermission;
+    }
+
 }

@@ -595,7 +595,7 @@ public class MainUI extends JFrame {
             int row = table.getSelectedRow();
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
-               deleteFolder(item.getTreeNode());
+                deleteFolder(item.getTreeNode());
             }
         });
         menu.add(delete);
@@ -613,5 +613,4 @@ public class MainUI extends JFrame {
         return menuBar;
     }
 }
-
 

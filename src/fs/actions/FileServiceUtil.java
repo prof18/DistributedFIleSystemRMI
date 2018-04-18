@@ -1,13 +1,14 @@
 package fs.actions;
 
-import fs.actions.interfaces.FlatService;
-import fs.actions.object.WrapperFlatServiceUtil;
+import fs.actions.interfaces.FileService;
+import fs.actions.object.WrapperFileServiceUtil;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeImpl;
 import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
 import net.objects.interfaces.NetNode;
+import ui.frame.MainUI;
 import utils.Util;
 
 import java.rmi.AlreadyBoundException;
@@ -18,9 +19,12 @@ import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FlatServiceUtil {
-    public static WrapperFlatServiceUtil create(String path, String ownIP, String nameService, NetNodeLocation locationRet) {
+public class FileServiceUtil {
+    private static String hostName;
+
+    public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) {
         System.setProperty("java.rmi.server.hostname", ownIP);
+        System.out.println("locationRet = " + locationRet);
         HashMap<Integer, NetNodeLocation> ret = null;
         MediatorFsNet mediatorFsNet = new MediatorFsNet();
         RegistryWrapper rw = Util.getNextFreePort();
@@ -29,16 +33,18 @@ public class FlatServiceUtil {
         NetNode node = null;
         try {
             //node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
-            node = new NetNodeImpl(path, ownIP, port, mediatorFsNet);
+            node = new NetNodeImpl(path, ownIP, port, mediatorFsNet, mainUI);
+            hostName = node.getHostName();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        FlatService service = new FlatServiceImpl(path, mediatorFsNet);
+        FileService service = new FileServiceImpl(path, mediatorFsNet);
         mediatorFsNet.addNetService(node);
         mediatorFsNet.addService(service);
-        String connectPath = "rmi://" + ownIP + ":" + port + "/" + nameService;
-        System.out.println("connectPath = " + connectPath);
         try {
+            String connectPath = "rmi://" + ownIP + ":" + port + "/" + hostName;
+            System.out.println("connectPath = " + connectPath);
+
             registry.bind(connectPath, node);
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -49,12 +55,13 @@ public class FlatServiceUtil {
             String recPat = locationRet.toUrl();
             try {
                 Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
+                System.out.println("recPat = " + recPat);
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
                 System.out.println("[AGGIORNAMENTO NODI]");
 
                 //Modifiche per il nome Host random
-                JoinWrap jWrap = node1.join(ownIP, port, locationRet.getName());
+                JoinWrap jWrap = node1.join(ownIP, port, hostName);
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
 
@@ -63,6 +70,7 @@ public class FlatServiceUtil {
                 System.out.println();
                 Util.plot(retMap);
                 node.setConnectedNodes(retMap);
+                mainUI.updateConnectedNode(retMap);
                 ret = retMap;
 
                 //Se i nodi sono solo 2 le Map saranno già aggiornate
@@ -81,6 +89,7 @@ public class FlatServiceUtil {
                             NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
                             tmpNode.setConnectedNodes(node.getHashMap());
                             ret = node.getHashMap();
+                            mainUI.updateConnectedNode(node.getHashMap());
                         }
                     }
                 }
@@ -92,7 +101,8 @@ public class FlatServiceUtil {
                 e.printStackTrace();
             }
         }
-        return new WrapperFlatServiceUtil(new NetNodeLocation(ownIP, port, nameService), ret, service);
+
+        return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service, node);
 
     }
 }

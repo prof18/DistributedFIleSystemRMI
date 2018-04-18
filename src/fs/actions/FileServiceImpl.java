@@ -1,14 +1,14 @@
 package fs.actions;
 
 /*
-FlatServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
+FileServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
  */
 
 import fs.actions.cache.ReadingNodeCache;
 import fs.actions.cache.WritingNodeCache;
-import fs.actions.interfaces.FlatService;
+import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
-import fs.actions.object.WrapperFlatServiceUtil;
+import fs.actions.object.WrapperFileServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
@@ -26,14 +26,14 @@ import java.time.Instant;
 import java.util.*;
 
 
-public class FlatServiceImpl implements FlatService {
+public class FileServiceImpl implements FileService {
 
     private MediatorFsNet mediator;
     private final String path;
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-    public FlatServiceImpl(String path, MediatorFsNet mediatorFsNet) {
+    public FileServiceImpl(String path, MediatorFsNet mediatorFsNet) {
         mediator = mediatorFsNet;
         this.path = path;
         System.out.println("sono tornato al costruttore");
@@ -177,14 +177,14 @@ public class FlatServiceImpl implements FlatService {
 
     //utilizzo replicazione
 
-    public String create(String host,FileAttribute attribute) throws Exception {
-        String pathName = host+"_"+ Date.from(Instant.now()).hashCode();
-        File file = new File(path+pathName);
+    public String create(String host, FileAttribute attribute) throws IOException {
+        String pathName = host + "_" + Date.from(Instant.now()).hashCode();
+        File file = new File(path + pathName);
         if (file.exists()) {
             throw new FileNotFoundException();
         }
         file.createNewFile();
-        FileOutputStream out = new FileOutputStream(path+pathName + ".attr");
+        FileOutputStream out = new FileOutputStream(path + pathName + ".attr");
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
@@ -193,16 +193,15 @@ public class FlatServiceImpl implements FlatService {
     }
 
     /**
-     *
      * @param host è il nome del servizio
      * @return ritorna il nome assegnato al file
      * @throws Exception
      */
     @Override
-    public String create(String host) throws Exception {
+    public String create(String host) throws IOException {
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
-        return create(host,attribute);
+        return create(host, attribute);
 
     }
 
@@ -226,7 +225,7 @@ public class FlatServiceImpl implements FlatService {
     public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
         System.out.println("entrato in getAttributes");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
-        if(cacheFileWrapper==null) throw new FileNotFoundException();
+        if (cacheFileWrapper == null) throw new FileNotFoundException();
         return cacheFileWrapper.getAttribute();
     }
 
@@ -241,7 +240,7 @@ public class FlatServiceImpl implements FlatService {
     //TODO: verifica setAttributes
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(path+fileID + ".attr");
+            FileOutputStream fileOutputStream = new FileOutputStream(path + fileID + ".attr");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(attr);
         } catch (IOException e) {
@@ -297,7 +296,7 @@ public class FlatServiceImpl implements FlatService {
                 return cacheFileWrapper;
             } else {
                 CacheFileWrapper cacheFile = mediator.getFile(UFID);
-                if(cacheFile==null) throw new FileNotFoundException();
+                if (cacheFile == null) throw new FileNotFoundException();
                 cacheFile.setLocal(false);
                 readingCache.put(UFID, cacheFile);
                 return cacheFile;
@@ -352,7 +351,7 @@ public class FlatServiceImpl implements FlatService {
 
     public CacheFileWrapper getFileAndAttribute(String UFID) {
         File file = new File(path + UFID);
-        FileAttribute ret=null;
+        FileAttribute ret = null;
         if (file.exists()) {
             System.out.println("trovato il file " + path + UFID);
             try {

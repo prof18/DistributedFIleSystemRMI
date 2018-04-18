@@ -1,6 +1,6 @@
 package fs.actions;
 
-import fs.actions.object.WrapperFlatServiceUtil;
+import fs.actions.object.WrapperFileServiceUtil;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
@@ -14,9 +14,9 @@ public class ReplicationTask extends TimerTask {
 
     private NetNodeLocation netNode;
     private ReplicationWrapper repWr;
-    private WrapperFlatServiceUtil wfsu;
+    private WrapperFileServiceUtil wfsu;
 
-    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw,  WrapperFlatServiceUtil wfsu){
+    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw,  WrapperFileServiceUtil wfsu){
         netNode = node;
         repWr = rw;
         this.wfsu = wfsu;

@@ -1,13 +1,18 @@
 package net.objects;
 
+import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
+import ui.frame.MainUI;
 import utils.Util;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -29,31 +34,35 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
 
-    public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1) throws RemoteException {
+    private MainUI mainUI;
+
+    public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
         super();
 
-        mediatorFsNet = mediatorFsNet1;
-
         this.path = path;
-        this.ownIP = ownIP;
-        this.port = port;
+        mediatorFsNet = mediatorFsNet1;
+        this.mainUI = mainUI;
 
+        //creation of a random name for the new nodes
         String name = "host" + new Random().nextInt(1000);
 
         ownLocation = new NetNodeLocation(ownIP, port, name);
         connectedNodes = new HashMap<>();
         connectedNodes.put((ownIP + port).hashCode(), new NetNodeLocation(ownIP, port, name));
-        System.out.println("[COSTRUTTORE]");
+
         Util.plot(connectedNodes);
-        System.out.println("AVVIO THREAD");
+
+        mainUI.updateConnectedNode(connectedNodes);
+
+        //starting the service that controls the reachable nodes
         GarbageService v;
         try {
-            v = new GarbageService(this.ownIP, ownLocation.getName(), this.port);
+            v = new GarbageService(ownLocation.getIp(), ownLocation.getName(), ownLocation.getPort());
             Thread t = new Thread(v);
             t.start();
         } catch (RemoteException e) {
-            System.out.println("Avvio Thread Remote Exc");
-            e.printStackTrace();
+            System.out.println("Error in the initialization of the garbage collector, please restart the program");
+            System.exit(-1);
         }
 
     }
@@ -78,8 +87,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, newName));
         System.out.println("[JOIN]");
         Util.plot(connectedNodes);
+        mainUI.updateConnectedNode(connectedNodes);
 
-        return new JoinWrap(newName,connectedNodes);
+        return new JoinWrap(newName, connectedNodes);
     }
 
     @Override
@@ -99,7 +109,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 NetNodeLocation tmp = entry.getValue();
 
-                if (tmp.getName() == oldName) {
+                if (tmp.getName().equals(oldName)) {
                     newName = "host" + new Random().nextInt(1000);
                     changed = true;
                 }
@@ -110,9 +120,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return newName;
     }
 
-    public NetNodeWrap add(String ip, int port) {
+    /*public NetNodeWrap add(String ip, int port) {
         return null;
-    }
+    }*/
 
     @Override
     public String getHostName() {
@@ -289,4 +299,90 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
+    public boolean saveFileReplica(ReplicationWrapper rw) {
+
+        String filePath = rw.getPath();
+
+        if (filePath.length() > 1) { //non è la radice
+            String directoryPath = filePath.substring(0, filePath.length() - 1);
+            File directory = new File(directoryPath);
+
+            if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
+                directory.mkdirs();
+            }
+        }
+
+        File fileAtt = new File(filePath + rw.getUFID() + ".attr");
+        File f = new File(filePath + rw.getUFID());
+
+        try {
+
+            FileOutputStream fos = new FileOutputStream(f, false);
+            fos.write(rw.getContent());
+            fos.flush();
+            fos.close();
+
+            fos = new FileOutputStream(fileAtt);
+            ObjectOutputStream oot = new ObjectOutputStream(fos);
+            oot.writeObject(rw.getAttribute());
+            oot.flush();
+            fos.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        byte[] bytesArray = null;
+        Path path = Paths.get(f.getPath());
+
+        try {
+            bytesArray = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String checksum = Util.getChecksum(bytesArray);
+        if (checksum.compareTo(rw.getChecksum()) != 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /*public static Object deepClone(Object object) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(object);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return ois.readObject();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }*/
+
+    public MediatorFsNet getMediator() {
+        return mediatorFsNet;
+    }
+
+    @Override
+
+    public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
+        ArrayList<NetNodeLocation> nodeLocations = mediatorFsNet.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+        for (NetNodeLocation nnl: nodeLocations) {
+            if(nodeList.get(nodeList.indexOf(nnl)).canWrite()){
+                nnl.lockWriting();
+            }else{
+                nnl.unlockWriting();
+            }
+        }
+
+        return true;
+    }
 }
