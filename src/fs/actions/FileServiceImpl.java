@@ -1,9 +1,5 @@
 package fs.actions;
 
-/*
-FileServiceImpl è ad un livello superiore rispetto a NodeImpl e quindi lo inizializza
- */
-
 import fs.actions.cache.ReadingNodeCache;
 import fs.actions.cache.WritingNodeCache;
 import fs.actions.interfaces.FileService;
@@ -26,7 +22,9 @@ import java.rmi.RemoteException;
 import java.time.Instant;
 import java.util.*;
 
-
+/**
+ * This class is on a higher level compared to NetNodeImpl and so FileServiceImpl initialize it.
+ */
 public class FileServiceImpl implements FileService {
 
     private MediatorFsNet mediator;
@@ -44,8 +42,9 @@ public class FileServiceImpl implements FileService {
     }
 
     /**
-     * Lettura del file con nome fileID, con offset e count inseriti dall'utente, in caso il file
-     * non venga trovato sia in locale che in remoto viene lanciata l'eccezione FileNotFoundException.
+     * It Reads a file using the fileID.
+     * The offset and the count are provide by the user
+     * If the file is not found both locally or remotely the system throws FileNotFoundException
      */
 
     public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
@@ -57,9 +56,8 @@ public class FileServiceImpl implements FileService {
     }
 
     /**
-     * Lettura del file con nome file ID, e offset assegnato con l'utente, il count è assegnato automaticamente
-     * al valore corrispondente alla lunghezza del file, se il file non viene trovato sia in locale che in
-     * remoto viene lanciata l'eccezione FileNotFoundException.
+     * This method differs from the previous one
+     * because the lenght of the file is automatically assigned to the count.
      */
     public byte[] read(String fileID, int offset) throws FileNotFoundException {
         System.out.println("Entrato nel read senza parametri");
@@ -83,8 +81,6 @@ public class FileServiceImpl implements FileService {
         System.out.println("content = " + new String(content));
         return content;
     }
-
-    //utilizza cache in scrittura
 
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
@@ -230,8 +226,6 @@ public class FileServiceImpl implements FileService {
     }
 
 
-    //utilizzo replicazione
-
     public String create(String host, FileAttribute attribute, FSTreeNode curDir) throws IOException {
         String UFID = host + "_" + Date.from(Instant.now()).hashCode();
         String directoryPath = curDir.getPathWithoutRoot();
@@ -270,11 +264,6 @@ public class FileServiceImpl implements FileService {
         return UFID;
     }
 
-    /**
-     * @param host è il nome del servizio
-     * @return ritorna il nome assegnato al file
-     * @throws Exception
-     */
     @Override
     public String create(String host, FSTreeNode curDir) throws IOException { //crea il file (nomehost+timestamp) in locale
         Date date = Date.from(Instant.now());
@@ -283,8 +272,7 @@ public class FileServiceImpl implements FileService {
         return create(host, attribute, curDir);
 
     }
-
-    //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
+    
 
     public void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback) {
         //eliminazione in locale
@@ -323,28 +311,12 @@ public class FileServiceImpl implements FileService {
     }
 
 
-    /**
-     * Ritorna gli attributi di uno specifico file
-     *
-     * @param fileID nome del file
-     * @return ritorna gli attributi di un file in formato FileAttribute
-     */
-
-
     public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
         System.out.println("entrato in getAttributes");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         if (cacheFileWrapper == null) throw new FileNotFoundException();
         return cacheFileWrapper.getAttribute();
     }
-
-    /**
-     * Setta gli attributi di un file,
-     *
-     * @param fileID nome del file
-     * @param attr   nuovi attributi da scrivere nel file
-     */
-
 
     //TODO: verifica setAttributes
     public void setAttributes(String fileID, FileAttribute attr) {
