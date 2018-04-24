@@ -468,7 +468,7 @@ public class MainUI extends JFrame {
         boolean isCreated = true;
 
         try {
-            String ufid = fileService.create(netNodeLocation.getName());
+            String ufid = fileService.create(netNodeLocation.getName(), currentNode);
             directoryService.addName(currentNode, fileName, ufid, this::updateModels);
         } catch (IOException e) {
             e.printStackTrace();
@@ -480,14 +480,6 @@ public class MainUI extends JFrame {
 
     private void newFolder(String folderName) {
         directoryService.createDirectory(currentNode, folderName, this::updateModels);
-    }
-
-    private boolean renameFile(FileWrapper fileWrapper) {
-        boolean isRenamed = false;
-
-
-
-        return isRenamed;
     }
 
     private void renameFolder(FSTreeNode node,String newName) {
