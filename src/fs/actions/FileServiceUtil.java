@@ -20,8 +20,30 @@ import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is used by the mainUI:
+ *  to create a new node;
+ *  to connect it to the Distributed FileSystem;
+ *  to notify to all the connected nodes that a new node has entered in the network.
+ */
+
 public class FileServiceUtil {
     private static String hostName;
+
+    /**
+     *
+     * @param path path to connect
+     * @param ownIP ip of the new node
+     * @param locationRet gives the parameters to connect to an another node
+     * @param mainUI instance of the MainUI
+     * @return a WrapperFileServiceUtil that contains:
+     *  the location of this node
+     *  the hash map of all the nodes in the system and their location
+     *  the created node
+     *  the hashMap that has for keys the UFID of the files and values the location of nodes that contain a file
+     * @throws NotBoundException
+     * @throws UnknownHostException
+     */
 
     public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) throws NotBoundException, UnknownHostException {
         System.setProperty("java.rmi.server.hostname", ownIP);
