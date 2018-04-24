@@ -303,7 +303,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public boolean saveFileReplica(ReplicationWrapper rw) {
 
-        String filePath = rw.getPath();
+        String filePath = path + rw.getPath();
 
         if (filePath.length() > 1) { //non è la radice
             String directoryPath = filePath.substring(0, filePath.length() - 1);

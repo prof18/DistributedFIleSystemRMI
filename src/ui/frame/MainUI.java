@@ -460,7 +460,7 @@ public class MainUI extends JFrame {
         boolean isCreated = true;
 
         try {
-            String ufid = fileService.create(netNodeLocation.getName());
+            String ufid = fileService.create(netNodeLocation.getName(), currentNode);
             directoryService.addName(currentNode, fileName, ufid, (fsTreeNode -> {
                 FileViewTableModel model = (FileViewTableModel) table.getModel();
                 model.setNode(fsTreeNode);

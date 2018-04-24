@@ -18,7 +18,7 @@ public interface FileService extends Remote, Serializable {
     void write(String fileID, int i, int count, byte[] data) throws FileNotFoundException;
 
 
-    String create(String host) throws IOException;
+    String create(String host, FSTreeNode curDir) throws IOException;
 
     CacheFileWrapper getFileAndAttribute(String UFID);
 
