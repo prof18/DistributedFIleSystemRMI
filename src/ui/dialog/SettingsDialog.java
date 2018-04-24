@@ -1,5 +1,6 @@
 package ui.dialog;
 
+import com.sun.tools.javac.Main;
 import ui.frame.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -13,11 +14,14 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.rmi.NotBoundException;
+import java.rmi.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 
 import static java.net.NetworkInterface.getNetworkInterfaces;
+import static javax.swing.JOptionPane.showMessageDialog;
 
 public class SettingsDialog extends JDialog {
 
@@ -142,9 +146,19 @@ public class SettingsDialog extends JDialog {
             helper.writeConfig(Constants.HOST_NAME_CONFIG, fsName);
             helper.writeConfig(Constants.WORKING_DIR_CONFIG, fsDir);
 
-            dispose();
+            MainUI main = null;
 
-            new MainUI();
+            try {
+                dispose();
+                main = new MainUI();
+                main.showUI(true);
+            } catch (NotBoundException | UnknownHostException e) {
+                System.out.println("Non funzia");
+                new SettingsDialog(true);
+                showMessageDialog(null, "Hostname not correct");
+                System.exit(0);
+
+            }
         });
 
         JPanel bp = new JPanel();
@@ -162,7 +176,7 @@ public class SettingsDialog extends JDialog {
     }
 
     private void showErrorMessage() {
-        JOptionPane.showMessageDialog(this,
+        showMessageDialog(this,
                 "You have to provide some info to go forward",
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
@@ -170,6 +184,7 @@ public class SettingsDialog extends JDialog {
 
     /**
      * Gets all the Network Interfaces of the host PC
+     *
      * @return An Array List with all the Address
      */
     private ArrayList<String> getAddress() {

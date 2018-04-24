@@ -24,6 +24,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.rmi.NotBoundException;
+import java.rmi.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,16 +55,22 @@ public class MainUI extends JFrame {
 
     private JPanel rightWrapper, rightDownWrapper, filesUI, filesDetail, connectedStatus;
 
-    JScrollPane treeScroll;
+    private JScrollPane treeScroll;
 
-    public MainUI() {
+    public void showUI(boolean show) {
+        if (show)
+            setVisible(true);
+        else
+            setVisible(false);
+    }
+
+    public MainUI() throws NotBoundException, UnknownHostException {
         super("Distributed File System");
         //Create and show the main UI block
         setLocationRelativeTo(null);
         setSize(1050, 700);
-        setVisible(true);
+        //setVisible(true);
         setLocationRelativeTo(null);
-        setVisible(true);
         this.setJMenuBar(createMenuBar());
 
         rightWrapper = new JPanel(new GridBagLayout());
@@ -158,7 +166,7 @@ public class MainUI extends JFrame {
         cs.fill = GridBagConstraints.BOTH;
     }
 
-    private void connect() {
+    private void connect() throws NotBoundException, UnknownHostException {
         String ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
         String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
         String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
@@ -482,10 +490,10 @@ public class MainUI extends JFrame {
         directoryService.createDirectory(currentNode, folderName, this::updateModels);
     }
 
-    private void renameFolder(FSTreeNode node,String newName) {
+    private void renameFolder(FSTreeNode node, String newName) {
 
         directoryService.renameDirectory(node, newName, (fsTreeNode -> {
-           updateModels(currentNode);
+            updateModels(currentNode);
         }));
 
     }
