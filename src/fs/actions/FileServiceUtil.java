@@ -102,8 +102,10 @@
                     e.printStackTrace();
                 }
             }
+            WrapperFileServiceUtil wfsu = new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service, node);
+            mediatorFsNet.setWrapperFileServiceUtil(wfsu);
 
-            return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service, node);
+            return wfsu;
 
 
         }
