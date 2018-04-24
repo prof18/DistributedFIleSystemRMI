@@ -14,6 +14,10 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * This interface is dedicated in order to manage all the operation related to communication
+ */
+
 public interface NetNode extends Remote, Serializable {
 
     /**
@@ -29,15 +33,15 @@ public interface NetNode extends Remote, Serializable {
     JoinWrap join(String ipNode, int port, String name) throws RemoteException;
 
     /**
-     * This method is used to
-     * @return
+     * This method is used to get the own ip address
+     * @return own Ip
      * @throws RemoteException
      */
 
     String getOwnIp() throws RemoteException;
 
     /**
-     *
+     * This method returns the instance of the related mediator
      * @return
      * @throws RemoteException
      */
@@ -150,9 +154,9 @@ public interface NetNode extends Remote, Serializable {
     String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
 
     /**
-     *
-     * @param rw
-     * @return
+     *This method is used to implement the replication
+     * @param rw is a wrapper that contains all the needed about the file
+     * @return a boolean that indicates the success of the operation
      * @throws RemoteException
      */
 
@@ -160,9 +164,9 @@ public interface NetNode extends Remote, Serializable {
 
 
     /**
-     *
-     * @param fileID
-     * @param nodeList
+     * This method is used to lock the writing of a specific file
+     * @param fileID is the unique identifier of the file
+     * @param nodeList is the list of nodes that stores the specific file
      * @return
      * @throws RemoteException
      */
