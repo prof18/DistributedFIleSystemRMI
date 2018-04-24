@@ -239,7 +239,7 @@ public class FileServiceImpl implements FileService {
         if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
             directory.mkdirs();
         }
-        String filePath = path + directoryPath + "/" + UFID;
+        String filePath = path + directoryPath + UFID;
         File file = new File(filePath);
         if (file.exists()) {
             throw new FileNotFoundException();
@@ -286,7 +286,7 @@ public class FileServiceImpl implements FileService {
 
     //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
 
-    public void delete(String fileID) {
+    public void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback) {
         //eliminazione in locale
         File file = new File(path + fileID);
         File fileAttr = new File(path + fileID + ".attr");
@@ -309,6 +309,8 @@ public class FileServiceImpl implements FileService {
 
         list.remove(j);
 
+        currentNode.removeOneFile(currentNode.getFileName(fileID));
+
         //eliminazione totale
 
         for (NetNodeLocation nnl : mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID)) {
@@ -316,6 +318,8 @@ public class FileServiceImpl implements FileService {
         }
 
         mediator.getWrapperFileServiceUtil().getNetNodeList().remove(fileID);
+
+        callback.onItemChanged(currentNode);
     }
 
 
@@ -474,6 +478,7 @@ public class FileServiceImpl implements FileService {
     }
 
     private void replication(ReplicationWrapper repWr, WrapperFileServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+
         HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
 
         if (!hm.containsKey(repWr.getUFID())) {

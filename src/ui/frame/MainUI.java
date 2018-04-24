@@ -455,20 +455,21 @@ public class MainUI extends JFrame {
         return isOpen;
     }
 
+    private void updateModels(FSTreeNode treeNode) {
+        FileViewTableModel model = (FileViewTableModel) table.getModel();
+        model.setNode(treeNode);
+        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+        tree.setModel(treeModel);
+        fsStructure.generateJson(directoryTree);
+    }
+
 
     private boolean newFile(String fileName) {
         boolean isCreated = true;
 
         try {
             String ufid = fileService.create(netNodeLocation.getName(), currentNode);
-            directoryService.addName(currentNode, fileName, ufid, (fsTreeNode -> {
-                FileViewTableModel model = (FileViewTableModel) table.getModel();
-                model.setNode(fsTreeNode);
-                //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-                FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-                tree.setModel(treeModel);
-                fsStructure.generateJson(directoryTree);
-            }));
+            directoryService.addName(currentNode, fileName, ufid, this::updateModels);
         } catch (IOException e) {
             e.printStackTrace();
             isCreated = false;
@@ -478,54 +479,23 @@ public class MainUI extends JFrame {
     }
 
     private void newFolder(String folderName) {
-        directoryService.createDirectory(currentNode, folderName, (treeNode) -> {
-            FileViewTableModel model = (FileViewTableModel) table.getModel();
-            model.setNode(treeNode);
-            //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-            FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-            tree.setModel(treeModel);
-            fsStructure.generateJson(directoryTree);
-        });
-    }
-
-    private boolean renameFile(FileWrapper fileWrapper) {
-        boolean isRenamed = false;
-
-
-
-        return isRenamed;
+        directoryService.createDirectory(currentNode, folderName, this::updateModels);
     }
 
     private void renameFolder(FSTreeNode node,String newName) {
 
         directoryService.renameDirectory(node, newName, (fsTreeNode -> {
-            FileViewTableModel model = (FileViewTableModel) table.getModel();
-            model.setNode(currentNode);
-            //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-            FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-            tree.setModel(treeModel);
-            fsStructure.generateJson(directoryTree);
-            System.out.println("Callback");
+           updateModels(currentNode);
         }));
 
     }
 
-    private boolean deleteFile(FileWrapper fileWrapper) {
-        boolean isDeleted = false;
-
-        return isDeleted;
+    private void deleteFile(FileWrapper fileWrapper) {
+        fileService.delete(fileWrapper.getUFID(), currentNode, this::updateModels);
     }
 
     private void deleteFolder(FSTreeNode node) {
-        directoryService.deleteDirectory(node, (fsTreeNode -> {
-            FileViewTableModel model = (FileViewTableModel) table.getModel();
-            model.setNode(fsTreeNode);
-            //TODO: find a better way to update the tree view, maybe with a TreeModel Listener
-            FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
-            tree.setModel(treeModel);
-            fsStructure.generateJson(directoryTree);
-            System.out.println("Callback");
-        }));
+        directoryService.deleteDirectory(node, this::updateModels);
     }
 
 
@@ -590,6 +560,9 @@ public class MainUI extends JFrame {
             if (!item.isFile()) {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
                 renameFolder(item.getTreeNode(), newName);
+            } else {
+                String newName = JOptionPane.showInputDialog("New File Name: ", item.getTreeNode().getNameNode());
+                item.getFileWrapper().setFileName(newName);
             }
         });
         menu.add(rename);
@@ -601,6 +574,8 @@ public class MainUI extends JFrame {
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
                 deleteFolder(item.getTreeNode());
+            } else {
+                deleteFile(item.getFileWrapper());
             }
         });
         menu.add(delete);

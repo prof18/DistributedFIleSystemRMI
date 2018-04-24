@@ -62,7 +62,8 @@ public interface FileService extends Remote, Serializable {
      *
      * @param fileID
      */
-    void delete(String fileID);
+
+    void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback);
 
     /**
      *
@@ -72,11 +73,9 @@ public interface FileService extends Remote, Serializable {
      */
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
-    /**
-     *
-     * @param fileID
-     * @param attr
-     */
     void setAttributes(String fileID, FileAttribute attr);
 
+    interface DeleteFileCallback {
+        void onItemChanged(FSTreeNode fsTreeNode);
+    }
 }
