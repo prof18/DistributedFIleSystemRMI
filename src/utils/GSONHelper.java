@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 public class GSONHelper {
 
+    //TODO chiedere a Marco cosa fanno i metodi nella classe
     private static GSONHelper INSTANCE = null;
     private Gson gson;
 

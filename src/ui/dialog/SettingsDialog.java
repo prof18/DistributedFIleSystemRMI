@@ -9,6 +9,15 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+
+import static java.net.NetworkInterface.getNetworkInterfaces;
 
 public class SettingsDialog extends JDialog {
 
@@ -39,10 +48,10 @@ public class SettingsDialog extends JDialog {
         cs.gridy = 0;
         panel.add(ipHostLabel, cs);
 
-        JTextField ipHostTextField = new JTextField(20);
+        JComboBox<Object> petList = new JComboBox<>(getAddress().toArray());
         cs.gridx = 1;
         cs.gridy = 0;
-        panel.add(ipHostTextField, cs);
+        panel.add(petList, cs);
 
         //ipHost to connect
         JLabel ipToConnectLabel = new JLabel("IP to Connect: ");
@@ -119,13 +128,14 @@ public class SettingsDialog extends JDialog {
 
         JButton okBtn = new JButton("OK");
         okBtn.addActionListener((ActionListener) -> {
-            this.ipHost = ipHostTextField.getText();
+            this.ipHost = (String) petList.getSelectedItem();
             this.ipToConnect = ipToConnectTextField.getText();
             this.portToConnect = portTextField.getText();
             this.fsName = nameFSTextField.getText();
             this.fsDir = folderChooserTF.getText();
 
             PropertiesHelper helper = PropertiesHelper.getInstance();
+            PropertiesHelper.setPropFile(fsDir + "/" + "config.properties");
             helper.writeConfig(Constants.IP_HOST_CONFIG, ipHost);
             helper.writeConfig(Constants.IP_FS_CONFIG, ipToConnect);
             helper.writeConfig(Constants.PORT_RET_CONFIG, portToConnect);
@@ -147,16 +157,8 @@ public class SettingsDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(null);
 
-        //load saved data
-
-        PropertiesHelper helper = PropertiesHelper.getInstance();
-        ipHostTextField.setText(helper.loadConfig(Constants.IP_HOST_CONFIG));
-        folderChooserTF.setText(helper.loadConfig(Constants.WORKING_DIR_CONFIG));
-
         //TODO: uncomment this to generate a fake fs
         //Util.saveFSExample();
-
-        //  new MainUI();
     }
 
     private void showErrorMessage() {
@@ -165,4 +167,30 @@ public class SettingsDialog extends JDialog {
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
     }
+
+    /**
+     * Gets all the Network Interfaces of the host PC
+     * @return An Array List with all the Address
+     */
+    private ArrayList<String> getAddress() {
+
+        ArrayList<String> list = new ArrayList<>();
+
+        try {
+            Iterator<NetworkInterface> iterator = getNetworkInterfaces().asIterator();
+            while (iterator.hasNext()) {
+                NetworkInterface net = iterator.next();
+                Enumeration<InetAddress> ee = net.getInetAddresses();
+                while (ee.hasMoreElements()) {
+                    InetAddress i = ee.nextElement();
+                    list.add(i.getHostName());
+                }
+
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }

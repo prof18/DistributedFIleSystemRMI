@@ -12,10 +12,18 @@ import java.rmi.registry.Registry;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import javax.xml.bind.DatatypeConverter;
 
+/**
+ * This class contains a list of util methods used in the code
+ */
 public class Util {
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
+    /**
+     * This method is used in order to search the next free port.
+     * @return a wrapper that contains the number of the port and the created registry
+     */
     public static RegistryWrapper getNextFreePort() {
         Registry registry = null;
         int port = 1099;
@@ -32,6 +40,10 @@ public class Util {
         return new RegistryWrapper(port, registry);
     }
 
+    /**
+     * This method is used in the debug phase with the purpose of plotting the connected nodes
+     * @param hashMap is the list of connected nodes
+     */
     public static void plot(HashMap<Integer, NetNodeLocation> hashMap) {
         String leftAlignFormat = "| %-15d | %-10s | %-8d |  %-8s|%n";
 
@@ -46,16 +58,7 @@ public class Util {
 
     }
 
-    public static void plotService(Registry registry) {
-        try {
-            String[] lista = registry.list();
-            for (String tmp : lista) {
-                System.out.printf(tmp);
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     /**
      * This method generates a fake file system configuration and save it on the
@@ -69,6 +72,10 @@ public class Util {
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
     }
 
+    /**
+     * This method is used in debug phase, in order to create a fictional system
+     * @return
+     */
     private static HashMap<String, JsonFolder> generateFakeObjects() {
 
         HashMap<String, JsonFolder> folderMap = new HashMap<>();
@@ -183,6 +190,11 @@ public class Util {
 
     }
 
+    /**
+     * This method is used with the goal of the checksum computation
+     * @param ab is an array of byte
+     * @return the computed checksum
+     */
     public static String getChecksum(byte[] ab) {
         String result;
         System.out.println(ab);
@@ -200,6 +212,13 @@ public class Util {
         return result;
     }
 
+
+    /**
+     *
+     * @param hash
+     * @return
+     */
+    private static String bytesToHex(byte[] hash) {
 
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
