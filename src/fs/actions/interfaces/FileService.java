@@ -22,10 +22,13 @@ public interface FileService extends Remote, Serializable {
 
     CacheFileWrapper getFileAndAttribute(String UFID);
 
-    void delete(String fileID);
+    void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback);
 
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
     void setAttributes(String fileID, FileAttribute attr);
 
+    interface DeleteFileCallback {
+        void onItemChanged(FSTreeNode fsTreeNode);
+    }
 }
