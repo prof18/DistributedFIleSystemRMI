@@ -11,6 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 
+//TODO: questa classe non serve più
 public class WritingNodeCache {
     private ArrayList<WritingCacheFileWrapper> fileList;
     private final int replacedTimer = 60000; //ms
