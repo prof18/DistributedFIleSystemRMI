@@ -14,6 +14,7 @@
     import java.rmi.AlreadyBoundException;
     import java.rmi.NotBoundException;
     import java.rmi.RemoteException;
+    import java.rmi.UnknownHostException;
     import java.rmi.registry.LocateRegistry;
     import java.rmi.registry.Registry;
     import java.util.HashMap;
@@ -22,7 +23,7 @@
     public class FileServiceUtil {
         private static String hostName;
 
-        public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) {
+        public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) throws NotBoundException, UnknownHostException {
             System.setProperty("java.rmi.server.hostname", ownIP);
             System.out.println("locationRet = " + locationRet);
             HashMap<Integer, NetNodeLocation> ret = null;
@@ -98,8 +99,6 @@
 
 
                 } catch (RemoteException e) {
-                    e.printStackTrace();
-                } catch (NotBoundException e) {
                     e.printStackTrace();
                 }
             }
