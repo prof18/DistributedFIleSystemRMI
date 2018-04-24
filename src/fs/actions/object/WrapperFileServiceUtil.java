@@ -12,7 +12,7 @@ public class WrapperFileServiceUtil {
     private HashMap<Integer, NetNodeLocation> locationHashMap;
     private FileService service;
     private NetNode netNode;
-    private HashMap<String, ArrayList<NetNodeLocation>> netNodeList; //hashmap file-nodi che possiedono una copia di tale file.
+    private HashMap<String, ArrayList<NetNodeLocation>> netNodeList= new HashMap(); //hashmap file-nodi che possiedono una copia di tale file.
 
     public WrapperFileServiceUtil(NetNodeLocation ownLocation, HashMap<Integer, NetNodeLocation> locationHashMap,
                                   FileService service, NetNode netNode) {

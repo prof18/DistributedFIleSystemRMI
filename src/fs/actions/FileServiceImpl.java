@@ -239,7 +239,7 @@ public class FileServiceImpl implements FileService {
         if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
             directory.mkdirs();
         }
-        String filePath = path + directoryPath + "/" + UFID;
+        String filePath = path + directoryPath + UFID;
         File file = new File(filePath);
         if (file.exists()) {
             throw new FileNotFoundException();
@@ -477,6 +477,7 @@ public class FileServiceImpl implements FileService {
     }
 
     private void replication(ReplicationWrapper repWr, WrapperFileServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+
         HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
 
         if (!hm.containsKey(repWr.getUFID())) {
