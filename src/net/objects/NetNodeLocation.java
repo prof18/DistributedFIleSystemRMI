@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+
 public class NetNodeLocation implements Serializable {
     private String ip;
     private int port;

@@ -205,7 +205,12 @@ public class FSTreeNode {
     }
 
     public String getPath() {
-        String path = "/";
+
+        return "/" + getPathWithoutRoot();
+    }
+
+    public String getPathWithoutRoot(){
+        String path ="";
         if (!isRoot()) {
             FSTreeNode node = parent;
             while (!node.isRoot()) {

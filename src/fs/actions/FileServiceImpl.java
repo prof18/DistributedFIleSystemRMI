@@ -14,7 +14,6 @@ import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
-import net.objects.interfaces.NetNode;
 import utils.Constants;
 import utils.PropertiesHelper;
 import utils.Util;
@@ -23,11 +22,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.AccessException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.time.Instant;
 import java.util.*;
 
@@ -100,7 +95,7 @@ public class FileServiceImpl implements FileService {
         int oldLength = 0; //file length before write the new content
         String localHost = null;
         try {
-            localHost = mediator.getNode().getHost();
+            localHost = mediator.getNode().getOwnIp();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -210,7 +205,7 @@ public class FileServiceImpl implements FileService {
                 ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
                 rw.setAttribute(cacheFileWrapper.getAttribute());
                 rw.setContent(repContent);
-                System.out.println("mediator: "+mediator.getFsStructure().getTree().getPath());
+                System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
                 rw.setPath(mediator.getFsStructure().getTree().getPath());
                 mediator.getFsStructure().generateTreeStructure();
                 rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
@@ -237,28 +232,34 @@ public class FileServiceImpl implements FileService {
 
     //utilizzo replicazione
 
-    public String create(String host, FileAttribute attribute) throws IOException {
-        String pathName = host + "_" + Date.from(Instant.now()).hashCode();
-        String filePath = path + pathName;
+    public String create(String host, FileAttribute attribute, FSTreeNode curDir) throws IOException {
+        String UFID = host + "_" + Date.from(Instant.now()).hashCode();
+        String directoryPath = curDir.getPathWithoutRoot();
+        File directory = new File(path + directoryPath);
+        if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
+            directory.mkdirs();
+        }
+        String filePath = path + directoryPath + "/" + UFID;
         File file = new File(filePath);
         if (file.exists()) {
             throw new FileNotFoundException();
         }
         file.createNewFile();
-        FileOutputStream out = new FileOutputStream(path + pathName + ".attr");
+        FileOutputStream out = new FileOutputStream(filePath + ".attr");
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
         //la replicazione
         Date creationDate = new Date().from(Instant.now());
-        String UFID = host + creationDate.getTime();
+
         byte[] ftb = fileToBytes(filePath);
 
         mediator.setFsStructure();
 
         ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
-        rw.setPath(mediator.getFsStructure().getTree().getPath());
-        System.out.println("Set path file:" + rw.getPath());
+        System.out.println("Local path file:" + filePath);
+        rw.setPath(curDir.getPath());
+        System.out.println("Set path file from file system root:" + rw.getPath());
         rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
         rw.setContent(ftb);
         rw.setChecksum(Util.getChecksum(ftb));
@@ -275,10 +276,10 @@ public class FileServiceImpl implements FileService {
      * @throws Exception
      */
     @Override
-    public String create(String host) throws IOException { //crea il file (nomehost+timestamp) in locale
+    public String create(String host, FSTreeNode curDir) throws IOException { //crea il file (nomehost+timestamp) in locale
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
-        return create(host, attribute);
+        return create(host, attribute, curDir);
 
     }
 
@@ -296,7 +297,7 @@ public class FileServiceImpl implements FileService {
         int j = 0;
         for (int i = 0; i < list.size(); i++) {
             try {
-                if (list.get(i).getIp().compareTo(mediator.getNode().getHost()) == 0) {
+                if (list.get(i).getIp().compareTo(mediator.getNode().getOwnIp()) == 0) {
                     j = i;
                     break;
                 }

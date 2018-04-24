@@ -67,14 +67,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public String getHost() {
-        return ownIP;
+    public String getOwnIp() {
+        return ownLocation.getIp();
     }
 
-    @Override
-    public int getPort() {
-        return port;
-    }
 
     @Override
     public synchronized JoinWrap join(String ipNode, int port, String name) {
@@ -303,7 +299,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public boolean saveFileReplica(ReplicationWrapper rw) {
 
-        String filePath = rw.getPath();
+        String filePath = path + rw.getPath();
 
         if (filePath.length() > 1) { //non è la radice
             String directoryPath = filePath.substring(0, filePath.length() - 1);
