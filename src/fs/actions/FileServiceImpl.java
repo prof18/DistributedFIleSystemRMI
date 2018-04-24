@@ -89,10 +89,15 @@ public class FileServiceImpl implements FileService {
 
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
-        ArrayList<NetNodeLocation> nodeList = mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+        WrapperFileServiceUtil wfsu = mediator.getWrapperFileServiceUtil();
+        boolean canReplicate = false;
+        ArrayList<NetNodeLocation> nodeList = wfsu.getNetNodeList().get(fileID);
         if (nodeList.size() == 0) {
             System.out.println("nessun file trovato");
             return;
+        }
+        if (wfsu.getLocationHashMap().size() > 1){
+            canReplicate = true;
         }
         ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList);
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
@@ -120,7 +125,7 @@ public class FileServiceImpl implements FileService {
                     int pos = nodeList.indexOf(nnl);
                     nodeList.get(pos).lockWriting();
                 }
-                new MapUpdateTask(fileID, mediator.getWrapperFileServiceUtil().getLocationHashMap().values(), nodeList);
+                new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
 
 
                 if (cacheFileWrapper == null) throw new FileNotFoundException();
@@ -207,25 +212,28 @@ public class FileServiceImpl implements FileService {
                     WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
                     writingNodeCache.add(wcfw);
                 }
-                ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
-                rw.setAttribute(cacheFileWrapper.getAttribute());
-                rw.setContent(repContent);
-                System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
-                rw.setPath(mediator.getFsStructure().getTree().getPath());
-                mediator.getFsStructure().generateTreeStructure();
-                rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-                System.out.println("Set path file:" + rw.getPath());
 
-                for (NetNodeLocation ndl : nodeList) {
-                    ndl.reduceOccupiedSpace(oldLength);
-                    new ReplicationTask(ndl, rw, mediator.getWrapperFileServiceUtil()).run();
-                }
+                if (canReplicate){
+                    ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
+                    rw.setAttribute(cacheFileWrapper.getAttribute());
+                    rw.setContent(repContent);
+                    System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
+                    rw.setPath(mediator.getFsStructure().getTree().getPath());
+                    mediator.getFsStructure().generateTreeStructure();
+                    rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+                    System.out.println("Set path file:" + rw.getPath());
 
-                for (NetNodeLocation nnl : tempNodeList) {
-                    int pos = nodeList.indexOf(nnl);
-                    nodeList.get(pos).unlockWriting();
+                    for (NetNodeLocation ndl : nodeList) {
+                        ndl.reduceOccupiedSpace(oldLength);
+                        new ReplicationTask(ndl, rw, wfsu).run();
+                    }
+
+                    for (NetNodeLocation nnl : tempNodeList) {
+                        int pos = nodeList.indexOf(nnl);
+                        nodeList.get(pos).unlockWriting();
+                    }
+                    new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
                 }
-                new MapUpdateTask(fileID, mediator.getWrapperFileServiceUtil().getLocationHashMap().values(), nodeList);
 
             } else {
                 System.out.println("Impossibile scrivere sul file " + fileID + ", qualcuno sta scrivendo.");
@@ -260,23 +268,25 @@ public class FileServiceImpl implements FileService {
         wfsu.getNetNodeList().put(UFID, nl);
 
         //la replicazione
-        Date creationDate = new Date().from(Instant.now());
+        if (wfsu.getNetNodeList().size() >1 ){
+            Date creationDate = new Date().from(Instant.now());
 
-        byte[] ftb = fileToBytes(filePath);
+            byte[] ftb = fileToBytes(filePath);
 
-        mediator.setFsStructure();
+            mediator.setFsStructure();
 
-        ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
-        System.out.println("Local path file:" + filePath);
-        rw.setPath(curDir.getPath());
-        System.out.println("Set path file from file system root:" + rw.getPath());
-        rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
-        rw.setContent(ftb);
-        rw.setChecksum(Util.getChecksum(ftb));
-        mediator.getFsStructure().generateTreeStructure();
-        rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
+            System.out.println("Local path file:" + filePath);
+            rw.setPath(curDir.getPath());
+            System.out.println("Set path file from file system root:" + rw.getPath());
+            rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
+            rw.setContent(ftb);
+            rw.setChecksum(Util.getChecksum(ftb));
+            mediator.getFsStructure().generateTreeStructure();
+            rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
 
-        replication(rw, mediator.getWrapperFileServiceUtil());
+            replication(rw, mediator.getWrapperFileServiceUtil());
+        }
 
         return UFID;
     }

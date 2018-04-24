@@ -46,9 +46,7 @@ public class ReplicationTask extends TimerTask {
             } else {
                 System.out.println("File non replicato");
             }*/
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
+        } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
     }
