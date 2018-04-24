@@ -18,6 +18,7 @@ import utils.Constants;
 import utils.PropertiesHelper;
 import utils.Util;
 
+import javax.naming.NamingEnumeration;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,6 +90,10 @@ public class FileServiceImpl implements FileService {
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
         ArrayList<NetNodeLocation> nodeList = mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+        if (nodeList.size() == 0) {
+            System.out.println("nessun file trovato");
+            return;
+        }
         ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList);
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         byte[] repContent = null;
@@ -249,6 +254,11 @@ public class FileServiceImpl implements FileService {
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
+        WrapperFileServiceUtil wfsu = mediator.getWrapperFileServiceUtil();
+        ArrayList<NetNodeLocation> nl = new ArrayList<>();
+        nl.add(wfsu.getOwnLocation());
+        wfsu.getNetNodeList().put(UFID, nl);
+
         //la replicazione
         Date creationDate = new Date().from(Instant.now());
 
@@ -265,6 +275,7 @@ public class FileServiceImpl implements FileService {
         rw.setChecksum(Util.getChecksum(ftb));
         mediator.getFsStructure().generateTreeStructure();
         rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+
         replication(rw, mediator.getWrapperFileServiceUtil());
 
         return UFID;

@@ -11,7 +11,7 @@ public class FileWrapper {
     public FileWrapper() {
     }
 
-    public FileWrapper(String UFID, String fileName){
+    public FileWrapper(String UFID, String fileName) {
         this.UFID = UFID;
         this.fileName = fileName;
     }

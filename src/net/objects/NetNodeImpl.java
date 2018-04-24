@@ -82,7 +82,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, newName));
         System.out.println("[JOIN]");
         Util.plot(connectedNodes);
-        System.out.println("aggiornamento nodi UI "+getHostName());
+        System.out.println("aggiornamento nodi UI " + getHostName());
         mainUI.updateConnectedNode(connectedNodes);
 
         return new JoinWrap(newName, connectedNodes);
@@ -376,10 +376,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
         ArrayList<NetNodeLocation> nodeLocations = mediatorFsNet.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
-        for (NetNodeLocation nnl: nodeLocations) {
-            if(nodeList.get(nodeList.indexOf(nnl)).canWrite()){
+        for (NetNodeLocation nnl : nodeLocations) {
+            if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
                 nnl.lockWriting();
-            }else{
+            } else {
                 nnl.unlockWriting();
             }
         }

@@ -16,11 +16,12 @@ public class ReplicationTask extends TimerTask {
     private ReplicationWrapper repWr;
     private WrapperFileServiceUtil wfsu;
 
-    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw,  WrapperFileServiceUtil wfsu){
+    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw, WrapperFileServiceUtil wfsu) {
         netNode = node;
         repWr = rw;
         this.wfsu = wfsu;
     }
+
     @Override
     public void run() {
         Registry registry;

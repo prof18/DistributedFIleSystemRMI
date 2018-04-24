@@ -17,16 +17,17 @@ public class MapUpdateTask extends TimerTask {
     private String fileID;
     private Collection<NetNodeLocation> nodeSet;
 
-    public MapUpdateTask(String fileID, Collection<NetNodeLocation> nodeSet, ArrayList<NetNodeLocation> nodeList){
+    public MapUpdateTask(String fileID, Collection<NetNodeLocation> nodeSet, ArrayList<NetNodeLocation> nodeList) {
         this.fileID = fileID;
         this.nodeSet = nodeSet;
         this.nodeList = nodeList;
     }
+
     @Override
     public void run() {
         Registry registry;
         try {
-            for (NetNodeLocation netNode: nodeSet) {
+            for (NetNodeLocation netNode : nodeSet) {
                 registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
                 NetNode node = (NetNode) registry.lookup(netNode.toUrl());
                 node.updateFileList(fileID, nodeList);

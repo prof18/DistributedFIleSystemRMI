@@ -29,8 +29,8 @@ public class PropertiesHelper {
     /**
      * Load a value from the configuration file
      *
-     * @param key   The key to load
-     * @return      The value loaded
+     * @param key The key to load
+     * @return The value loaded
      */
     public String loadConfig(String key) {
         try {

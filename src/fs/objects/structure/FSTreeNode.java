@@ -192,11 +192,11 @@ public class FSTreeNode {
         return fileFound;
     }
 
-    public String getFileName(String UFID){
+    public String getFileName(String UFID) {
         FileWrapper fileFound = null;
-        if(hasFile(UFID)){
-            for(FileWrapper fw : files){
-                if (fw.getUFID().compareTo(UFID) == 0){
+        if (hasFile(UFID)) {
+            for (FileWrapper fw : files) {
+                if (fw.getUFID().compareTo(UFID) == 0) {
                     fileFound = fw;
                 }
             }
@@ -209,8 +209,8 @@ public class FSTreeNode {
         return "/" + getPathWithoutRoot();
     }
 
-    public String getPathWithoutRoot(){
-        String path ="";
+    public String getPathWithoutRoot() {
+        String path = "";
         if (!isRoot()) {
             FSTreeNode node = parent;
             while (!node.isRoot()) {

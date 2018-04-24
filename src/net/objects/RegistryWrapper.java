@@ -11,7 +11,8 @@ public class RegistryWrapper {
 
     /**
      * Is the constructor of the class
-     * @param port is the number of the service port
+     *
+     * @param port     is the number of the service port
      * @param registry is the registry
      */
     public RegistryWrapper(int port, Registry registry) {
@@ -20,7 +21,6 @@ public class RegistryWrapper {
     }
 
     /**
-     *
      * @return the number of the port
      */
     public int getPort() {
@@ -28,7 +28,6 @@ public class RegistryWrapper {
     }
 
     /**
-     *
      * @return the instance of the object registry
      */
     public Registry getRegistry() {

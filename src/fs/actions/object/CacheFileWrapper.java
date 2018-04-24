@@ -17,15 +17,15 @@ public class CacheFileWrapper implements Serializable {
     private byte[] content;
 
 
-    public CacheFileWrapper(File file, FileAttribute attribute,String UFID,boolean isLocal) {
-        this.UFID=UFID;
+    public CacheFileWrapper(File file, FileAttribute attribute, String UFID, boolean isLocal) {
+        this.UFID = UFID;
         this.file = file;
         this.attribute = attribute;
-        this.isLocal=isLocal;
-        FileInputStream fis= null;
+        this.isLocal = isLocal;
+        FileInputStream fis = null;
         try {
             fis = new FileInputStream(file);
-            content=fis.readAllBytes();
+            content = fis.readAllBytes();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

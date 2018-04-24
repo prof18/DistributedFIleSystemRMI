@@ -13,7 +13,7 @@ public class GSONHelper {
     private static GSONHelper INSTANCE = null;
     private Gson gson;
 
-    public static GSONHelper getInstance(){
+    public static GSONHelper getInstance() {
         if (INSTANCE == null)
             INSTANCE = new GSONHelper();
         return INSTANCE;
@@ -28,7 +28,8 @@ public class GSONHelper {
     }
 
     public HashMap<String, JsonFolder> jsonToFolders(String json) {
-        Type folderMapType = new TypeToken<HashMap<String, JsonFolder>>(){}.getType();
+        Type folderMapType = new TypeToken<HashMap<String, JsonFolder>>() {
+        }.getType();
         return gson.fromJson(json, folderMapType);
     }
 

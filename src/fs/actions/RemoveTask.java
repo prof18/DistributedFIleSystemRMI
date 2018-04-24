@@ -15,10 +15,11 @@ public class RemoveTask extends TimerTask {
     private String fileID;
     private NetNodeLocation netNode;
 
-    public RemoveTask(String fileID, NetNodeLocation node){
+    public RemoveTask(String fileID, NetNodeLocation node) {
         this.fileID = fileID;
         netNode = node;
     }
+
     @Override
     public void run() {
         Registry registry;
@@ -26,7 +27,7 @@ public class RemoveTask extends TimerTask {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
             node.getMediator().getFsStructure().getTree().removeOneFile(fileID);
-            node.getMediator().getFsStructure().getTree().removeOneFile(fileID+".attr");
+            node.getMediator().getFsStructure().getTree().removeOneFile(fileID + ".attr");
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {

@@ -45,7 +45,7 @@ public class MediatorFsNet {
         this.fsStructure = FSStructure.getInstance();
     }
 
-    public void setWrapperFileServiceUtil(WrapperFileServiceUtil wfsu){
+    public void setWrapperFileServiceUtil(WrapperFileServiceUtil wfsu) {
         this.wfsu = wfsu;
     }
 
@@ -56,7 +56,7 @@ public class MediatorFsNet {
      * @return return a wrapper that contains the file and its attribute
      */
     public CacheFileWrapper getFile(String UFID) { //ricerca nella "rete" del file
-        System.out.println("entrato nel mediator alla ricerca del file : "+UFID);
+        System.out.println("entrato nel mediator alla ricerca del file : " + UFID);
         try {
             return node.getFileOtherHost(UFID);
         } catch (RemoteException e) {
@@ -71,7 +71,7 @@ public class MediatorFsNet {
      * @param UFID is the unique name of the requested file
      * @return return a wrapper that contains the file and its attribute
      */
-    public CacheFileWrapper getFilefromFS(String UFID){
+    public CacheFileWrapper getFilefromFS(String UFID) {
         System.out.println("entrato in mediator -> getFileFromFS");
         return service.getFileAndAttribute(UFID);
     }
@@ -82,9 +82,9 @@ public class MediatorFsNet {
      *
      * @param list is a list of file to replace
      */
-    public void replaceFile(ArrayList<WritingCacheFileWrapper> list){
+    public void replaceFile(ArrayList<WritingCacheFileWrapper> list) {
         System.out.println("[MEDIATOR] entrato in replaceFile");
-        System.out.println("file da modificare "+list.size());
+        System.out.println("file da modificare " + list.size());
         try {
             node.replaceFileFromFS(list);
         } catch (RemoteException e) {
@@ -100,7 +100,7 @@ public class MediatorFsNet {
         return wfsu;
     }
 
-    public NetNode getNode(){
+    public NetNode getNode() {
         return node;
     }
 

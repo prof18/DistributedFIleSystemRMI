@@ -8,6 +8,7 @@ public class ExecuteAll {
 
     /**
      * This class is used in order to launch the system , this method loads the Graphical Interface
+     *
      * @param args
      */
 

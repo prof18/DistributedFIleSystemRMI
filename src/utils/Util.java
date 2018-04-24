@@ -22,6 +22,7 @@ public class Util {
 
     /**
      * This method is used in order to search the next free port.
+     *
      * @return a wrapper that contains the number of the port and the created registry
      */
     public static RegistryWrapper getNextFreePort() {
@@ -42,6 +43,7 @@ public class Util {
 
     /**
      * This method is used in the debug phase with the purpose of plotting the connected nodes
+     *
      * @param hashMap is the list of connected nodes
      */
     public static void plot(HashMap<Integer, NetNodeLocation> hashMap) {
@@ -59,7 +61,6 @@ public class Util {
     }
 
 
-
     /**
      * This method generates a fake file system configuration and save it on the
      * properties
@@ -74,6 +75,7 @@ public class Util {
 
     /**
      * This method is used in debug phase, in order to create a fictional system
+     *
      * @return
      */
     private static HashMap<String, JsonFolder> generateFakeObjects() {
@@ -192,6 +194,7 @@ public class Util {
 
     /**
      * This method is used with the goal of the checksum computation
+     *
      * @param ab is an array of byte
      * @return the computed checksum
      */
@@ -215,6 +218,7 @@ public class Util {
 
     /**
      * This method converts an array of byte in a hexadecimal string
+     *
      * @param bytes is an array of bite
      * @return string of hexadecimal value
      */

@@ -12,7 +12,7 @@ public class ReplicationWrapper {
     private String jSon;
 
 
-    public ReplicationWrapper(String UFID, String fileName){
+    public ReplicationWrapper(String UFID, String fileName) {
         this.UFID = UFID;
         this.fileName = fileName;
     }

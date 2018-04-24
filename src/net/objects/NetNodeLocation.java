@@ -33,7 +33,9 @@ public class NetNodeLocation implements Serializable {
         return port;
     }
 
-    public long getTimeStamp(){return timeStamp;}
+    public long getTimeStamp() {
+        return timeStamp;
+    }
 
 
     @Override
@@ -42,7 +44,7 @@ public class NetNodeLocation implements Serializable {
     }
 
     public String toUrl() {
-        return "rmi://" + ip + ":" + port + "/"+name;
+        return "rmi://" + ip + ":" + port + "/" + name;
     }
 
     @Override
@@ -62,31 +64,35 @@ public class NetNodeLocation implements Serializable {
     }
 
 
-    public int getTotalByte(){return totalByte;}
+    public int getTotalByte() {
+        return totalByte;
+    }
 
-    public void setName(String name){this.name = name;}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public void setTotalByte(int tb){
+    public void setTotalByte(int tb) {
         totalByte = tb;
     }
 
-    public void addOccupiedSpace(int i){
+    public void addOccupiedSpace(int i) {
         totalByte += i;
     }
 
-    public void reduceOccupiedSpace(int i){
+    public void reduceOccupiedSpace(int i) {
         totalByte -= i;
     }
 
-    public void unlockWriting(){
+    public void unlockWriting() {
         writingPermission = true;
     }
 
-    public void lockWriting(){
+    public void lockWriting() {
         writingPermission = false;
     }
 
-    public boolean canWrite(){
+    public boolean canWrite() {
         return writingPermission;
     }
 
