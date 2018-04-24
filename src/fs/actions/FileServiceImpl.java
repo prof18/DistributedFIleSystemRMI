@@ -174,7 +174,7 @@ public class FileServiceImpl implements FileService {
                 e.printStackTrace();
             }
 
-            //new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
+
         } else {
             System.out.println("il file che si vuole sovrascrivere non è locale");
             FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
@@ -210,8 +210,10 @@ public class FileServiceImpl implements FileService {
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
             WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
             writingNodeCache.add(wcfw);
+        }
 
-            //new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
+        if (wfsu.getLocationHashMap().size() > 1 && wfsu.getNetNodeList().get(fileID).size() > 1) {
+            new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList).run();
         }
 
         System.out.println("Can replicate: " + canReplicate);

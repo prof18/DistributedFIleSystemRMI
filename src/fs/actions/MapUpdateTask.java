@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TimerTask;
 
+//task per la modifica dei flag di scrittura
 public class MapUpdateTask extends TimerTask {
 
     private ArrayList<NetNodeLocation> nodeList;
@@ -32,9 +33,7 @@ public class MapUpdateTask extends TimerTask {
                 NetNode node = (NetNode) registry.lookup(netNode.toUrl());
                 node.updateFileList(fileID, nodeList);
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
+        } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
     }
