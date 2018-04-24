@@ -46,7 +46,7 @@ public interface DirectoryService {
     void addName(FSTreeNode currentNode, String name, String fileID, NewItemCallback callback);
 
     /**
-     * Is used to inform the UI about the change in the directory
+     * This callback is used to inform the UI about the change in the directory
      */
     interface NewItemCallback {
         void onItemChanged(FSTreeNode fsTreeNode);
