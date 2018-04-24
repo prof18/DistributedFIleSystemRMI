@@ -13,6 +13,7 @@ import net.objects.interfaces.NetNode;
 import ui.utility.*;
 import utils.Constants;
 import utils.PropertiesHelper;
+import utils.Util;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -299,13 +300,17 @@ public class MainUI extends JFrame {
     }
 
     public void updateConnectedNode(HashMap<Integer, NetNodeLocation> connectedNodes) {
-
+        System.out.println("updateConnectedNode HashMap");
+        Util.plot(connectedNodes);
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
             NetNodeLocation node = entry.getValue();
             sb.append(node.toString());
             sb.append('\n');
         }
+        System.out.println("updateConnectedNode sb");
+        System.out.println(sb.toString());
+
         connectedNodeTextArea.setText(sb.toString());
     }
 

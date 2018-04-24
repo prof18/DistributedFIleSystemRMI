@@ -86,6 +86,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         connectedNodes.put((ipNode + port).hashCode(), new NetNodeLocation(ipNode, port, newName));
         System.out.println("[JOIN]");
         Util.plot(connectedNodes);
+        System.out.println("aggiornamento nodi UI "+getHostName());
         mainUI.updateConnectedNode(connectedNodes);
 
         return new JoinWrap(newName, connectedNodes);
@@ -238,6 +239,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
         this.connectedNodes = connectedNodes;
         Util.plot(this.connectedNodes);
+        mainUI.updateConnectedNode(this.connectedNodes);
+
     }
 
     @Override

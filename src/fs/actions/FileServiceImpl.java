@@ -209,6 +209,7 @@ public class FileServiceImpl implements FileService {
                 ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
                 rw.setAttribute(cacheFileWrapper.getAttribute());
                 rw.setContent(repContent);
+                System.out.println("mediator: "+mediator.getFsStructure().getTree().getPath());
                 rw.setPath(mediator.getFsStructure().getTree().getPath());
                 mediator.getFsStructure().generateTreeStructure();
                 rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
