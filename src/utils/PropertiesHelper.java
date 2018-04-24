@@ -19,8 +19,11 @@ public class PropertiesHelper {
     }
 
     private PropertiesHelper() {
-        propFile = new File("config.properties");
         props = new Properties();
+    }
+
+    public static void setPropFile(String path) {
+        PropertiesHelper.propFile = new File(path);
     }
 
     /**
