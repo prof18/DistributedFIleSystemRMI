@@ -45,36 +45,46 @@ public interface FileService extends Remote, Serializable {
     /**
      * This method is used to create a new file in the filesystem
      * @param host is the host that creates the new file
-     * @param curDir
-     * @return
+     * @param curDir is the current directory where saving the file
+     * @return the unique identifier UFID of the new file
      * @throws IOException
      */
     String create(String host, FSTreeNode curDir) throws IOException;
 
     /**
-     *
-     * @param UFID
-     * @return
+     * This method returns a wrapper that contains both the file and own attribute
+     * @param UFID is the unique identifier of the selected file
+     * @return a CacheFileWrapper that contains both the file and own attribute
      */
     CacheFileWrapper getFileAndAttribute(String UFID);
 
     /**
-     *
-     * @param fileID
+     * This method is used in order to delete a specific file
+     * @param fileID is the unique identifier of the file
+     * @param currentNode is the current node in the directory three
+     * @param callback is the callback that informs the deletion of a file
      */
 
     void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback);
 
     /**
-     *
-     * @param fileID
-     * @return
+     * With this method it is possible to get the attribute related to a File
+     * @param fileID is the unique identifier of the file
+     * @return an instance of FileAttribute that contains all the file attributes
      * @throws FileNotFoundException
      */
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
+    /**
+     * This method is used to update the information about a file
+     * @param fileID is the unique identifier of a file
+     * @param attr is the new instance of the class FileAttribute to save
+     */
     void setAttributes(String fileID, FileAttribute attr);
 
+    /**
+     * Is the callback used to inform the UI of the deletion a file
+     */
     interface DeleteFileCallback {
         void onItemChanged(FSTreeNode fsTreeNode);
     }
