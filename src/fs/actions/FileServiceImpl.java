@@ -86,14 +86,14 @@ public class FileServiceImpl implements FileService {
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
         WrapperFileServiceUtil wfsu = mediator.getWrapperFileServiceUtil();
-        boolean canReplicate = false;
+        boolean canReplicate = true;
         ArrayList<NetNodeLocation> nodeList = wfsu.getNetNodeList().get(fileID);
         if (nodeList.size() == 0) {
             System.out.println("nessun file trovato");
             return;
         }
-        if (wfsu.getLocationHashMap().size() > 1){
-            canReplicate = true;
+        if (wfsu.getNetNodeList().get(fileID).size() <= 1) {
+            canReplicate = false;
         }
         ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList);
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
@@ -106,7 +106,7 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
-        if (localHost != null) {
+        if (localHost != null && wfsu.getNetNodeList().get(fileID).size() > 1) {
             if (nodeList.get(nodeList.indexOf(localHost)).canWrite()) {
                 for (int i = 0; i < nodeList.size(); i++) {
                     if (nodeList.get(i).getIp().compareTo(localHost) == 0) { //trovo il nodo locale
@@ -121,121 +121,123 @@ public class FileServiceImpl implements FileService {
                     int pos = nodeList.indexOf(nnl);
                     nodeList.get(pos).lockWriting();
                 }
-                new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
+            }
+            new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
+        }
 
-
-                if (cacheFileWrapper == null) throw new FileNotFoundException();
-                if (cacheFileWrapper.isLocal()) {
-                    System.out.println("il file che si vuole sovrascrivere è locale");
-                    byte[] newContent = null;
-                    byte[] content = null;
-                    try {
-                        System.out.println("[WRITE] lettura del file prima della modifica");
-                        content = read(fileID, 0);
-                        System.out.println("[WRITE] prima della modifica: " + new String(content));
-                    } catch (NullPointerException e) {
-                        System.out.println("il file ha qualche problema");
-                    } catch (FileNotFoundException e) {
-                        System.out.println("il file non è presente");
-                    } catch (IndexOutOfBoundsException e) {
-                        System.out.println("problema con gli indici");
-                        e.printStackTrace();
-                        System.exit(-1);
-                    }
-                    repContent = newContent = joinArray(content, data, offset, count);
-                    System.out.println("[WRITE] nuovo contenuto da sovrascrivere : " + new String(newContent));
-                    ObjectInputStream ois = null;
-                    Date lastModified = null;
-                    FileAttribute fileAttribute = null;
-                    try {
-                        System.out.println("[WRITE] " + path + fileID);
-                        ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
-                        fileAttribute = (FileAttribute) ois.readObject();
-                        lastModified = fileAttribute.getLastModifiedTime();
-                        oldLength = (int) fileAttribute.getFileLength();
-                    } catch (IOException | ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-
-                    FileOutputStream fileOutputStream = null;
-                    try {
-                        File file = new File(path + fileID);
-                        System.out.println(file.delete());
-                        file = new File(path + fileID);
-                        fileOutputStream = new FileOutputStream(file);
-                        fileAttribute.setFileLength(file.length());
-                        fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
-                        setAttributes(fileID, fileAttribute);
-                        writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, fileID, true));
-                        System.out.println("newContent = " + new String(newContent));
-                        fileOutputStream.write(newContent, 0, newContent.length);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.out.println("il file che si vuole sovrascrivere non è locale");
-                    FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
-                    oldLength = (int) cacheFileWrapper.getFile().length();
-                    byte[] context = new byte[oldLength];
-                    System.out.println("length " + context.length);
-                    try {
-                        fis.read(context);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("context = " + new String(context));
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    File newFile = new File(cacheFileWrapper.getUFID());
-                    FileOutputStream fos = new FileOutputStream(newFile);
-                    byte[] newctx = joinArray(context, data, offset, count);
-                    repContent = newctx;
-                    System.out.println("contenuto da scrivere : " + new String(newctx));
-                    try {
-                        fos.write(newctx);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        fos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
-                    WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
-                    writingNodeCache.add(wcfw);
-                }
-
-                if (canReplicate){
-                    ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
-                    rw.setAttribute(cacheFileWrapper.getAttribute());
-                    rw.setContent(repContent);
-                    System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
-                    rw.setPath(mediator.getFsStructure().getTree().getPath());
-                    mediator.getFsStructure().generateTreeStructure();
-                    rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-                    System.out.println("Set path file:" + rw.getPath());
-
-                    for (NetNodeLocation ndl : nodeList) {
-                        ndl.reduceOccupiedSpace(oldLength);
-                        new ReplicationTask(ndl, rw, wfsu).run();
-                    }
-
-                    for (NetNodeLocation nnl : tempNodeList) {
-                        int pos = nodeList.indexOf(nnl);
-                        nodeList.get(pos).unlockWriting();
-                    }
-                    new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
-                }
-
-            } else {
-                System.out.println("Impossibile scrivere sul file " + fileID + ", qualcuno sta scrivendo.");
+        if (cacheFileWrapper == null) throw new FileNotFoundException();
+        if (cacheFileWrapper.isLocal()) {
+            System.out.println("il file che si vuole sovrascrivere è locale");
+            byte[] newContent = null;
+            byte[] content = null;
+            try {
+                System.out.println("[WRITE] lettura del file prima della modifica");
+                content = read(fileID, 0);
+                System.out.println("[WRITE] prima della modifica: " + new String(content));
+            } catch (NullPointerException e) {
+                System.out.println("il file ha qualche problema");
+            } catch (FileNotFoundException e) {
+                System.out.println("il file non è presente");
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("problema con gli indici");
+                e.printStackTrace();
+                System.exit(-1);
+            }
+            repContent = newContent = joinArray(content, data, offset, count);
+            System.out.println("[WRITE] nuovo contenuto da sovrascrivere : " + new String(newContent));
+            ObjectInputStream ois = null;
+            Date lastModified = null;
+            FileAttribute fileAttribute = null;
+            try {
+                System.out.println("[WRITE] " + path + fileID);
+                ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
+                fileAttribute = (FileAttribute) ois.readObject();
+                lastModified = fileAttribute.getLastModifiedTime();
+                oldLength = (int) fileAttribute.getFileLength();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
             }
 
+            FileOutputStream fileOutputStream = null;
+            try {
+                File file = new File(path + fileID);
+                System.out.println("Filde delete: " + file.delete());
+                file = new File(path + fileID);
+                fileOutputStream = new FileOutputStream(file);
+                fileAttribute.setFileLength(file.length());
+                fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
+                setAttributes(fileID, fileAttribute);
+                writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, fileID, true));
+                System.out.println("newContent = " + new String(newContent));
+                fileOutputStream.write(newContent, 0, newContent.length);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
+        } else {
+            System.out.println("il file che si vuole sovrascrivere non è locale");
+            FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
+            oldLength = (int) cacheFileWrapper.getFile().length();
+            byte[] context = new byte[oldLength];
+            System.out.println("length " + context.length);
+            try {
+                fis.read(context);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("context = " + new String(context));
+            try {
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            File newFile = new File(cacheFileWrapper.getUFID());
+            FileOutputStream fos = new FileOutputStream(newFile);
+            byte[] newctx = joinArray(context, data, offset, count);
+            repContent = newctx;
+            System.out.println("contenuto da scrivere : " + new String(newctx));
+            try {
+                fos.write(newctx);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
+            WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
+            writingNodeCache.add(wcfw);
+
+            //new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
         }
+
+        System.out.println("Can replicate: " + canReplicate);
+
+        if (canReplicate) {
+            ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
+            rw.setAttribute(cacheFileWrapper.getAttribute());
+            rw.setContent(repContent);
+            System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
+            rw.setPath(mediator.getFsStructure().getTree().getPath());
+            mediator.getFsStructure().generateTreeStructure();
+            rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            System.out.println("Set path file:" + rw.getPath());
+
+            for (NetNodeLocation ndl : nodeList) {
+                ndl.reduceOccupiedSpace(oldLength);
+                new ReplicationTask(ndl, rw, wfsu).run();
+            }
+
+            for (NetNodeLocation nnl : tempNodeList) {
+                int pos = nodeList.indexOf(nnl);
+                nodeList.get(pos).unlockWriting();
+            }
+        }
+
+
     }
 
 
@@ -262,7 +264,7 @@ public class FileServiceImpl implements FileService {
         wfsu.getNetNodeList().put(UFID, nl);
 
         //la replicazione
-        if (wfsu.getNetNodeList().size() >1 ){
+        if (wfsu.getNetNodeList().size() > 1) {
             Date creationDate = new Date().from(Instant.now());
 
             byte[] ftb = fileToBytes(filePath);
@@ -293,7 +295,7 @@ public class FileServiceImpl implements FileService {
         return create(host, attribute, curDir);
 
     }
-    
+
 
     public void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback) {
         //eliminazione in locale
