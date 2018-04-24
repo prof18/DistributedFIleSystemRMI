@@ -285,7 +285,7 @@ public class FileServiceImpl implements FileService {
 
     //bisogna decidere se il file deve essere eliminato solo in questo host oppure in tutti
 
-    public void delete(String fileID) {
+    public void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback) {
         //eliminazione in locale
         File file = new File(path + fileID);
         File fileAttr = new File(path + fileID + ".attr");
@@ -308,6 +308,8 @@ public class FileServiceImpl implements FileService {
 
         list.remove(j);
 
+        currentNode.removeOneFile(currentNode.getFileName(fileID));
+
         //eliminazione totale
 
         for (NetNodeLocation nnl : mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID)) {
@@ -315,6 +317,8 @@ public class FileServiceImpl implements FileService {
         }
 
         mediator.getWrapperFileServiceUtil().getNetNodeList().remove(fileID);
+
+        callback.onItemChanged(currentNode);
     }
 
 
