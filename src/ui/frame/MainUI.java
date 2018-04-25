@@ -573,9 +573,11 @@ public class MainUI extends JFrame {
             if (!item.isFile()) {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
                 renameFolder(item.getTreeNode(), newName);
+                fsStructure.generateJson(directoryTree);
             } else {
-                String newName = JOptionPane.showInputDialog("New File Name: ", item.getTreeNode().getNameNode());
+                String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
                 item.getFileWrapper().setFileName(newName);
+                fsStructure.generateJson(directoryTree);
             }
         });
         menu.add(rename);

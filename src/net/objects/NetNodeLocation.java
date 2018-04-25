@@ -40,7 +40,7 @@ public class NetNodeLocation implements Serializable {
 
     @Override
     public String toString() {
-        return "ip= " + ip + " " + "port= " + port;
+        return "IP= " + ip + " | " + "Port= " + port;
     }
 
     public String toUrl() {

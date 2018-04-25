@@ -193,15 +193,16 @@ public class FSTreeNode {
     }
 
     public String getFileName(String UFID) {
-        FileWrapper fileFound = null;
+        FileWrapper fileFound;
         if (hasFile(UFID)) {
             for (FileWrapper fw : files) {
                 if (fw.getUFID().compareTo(UFID) == 0) {
                     fileFound = fw;
+                    return fileFound.getFileName();
                 }
             }
         }
-        return fileFound.getFileName();
+        return "";
     }
 
     public String getPath() {
