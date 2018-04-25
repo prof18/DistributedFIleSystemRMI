@@ -19,9 +19,7 @@ import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.NotBoundException;
@@ -72,6 +70,13 @@ public class MainUI extends JFrame {
         //setVisible(true);
         setLocationRelativeTo(null);
         this.setJMenuBar(createMenuBar());
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
 
         rightWrapper = new JPanel(new GridBagLayout());
         rightDownWrapper = new JPanel(new GridBagLayout());

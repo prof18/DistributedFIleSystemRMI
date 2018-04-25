@@ -24,6 +24,13 @@ public class PropertiesHelper {
 
     public static void setPropFile(String path) {
         PropertiesHelper.propFile = new File(path);
+        try {
+            InputStream inputStream = new FileInputStream(propFile);
+            props.load(inputStream);
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
