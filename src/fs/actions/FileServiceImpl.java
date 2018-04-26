@@ -10,11 +10,11 @@ import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
+import net.objects.interfaces.NetNode;
 import utils.Constants;
 import utils.PropertiesHelper;
 import utils.Util;
 
-import javax.naming.NamingEnumeration;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,14 +85,13 @@ public class FileServiceImpl implements FileService {
 
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
-        WrapperFileServiceUtil wfsu = mediator.getWrapperFileServiceUtil();
         boolean canReplicate = true;
-        ArrayList<NetNodeLocation> nodeList = wfsu.getNetNodeList().get(fileID);
+        ArrayList<NetNodeLocation> nodeList = mediator.getNode().getFileNodeList().get(fileID);
         if (nodeList.size() == 0) {
             System.out.println("nessun file trovato");
             return;
         }
-        if (wfsu.getNetNodeList().get(fileID).size() <= 1) {
+        if (mediator.getNode().getFileNodeList().get(fileID).size() <= 1) {
             canReplicate = false;
         }
         ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList);
@@ -106,7 +105,7 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
-        if (localHost != null && wfsu.getNetNodeList().get(fileID).size() > 1) {
+        if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
             if (nodeList.get(nodeList.indexOf(localHost)).canWrite()) {
                 for (int i = 0; i < nodeList.size(); i++) {
                     if (nodeList.get(i).getIp().compareTo(localHost) == 0) { //trovo il nodo locale
@@ -122,7 +121,11 @@ public class FileServiceImpl implements FileService {
                     nodeList.get(pos).lockWriting();
                 }
             }
-            new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList);
+            try {
+                new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), nodeList);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
 
         if (cacheFileWrapper == null) throw new FileNotFoundException();
@@ -212,8 +215,13 @@ public class FileServiceImpl implements FileService {
             writingNodeCache.add(wcfw);
         }
 
-        if (wfsu.getLocationHashMap().size() > 1 && wfsu.getNetNodeList().get(fileID).size() > 1) {
-            new MapUpdateTask(fileID, wfsu.getLocationHashMap().values(), nodeList).run();
+        try {
+            if (mediator.getNode().getHashMap().size() > 1 && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
+
+                new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), nodeList).run();
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
 
         System.out.println("Can replicate: " + canReplicate);
@@ -230,7 +238,7 @@ public class FileServiceImpl implements FileService {
 
             for (NetNodeLocation ndl : nodeList) {
                 ndl.reduceOccupiedSpace(oldLength);
-                new ReplicationTask(ndl, rw, wfsu).run();
+                new ReplicationTask(ndl, rw, mediator.getNode()).run();
 
 
             }
@@ -262,17 +270,16 @@ public class FileServiceImpl implements FileService {
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
-        WrapperFileServiceUtil wfsu = mediator.getWrapperFileServiceUtil();
         ArrayList<NetNodeLocation> nl = new ArrayList<>();
-        nl.add(wfsu.getOwnLocation());
-        wfsu.getNetNodeList().put(UFID, nl);
+        nl.add(mediator.getNode().getOwnLocation());
+        mediator.getNode().getFileNodeList().put(UFID, nl);
 
         //la replicazione
         System.out.println("Eseguo la replicazione del file creato");
-        System.out.println("Nodi che hanno il file " + wfsu.getNetNodeList().size());
-        System.out.println("Numero chiavi e valori Hashmap nodi collegati: " + wfsu.getLocationHashMap().entrySet().size());
-        System.out.println("Dimensione Hashmap nodi collegati " + wfsu.getLocationHashMap().size());
-        if (wfsu.getNetNodeList().size() > 1 || wfsu.getLocationHashMap().size() > 1) {
+        System.out.println("Nodi che hanno il file " + mediator.getNode().getFileNodeList().size());
+        System.out.println("Numero chiavi e valori Hashmap nodi collegati: " + mediator.getNode().getHashMap().entrySet().size());
+        System.out.println("Dimensione Hashmap nodi collegati " + mediator.getNode().getHashMap().size());
+        if (mediator.getNode().getFileNodeList().size() > 1 || mediator.getNode().getHashMap().size() > 1) {
             Date creationDate = new Date().from(Instant.now());
 
             byte[] ftb = fileToBytes(filePath);
@@ -292,7 +299,7 @@ public class FileServiceImpl implements FileService {
             System.out.println("Creazione contenitore riuscita");
 
             System.out.println("Esecuzione metodo replication");
-            replication(rw, mediator.getWrapperFileServiceUtil());
+            replication(rw, mediator.getNode());
         }
 
         return UFID;
@@ -315,7 +322,7 @@ public class FileServiceImpl implements FileService {
         System.out.println(file.delete());
         System.out.println(fileAttr.delete());
 
-        ArrayList<NetNodeLocation> list = mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+        ArrayList<NetNodeLocation> list = mediator.getNode().getNetNodeList().get(fileID);
 
         int j = 0;
         for (int i = 0; i < list.size(); i++) {
@@ -335,11 +342,11 @@ public class FileServiceImpl implements FileService {
 
         //eliminazione totale
 
-        for (NetNodeLocation nnl : mediator.getWrapperFileServiceUtil().getNetNodeList().get(fileID)) {
+        for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID)) {
             new RemoveTask(fileID, nnl).run();
         }
 
-        mediator.getWrapperFileServiceUtil().getNetNodeList().remove(fileID);
+        mediator.getNode().getFileNodeList().remove(fileID);
 
         callback.onItemChanged(currentNode);
     }
@@ -483,9 +490,9 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
-    private void replication(ReplicationWrapper repWr, WrapperFileServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+    private void replication(ReplicationWrapper repWr, NetNode node) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
 
-        HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
+        HashMap<String, ArrayList<NetNodeLocation>> hm = node.getFileNodeList();
         NetNodeLocation selectedNode;
 
         System.out.println("Ricerca nodo per la replicazione");
@@ -493,16 +500,24 @@ public class FileServiceImpl implements FileService {
         if (!hm.containsKey(repWr.getUFID()) || hm.get(repWr.getUFID()).size() <= 1) {
             System.out.println("File not found in hashmap file-node");
             ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
-            Collection<NetNodeLocation> tmpColl = wfsu.getLocationHashMap().values();
-            for (NetNodeLocation nnl : tmpColl) {
-                nodeList.add(nnl);
+            Collection<NetNodeLocation> tmpColl = null;
+            try {
+                tmpColl = node.getHashMap().values();
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
-            nodeList = removeLocalNode(nodeList, wfsu);
+            if (tmpColl != null){
+                for (NetNodeLocation nnl : tmpColl) {
+                    nodeList.add(nnl);
+                }
+            }
+
+            nodeList = removeLocalNode(nodeList, node);
             ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
             selectedNode = selectedNode(nodeBiggerTime);
         } else {
             ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID());
-            nodeList = removeLocalNode(nodeList, wfsu);
+            nodeList = removeLocalNode(nodeList, node);
             ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
             selectedNode = selectedNode(nodeBiggerTime);
         }
@@ -518,7 +533,7 @@ public class FileServiceImpl implements FileService {
         //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
         //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
         System.out.println("Nodo trovato, avvio task replicazione");
-        new ReplicationTask(selectedNode, repWr, wfsu).run();
+        new ReplicationTask(selectedNode, repWr, node).run();
     }
 
     private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
@@ -550,7 +565,9 @@ public class FileServiceImpl implements FileService {
     private NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
         NetNodeLocation selectedNode = null;
         int occupiedSpace = Integer.MAX_VALUE;
+        System.out.println("Lista nodi maggior spazio libero");
         for (NetNodeLocation node : list) {
+            System.out.println(node.toUrl());
             if (node.getTotalByte() < occupiedSpace) {
                 occupiedSpace = node.getTotalByte();
                 selectedNode = node;
@@ -598,10 +615,10 @@ public class FileServiceImpl implements FileService {
 
     }
 
-    private ArrayList<NetNodeLocation> removeLocalNode(ArrayList<NetNodeLocation> nodeList, WrapperFileServiceUtil wfsu) {
+    private ArrayList<NetNodeLocation> removeLocalNode(ArrayList<NetNodeLocation> nodeList, NetNode node) {
 
         for (int i = 0; i < nodeList.size(); i++) {
-            if (nodeList.get(i).toUrl().compareTo(wfsu.getOwnLocation().toUrl()) == 0) {
+            if (nodeList.get(i).toUrl().compareTo(node.getOwnLocation().toUrl()) == 0) {
                 nodeList.remove(i);
             }
         }

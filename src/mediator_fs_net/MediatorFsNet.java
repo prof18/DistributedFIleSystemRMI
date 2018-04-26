@@ -18,7 +18,6 @@ public class MediatorFsNet {
     private NetNode node;
     private FileService service;
     private FSStructure fsStructure;
-    private WrapperFileServiceUtil wfsu;
 
     public MediatorFsNet() {
 
@@ -46,9 +45,6 @@ public class MediatorFsNet {
         this.fsStructure = FSStructure.getInstance();
     }
 
-    public void setWrapperFileServiceUtil(WrapperFileServiceUtil wfsu) {
-        this.wfsu = wfsu;
-    }
 
     /**
      * This method is used to call the method the getFileOtherHost of the interface NetNode
@@ -97,9 +93,6 @@ public class MediatorFsNet {
         return fsStructure;
     }
 
-    public WrapperFileServiceUtil getWrapperFileServiceUtil() {
-        return wfsu;
-    }
 
     public NetNode getNode() {
         return node;

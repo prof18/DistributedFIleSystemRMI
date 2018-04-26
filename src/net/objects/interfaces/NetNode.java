@@ -32,6 +32,13 @@ public interface NetNode extends Remote, Serializable {
 
     JoinWrap join(String ipNode, int port, String name) throws RemoteException;
 
+    HashMap<String, ArrayList<NetNodeLocation>> getFileNodeList();
+
+    void setFileNodeList(HashMap<String, ArrayList<NetNodeLocation>> fileNodeList);
+
+    void nodeFileAssociation(String UFID, NetNodeLocation netNode);
+
+    NetNodeLocation getOwnLocation();
     /**
      * This method is used to get the own ip address
      *

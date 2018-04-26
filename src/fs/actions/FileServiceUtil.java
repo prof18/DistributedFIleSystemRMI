@@ -125,9 +125,13 @@ public class FileServiceUtil {
                 e.printStackTrace();
             }
         }
-        WrapperFileServiceUtil wfsu = new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service, node);
+        WrapperFileServiceUtil wfsu = null;
+        try {
+            wfsu = new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), node.getHashMap(), service, node);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         mediatorFsNet.setWrapperFileServiceUtil(wfsu);
-        mediatorFsNet.getWrapperFileServiceUtil().setLocationHashMap(ret);
 
         return wfsu;
     }

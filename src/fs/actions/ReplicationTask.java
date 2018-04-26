@@ -15,12 +15,12 @@ public class ReplicationTask extends TimerTask {
 
     private NetNodeLocation netNode;
     private ReplicationWrapper repWr;
-    private WrapperFileServiceUtil wfsu;
+    private NetNode nNode;
 
-    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw, WrapperFileServiceUtil wfsu) {
+    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw, NetNode nNode) {
         netNode = node;
         repWr = rw;
-        this.wfsu = wfsu;
+        this.nNode = nNode;
     }
 
     @Override
@@ -36,9 +36,9 @@ public class ReplicationTask extends TimerTask {
                 rep = node.saveFileReplica(repWr);
 
                 if (rep) {
-                    wfsu.nodeFileAssociation(repWr.getUFID(), netNode);
+                    nNode.nodeFileAssociation(repWr.getUFID(), netNode);
                     netNode.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
-                    System.out.printf("Replicazione file " + repWr.getUFID() + " riuscita.");
+                    System.out.println("Replicazione file " + repWr.getUFID() + " riuscita.");
                 } else {
                     System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
                 }

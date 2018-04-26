@@ -32,7 +32,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private NetNodeLocation ownLocation;
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
-
+    private HashMap<String, ArrayList<NetNodeLocation>> fileNodeList = new HashMap(); //hashmap file-nodi che possiedono una copia di tale file.
     private MainUI mainUI;
 
     public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
@@ -64,6 +64,20 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             System.exit(-1);
         }
 
+    }
+
+
+    public HashMap<String, ArrayList<NetNodeLocation>> getFileNodeList() {
+        return fileNodeList;
+    }
+
+    public void setFileNodeList(HashMap<String, ArrayList<NetNodeLocation>> fileNodeList) {
+        this.fileNodeList = fileNodeList;
+    }
+
+
+    public NetNodeLocation getOwnLocation() {
+        return ownLocation;
     }
 
     @Override
@@ -375,7 +389,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     @Override
 
     public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
-        ArrayList<NetNodeLocation> nodeLocations = mediatorFsNet.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+        ArrayList<NetNodeLocation> nodeLocations = mediatorFsNet.getNode().getFileNodeList().get(fileID);
         for (NetNodeLocation nnl : nodeLocations) {
             if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
                 nnl.lockWriting();
@@ -385,5 +399,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         return true;
+    }
+
+    public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {
+        if (!fileNodeList.containsKey(UFID)) {
+            ArrayList<NetNodeLocation> a = new ArrayList<>();
+            a.add(netNode);
+            fileNodeList.put(UFID, a);
+        } else {
+            fileNodeList.get(UFID).add(netNode);
+        }
     }
 }
