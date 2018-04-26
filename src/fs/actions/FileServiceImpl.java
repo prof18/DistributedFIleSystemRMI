@@ -270,7 +270,7 @@ public class FileServiceImpl implements FileService {
         //la replicazione
         System.out.println("Eseguo la replicazione del file creato");
         System.out.println("Nodi che hanno il file " + wfsu.getNetNodeList().size());
-        System.out.println("Numero chiavi e valori Hashmap nodi collegati: "+ wfsu.getLocationHashMap().entrySet().size());
+        System.out.println("Numero chiavi e valori Hashmap nodi collegati: " + wfsu.getLocationHashMap().entrySet().size());
         System.out.println("Dimensione Hashmap nodi collegati " + wfsu.getLocationHashMap().size());
         if (wfsu.getNetNodeList().size() > 1 || wfsu.getLocationHashMap().size() > 1) {
             Date creationDate = new Date().from(Instant.now());
@@ -486,18 +486,28 @@ public class FileServiceImpl implements FileService {
     private void replication(ReplicationWrapper repWr, WrapperFileServiceUtil wfsu) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
 
         HashMap<String, ArrayList<NetNodeLocation>> hm = wfsu.getNetNodeList();
+        NetNodeLocation selectedNode;
 
-        if (!hm.containsKey(repWr.getUFID())) {
-            System.out.println("File not found");
-            return;
+        System.out.println("Ricerca nodo per la replicazione");
+
+        if (!hm.containsKey(repWr.getUFID()) || hm.get(repWr.getUFID()).size() <= 1) {
+            System.out.println("File not found in hashmap file-node");
+            ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
+            Collection<NetNodeLocation> tmpColl = wfsu.getLocationHashMap().values();
+            for (NetNodeLocation nnl : tmpColl) {
+                nodeList.add(nnl);
+            }
+            nodeList = removeLocalNode(nodeList, wfsu);
+            ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
+            selectedNode = selectedNode(nodeBiggerTime);
+        } else {
+            ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID());
+            nodeList = removeLocalNode(nodeList, wfsu);
+            ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
+            selectedNode = selectedNode(nodeBiggerTime);
         }
 
-        System.out.println("Ricerca nodo perla replicazione");
-        ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID());
-        ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
-        NetNodeLocation selectedNode = selectedNode(nodeBiggerTime);
-
-        System.out.println("Node scelto: " + selectedNode.toString());
+        System.out.println("Nodo scelto: " + selectedNode.toUrl());
 
         if (selectedNode == null) {
             System.out.println("Disastro!!! Siamo rovinati!!!");
@@ -586,6 +596,17 @@ public class FileServiceImpl implements FileService {
 
         return bytesArray;
 
+    }
+
+    private ArrayList<NetNodeLocation> removeLocalNode(ArrayList<NetNodeLocation> nodeList, WrapperFileServiceUtil wfsu) {
+
+        for (int i = 0; i < nodeList.size(); i++) {
+            if (nodeList.get(i).toUrl().compareTo(wfsu.getOwnLocation().toUrl()) == 0) {
+                nodeList.remove(i);
+            }
+        }
+
+        return nodeList;
     }
 
 }

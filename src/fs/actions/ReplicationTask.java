@@ -25,9 +25,11 @@ public class ReplicationTask extends TimerTask {
 
     @Override
     public void run() {
+        System.out.println("ReplicattionTask");
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
+            System.out.println("Node URL: " + netNode.toUrl());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
             boolean rep;
             do {
