@@ -131,8 +131,6 @@ public class FileServiceUtil {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        mediatorFsNet.setWrapperFileServiceUtil(wfsu);
-
         return wfsu;
     }
 }
