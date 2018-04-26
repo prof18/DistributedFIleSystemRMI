@@ -1,6 +1,7 @@
 package fs.actions;
 
 import fs.actions.object.WrapperFileServiceUtil;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 

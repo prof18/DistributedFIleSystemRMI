@@ -88,6 +88,7 @@ public class FileServiceUtil {
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
 
+
                 System.out.println();
                 System.out.println("[MAPPA RITORNATA]");
                 System.out.println();
@@ -126,9 +127,8 @@ public class FileServiceUtil {
         }
         WrapperFileServiceUtil wfsu = new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), ret, service, node);
         mediatorFsNet.setWrapperFileServiceUtil(wfsu);
+        mediatorFsNet.getWrapperFileServiceUtil().setLocationHashMap(ret);
 
         return wfsu;
-
-
     }
 }

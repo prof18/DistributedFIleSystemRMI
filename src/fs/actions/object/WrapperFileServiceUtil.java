@@ -51,4 +51,8 @@ public class WrapperFileServiceUtil {
             netNodeList.get(UFID).add(netNode);
         }
     }
+
+    public void setLocationHashMap(HashMap<Integer, NetNodeLocation> locationHashMap) {
+        this.locationHashMap = locationHashMap;
+    }
 }

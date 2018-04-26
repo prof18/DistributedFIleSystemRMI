@@ -161,7 +161,7 @@ public class FileServiceImpl implements FileService {
             FileOutputStream fileOutputStream = null;
             try {
                 File file = new File(path + fileID);
-                System.out.println("Filde delete: " + file.delete());
+                System.out.println("File delete: " + file.delete());
                 file = new File(path + fileID);
                 fileOutputStream = new FileOutputStream(file);
                 fileAttribute.setFileLength(file.length());
@@ -231,6 +231,8 @@ public class FileServiceImpl implements FileService {
             for (NetNodeLocation ndl : nodeList) {
                 ndl.reduceOccupiedSpace(oldLength);
                 new ReplicationTask(ndl, rw, wfsu).run();
+
+
             }
 
             for (NetNodeLocation nnl : tempNodeList) {
@@ -266,13 +268,18 @@ public class FileServiceImpl implements FileService {
         wfsu.getNetNodeList().put(UFID, nl);
 
         //la replicazione
-        if (wfsu.getNetNodeList().size() > 1) {
+        System.out.println("Eseguo la replicazione del file creato");
+        System.out.println("Nodi che hanno il file " + wfsu.getNetNodeList().size());
+        System.out.println("Numero chiavi e valori Hashmap nodi collegati: "+ wfsu.getLocationHashMap().entrySet().size());
+        System.out.println("Dimensione Hashmap nodi collegati " + wfsu.getLocationHashMap().size());
+        if (wfsu.getNetNodeList().size() > 1 || wfsu.getLocationHashMap().size() > 1) {
             Date creationDate = new Date().from(Instant.now());
 
             byte[] ftb = fileToBytes(filePath);
 
             mediator.setFsStructure();
 
+            System.out.println("Creazione contenitore per il file da replicare");
             ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
             System.out.println("Local path file:" + filePath);
             rw.setPath(curDir.getPath());
@@ -282,7 +289,9 @@ public class FileServiceImpl implements FileService {
             rw.setChecksum(Util.getChecksum(ftb));
             mediator.getFsStructure().generateTreeStructure();
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            System.out.println("Creazione contenitore riuscita");
 
+            System.out.println("Esecuzione metodo replication");
             replication(rw, mediator.getWrapperFileServiceUtil());
         }
 
@@ -301,7 +310,7 @@ public class FileServiceImpl implements FileService {
 
     public void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback) {
         //eliminazione in locale
-        File file = new File(path + fileID);
+        /*File file = new File(path + fileID);
         File fileAttr = new File(path + fileID + ".attr");
         System.out.println(file.delete());
         System.out.println(fileAttr.delete());
@@ -322,7 +331,7 @@ public class FileServiceImpl implements FileService {
 
         list.remove(j);
 
-        currentNode.removeOneFile(currentNode.getFileName(fileID));
+        currentNode.removeOneFile(currentNode.getFileName(fileID));*/
 
         //eliminazione totale
 
@@ -483,9 +492,12 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
+        System.out.println("Ricerca nodo perla replicazione");
         ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID());
         ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
         NetNodeLocation selectedNode = selectedNode(nodeBiggerTime);
+
+        System.out.println("Node scelto: " + selectedNode.toString());
 
         if (selectedNode == null) {
             System.out.println("Disastro!!! Siamo rovinati!!!");
@@ -495,6 +507,7 @@ public class FileServiceImpl implements FileService {
 
         //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
         //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
+        System.out.println("Nodo trovato, avvio task replicazione");
         new ReplicationTask(selectedNode, repWr, wfsu).run();
     }
 

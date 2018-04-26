@@ -1,6 +1,7 @@
 package mediator_fs_net;
 
 import fs.actions.FSStructure;
+import fs.actions.ReplicationWrapper;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
@@ -104,12 +105,18 @@ public class MediatorFsNet {
         return node;
     }
 
-    /*public void fileReplication(FileWrapper file){ //Probabile che sia da sistemare
+    public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
         System.out.println("[MEDIATOR] entrato in fileReplication");
-        boolean check;
+        boolean check = false;
+
         do {
-            check = node.saveFileReplica(file);
+            try {
+                check = node.saveFileReplica(file);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }while(!check);
 
-    }*/
+        return check;
+    }
 }

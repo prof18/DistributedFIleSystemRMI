@@ -21,7 +21,7 @@ public class RemoveTask extends TimerTask {
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
