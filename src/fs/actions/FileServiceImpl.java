@@ -328,14 +328,13 @@ public class FileServiceImpl implements FileService {
     }
 
 
-    public void delete(String fileID, FSTreeNode currentNode, DeleteFileCallback callback) {
-        //eliminazione in locale
-        /*File file = new File(path + fileID);
-        File fileAttr = new File(path + fileID + ".attr");
-        System.out.println(file.delete());
-        System.out.println(fileAttr.delete());
+    public void delete(String fileID, FSTreeNode curDir, DeleteFileCallback callback) {
 
-        ArrayList<NetNodeLocation> list = mediator.getNode().getNetNodeList().get(fileID);
+        String directoryPath = curDir.getPathWithoutRoot();
+        File file = new File(path + directoryPath + fileID);
+        File fileAttr = new File(path + directoryPath + fileID + ".attr");
+
+        /*ArrayList<NetNodeLocation> list = mediator.getNode().getNetNodeList().get(fileID);
 
         int j = 0;
         for (int i = 0; i < list.size(); i++) {
@@ -353,23 +352,36 @@ public class FileServiceImpl implements FileService {
 
         currentNode.removeOneFile(currentNode.getFileName(fileID));*/
 
-        //eliminazione totale
+        //eliminazione negli altri nodi
 
         try {
-            for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID)) {
-                new RemoveTask(fileID, nnl).run();
+            System.out.println("Nodi con il file: " + mediator.getNode().getFileNodeList().get(fileID).size());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
+                for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID)) {
+                    new RemoveTask(fileID, directoryPath, nnl).run();
+                }
+            }
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        //eliminazione in locale
+        try {
+            if (file.delete() && fileAttr.delete() && mediator.getNode().getFileNodeList().containsKey(fileID)) {
+                System.out.println("File cancellati in locale");
+                mediator.getNode().getFileNodeList().remove(fileID);
             }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
 
-        try {
-            mediator.getNode().getFileNodeList().remove(fileID);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
-        callback.onItemChanged(currentNode);
+        callback.onItemChanged(curDir);
     }
 
 
@@ -532,7 +544,7 @@ public class FileServiceImpl implements FileService {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            if (tmpColl != null){
+            if (tmpColl != null) {
                 for (NetNodeLocation nnl : tmpColl) {
                     nodeList.add(nnl);
                 }

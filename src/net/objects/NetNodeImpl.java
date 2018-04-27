@@ -382,6 +382,25 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }*/
 
+    public boolean deleteFile(String UFID, String filePath){
+
+        String totalFilePath = ownLocation.toUrl() + filePath + UFID;
+        boolean filesDeleted = false;
+        File file = new File(totalFilePath);
+        File fileAttr = new File(totalFilePath + ".attr");
+
+        if (file.delete() && fileAttr.delete()) {
+            filesDeleted = true;
+            mediatorFsNet.getFsStructure().getTree().removeOneFile(UFID);
+        }
+
+        if (filesDeleted && fileNodeList.containsKey(UFID)){
+            fileNodeList.remove(UFID);
+        }
+
+        return filesDeleted;
+    }
+
     public MediatorFsNet getMediator() {
         return mediatorFsNet;
     }

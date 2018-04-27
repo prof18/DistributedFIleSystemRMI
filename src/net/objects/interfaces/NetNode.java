@@ -38,6 +38,8 @@ public interface NetNode extends Remote, Serializable {
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
+    boolean deleteFile(String UFID, String filePath) throws RemoteException;
+
     NetNodeLocation getOwnLocation() throws RemoteException;
     /**
      * This method is used to get the own ip address
