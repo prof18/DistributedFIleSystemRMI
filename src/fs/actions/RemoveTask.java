@@ -31,6 +31,10 @@ public class RemoveTask extends TimerTask {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
 
+            System.out.println("Cancellazione file: " + fileID);
+            System.out.println("Percorso file: " + filePath);
+            System.out.println("Nel nodo: " + netNode.toUrl());
+
 
             if (node.deleteFile(fileID, filePath)) {
                 System.out.println("File e attributi eliminati con successo");

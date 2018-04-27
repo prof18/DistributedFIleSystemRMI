@@ -98,7 +98,7 @@ public class MediatorFsNet {
         return node;
     }
 
-    public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
+    /*public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
         System.out.println("[MEDIATOR] entrato in fileReplication");
         boolean check = false;
 
@@ -111,5 +111,5 @@ public class MediatorFsNet {
         }while(!check);
 
         return check;
-    }
+    }*/
 }

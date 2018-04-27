@@ -34,7 +34,7 @@ public interface NetNode extends Remote, Serializable {
 
     HashMap<String, ArrayList<NetNodeLocation>> getFileNodeList() throws RemoteException;
 
-    void setFileNodeList(HashMap<String, ArrayList<NetNodeLocation>> fileNodeList) throws RemoteException;
+    void updateFileNodeList(String UFID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 

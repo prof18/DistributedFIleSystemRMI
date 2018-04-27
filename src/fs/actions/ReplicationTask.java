@@ -39,6 +39,7 @@ public class ReplicationTask extends TimerTask {
                     nNode.nodeFileAssociation(repWr.getUFID(), netNode);
                     netNode.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
                     System.out.println("Replicazione file " + repWr.getUFID() + " riuscita.");
+
                 } else {
                     System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
                 }
