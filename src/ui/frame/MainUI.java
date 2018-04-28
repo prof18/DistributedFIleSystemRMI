@@ -566,7 +566,7 @@ public class MainUI extends JFrame {
         menuItem = new JMenuItem("New File");
         menuItem.addActionListener((ActionListener) -> {
             String fileName = JOptionPane.showInputDialog("New File Name: ");
-            if (!fileName.equals("")) {
+            if (fileName != null && !fileName.equals("")) {
                 if (!newFile(fileName))
                     showMessageDialog(null, "File not created. An error has occurred");
             }
@@ -577,7 +577,8 @@ public class MainUI extends JFrame {
         menuItem = new JMenuItem("New Folder");
         menuItem.addActionListener((ActionListener) -> {
             String folderName = JOptionPane.showInputDialog("New Folder Name: ");
-            newFolder(folderName);
+            if (folderName != null && !folderName.equals(""))
+                newFolder(folderName);
         });
         menu.add(menuItem);
         menu.addSeparator();
@@ -599,12 +600,16 @@ public class MainUI extends JFrame {
             TableItem item = model.getItems().get(row);
             if (!item.isFile()) {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
-                renameFolder(item.getTreeNode(), newName);
-                fsStructure.generateJson(directoryTree);
+                if (newName != null && !newName.equals("")) {
+                    renameFolder(item.getTreeNode(), newName);
+                    fsStructure.generateJson(directoryTree);
+                }
             } else {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
-                item.getFileWrapper().setFileName(newName);
-                fsStructure.generateJson(directoryTree);
+                if (newName != null && !newName.equals("")) {
+                    item.getFileWrapper().setFileName(newName);
+                    fsStructure.generateJson(directoryTree);
+                }
             }
         });
         menu.add(rename);
