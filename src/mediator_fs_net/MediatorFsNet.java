@@ -1,6 +1,7 @@
 package mediator_fs_net;
 
 import fs.actions.FSStructure;
+import fs.actions.ReplicationWrapper;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
@@ -17,7 +18,6 @@ public class MediatorFsNet {
     private NetNode node;
     private FileService service;
     private FSStructure fsStructure;
-    private WrapperFileServiceUtil wfsu;
 
     public MediatorFsNet() {
 
@@ -45,9 +45,6 @@ public class MediatorFsNet {
         this.fsStructure = FSStructure.getInstance();
     }
 
-    public void setWrapperFileServiceUtil(WrapperFileServiceUtil wfsu) {
-        this.wfsu = wfsu;
-    }
 
     /**
      * This method is used to call the method the getFileOtherHost of the interface NetNode
@@ -96,20 +93,23 @@ public class MediatorFsNet {
         return fsStructure;
     }
 
-    public WrapperFileServiceUtil getWrapperFileServiceUtil() {
-        return wfsu;
-    }
 
     public NetNode getNode() {
         return node;
     }
 
-    /*public void fileReplication(FileWrapper file){ //Probabile che sia da sistemare
+    /*public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
         System.out.println("[MEDIATOR] entrato in fileReplication");
-        boolean check;
+        boolean check = false;
+
         do {
-            check = node.saveFileReplica(file);
+            try {
+                check = node.saveFileReplica(file);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }while(!check);
 
+        return check;
     }*/
 }

@@ -32,7 +32,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private NetNodeLocation ownLocation;
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
-
+    private HashMap<String, ArrayList<NetNodeLocation>> fileNodeList = new HashMap(); //hashmap file-nodi che possiedono una copia di tale file.
     private MainUI mainUI;
 
     public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
@@ -64,6 +64,27 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             System.exit(-1);
         }
 
+    }
+
+
+    public HashMap<String, ArrayList<NetNodeLocation>> getFileNodeList() {
+        return fileNodeList;
+    }
+
+    public void updateFileNodeList(String UFID, ArrayList<NetNodeLocation> nodeList) {
+        System.out.println("UPDATE FILE NODE LIST");
+        if (fileNodeList.size() == 0){
+            fileNodeList.put(UFID, nodeList);
+        }else{
+            if (fileNodeList.containsKey(UFID) && fileNodeList.get(UFID).size() < nodeList.size()){
+                fileNodeList.replace(UFID, fileNodeList.get(UFID), nodeList);
+            }
+        }
+    }
+
+
+    public NetNodeLocation getOwnLocation() {
+        return ownLocation;
     }
 
     @Override
@@ -368,6 +389,31 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }*/
 
+    public boolean deleteFile(String UFID, String filePath){
+
+        String totalFilePath = path + filePath + UFID;
+        System.out.println("Percorso totale file: " + totalFilePath);
+        boolean filesDeleted = false;
+        File file = new File(totalFilePath);
+        File fileAttr = new File(totalFilePath + ".attr");
+        boolean fileDelete = file.delete();
+        boolean attrDelete = fileAttr.delete();
+
+        System.out.println("Cancellazione file: " + UFID);
+        System.out.println("Percorso file: " + filePath);
+
+        if (fileDelete && attrDelete) {
+            filesDeleted = true;
+            //mediatorFsNet.getFsStructure().getTree().removeOneFile(UFID);
+        }
+
+        if (filesDeleted && fileNodeList.containsKey(UFID)){
+            fileNodeList.remove(UFID);
+        }
+
+        return filesDeleted;
+    }
+
     public MediatorFsNet getMediator() {
         return mediatorFsNet;
     }
@@ -375,7 +421,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     @Override
 
     public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
-        ArrayList<NetNodeLocation> nodeLocations = mediatorFsNet.getWrapperFileServiceUtil().getNetNodeList().get(fileID);
+        ArrayList<NetNodeLocation> nodeLocations = null;
+        try {
+            nodeLocations = mediatorFsNet.getNode().getFileNodeList().get(fileID);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         for (NetNodeLocation nnl : nodeLocations) {
             if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
                 nnl.lockWriting();
@@ -385,5 +436,33 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         return true;
+    }
+
+    public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {
+        System.out.println("NODE FILE REPLICATION");
+        if (!fileNodeList.containsKey(UFID)) {
+            ArrayList<NetNodeLocation> a = new ArrayList<>();
+            a.add(netNode);
+            fileNodeList.put(UFID, a);
+        } else {
+            fileNodeList.get(UFID).add(netNode);
+        }
+
+        for (NetNodeLocation nnl:connectedNodes.values()) {
+            Registry registry = null;
+            try {
+                registry = LocateRegistry.getRegistry(nnl.getIp(), nnl.getPort());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Node URL: " + nnl.toUrl());
+            try {
+                NetNode nn = (NetNode) registry.lookup(nnl.toUrl());
+                nn.updateFileNodeList(UFID, fileNodeList.get(UFID));
+            } catch (RemoteException | NotBoundException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }

@@ -1,6 +1,7 @@
 package fs.actions;
 
 import fs.actions.object.WrapperFileServiceUtil;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
@@ -15,28 +16,31 @@ public class ReplicationTask extends TimerTask implements Serializable {
 
     private NetNodeLocation netNode;
     private ReplicationWrapper repWr;
-    private WrapperFileServiceUtil wfsu;
+    private NetNode nNode;
 
-    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw, WrapperFileServiceUtil wfsu) {
+    public ReplicationTask(NetNodeLocation node, ReplicationWrapper rw, NetNode nNode) {
         netNode = node;
         repWr = rw;
-        this.wfsu = wfsu;
+        this.nNode = nNode;
     }
 
     @Override
     public void run() {
+        System.out.println("ReplicattionTask");
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
+            System.out.println("Node URL: " + netNode.toUrl());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
             boolean rep;
             do {
                 rep = node.saveFileReplica(repWr);
 
                 if (rep) {
-                    wfsu.nodeFileAssociation(repWr.getUFID(), netNode);
+                    nNode.nodeFileAssociation(repWr.getUFID(), netNode);
                     netNode.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
-                    System.out.printf("Replicazione file " + repWr.getUFID() + " riuscita.");
+                    System.out.println("Replicazione file " + repWr.getUFID() + " riuscita.");
+
                 } else {
                     System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
                 }
