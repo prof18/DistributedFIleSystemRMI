@@ -29,7 +29,7 @@ public class PropertiesHelper {
             props.load(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Configuration File Not Found");
         }
     }
 
@@ -65,7 +65,7 @@ public class PropertiesHelper {
             outputStream.close();
             System.out.println("Configuration saved");
         } catch (IOException e) {
-            System.out.println("Config not Saved");
+            System.out.println("Configuration not Saved");
         }
     }
 
