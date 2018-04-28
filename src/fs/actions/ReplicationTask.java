@@ -4,13 +4,14 @@ import fs.actions.object.WrapperFileServiceUtil;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
+import java.io.Serializable;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.TimerTask;
 
-public class ReplicationTask extends TimerTask {
+public class ReplicationTask extends TimerTask implements Serializable {
 
     private NetNodeLocation netNode;
     private ReplicationWrapper repWr;

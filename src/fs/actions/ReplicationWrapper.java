@@ -2,7 +2,9 @@ package fs.actions;
 
 import fs.objects.structure.FileAttribute;
 
-public class ReplicationWrapper {
+import java.io.Serializable;
+
+public class ReplicationWrapper implements Serializable {
     private String path;
     private String fileName;
     private String UFID;
