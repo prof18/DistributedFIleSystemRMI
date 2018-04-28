@@ -22,6 +22,11 @@ public class PropertiesHelper {
         props = new Properties();
     }
 
+    /**
+     * Load the Proprieties file from a specific path
+     *
+     * @param path  The path of the properties file
+     */
     public static void setPropFile(String path) {
         PropertiesHelper.propFile = new File(path);
         try {

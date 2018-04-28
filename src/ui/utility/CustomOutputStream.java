@@ -3,6 +3,9 @@ package ui.utility;
 import javax.swing.*;
 import java.io.OutputStream;
 
+/**
+ * Redirects the Output Stream to a JTextArea
+ */
 public class CustomOutputStream extends OutputStream {
 
     private JTextArea textArea;
