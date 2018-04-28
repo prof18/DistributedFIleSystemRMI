@@ -226,6 +226,7 @@ public class FSTreeNode {
     public FSTreeNode findRoot() {
         FSTreeNode root = null;
         if (isRoot()) {
+            root = this;
             System.out.println("E' la radice");
         } else {
             FSTreeNode node = parent;

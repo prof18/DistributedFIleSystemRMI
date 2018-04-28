@@ -171,6 +171,8 @@ public class SettingsDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(null);
 
+        //folderChooserTF.setText("/home/marco/Projects/University/Distribuiti/fs1/");
+
         //TODO: uncomment this to generate a fake fs
         //Util.saveFSExample();
     }

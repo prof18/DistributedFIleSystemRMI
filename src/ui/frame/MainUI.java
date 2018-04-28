@@ -17,6 +17,7 @@ import utils.Util;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -25,8 +26,7 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.UnknownHostException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -54,6 +54,8 @@ public class MainUI extends JFrame {
     private JPanel rightWrapper, rightDownWrapper, filesUI, filesDetail, connectedStatus;
 
     private JScrollPane treeScroll;
+
+    private boolean isItemCreated = false;
 
     public void showUI(boolean show) {
         if (show)
@@ -203,21 +205,25 @@ public class MainUI extends JFrame {
         //Only One Selection
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.addTreeSelectionListener((TreeSelectionListener) -> {
-            clearInfo();
-            //load table ui
-            Object o = tree.getLastSelectedPathComponent();
-            if (o instanceof FileWrapper) {
-                //its a file
-                FileWrapper fileWrapper = (FileWrapper) o;
-                setFileInfo(fileWrapper);
+            if (!isItemCreated) {
+                clearInfo();
+                //load table ui
+                Object o = tree.getLastSelectedPathComponent();
+                if (o instanceof FileWrapper) {
+                    //its a file
+                    FileWrapper fileWrapper = (FileWrapper) o;
+                    setFileInfo(fileWrapper);
+                } else {
+                    //its a folder
+                    FSTreeNode node = (FSTreeNode) o;
+                    TableItem item = new TableItem();
+                    item.setTreeNode(node);
+                    item.setFile(false);
+                    changeTableView(false, item);
+                    setFolderInfo(node);
+                }
             } else {
-                //its a folder
-                FSTreeNode node = (FSTreeNode) o;
-                TableItem item = new TableItem();
-                item.setTreeNode(node);
-                item.setFile(false);
-                changeTableView(false, item);
-                setFolderInfo(node);
+                isItemCreated = false;
             }
         });
 
@@ -379,6 +385,7 @@ public class MainUI extends JFrame {
             model.setNode(node.getParent());
         }
 
+
     }
 
     private JPanel createDetailsUI() {
@@ -471,9 +478,16 @@ public class MainUI extends JFrame {
     private void updateModels(FSTreeNode treeNode) {
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         model.setNode(treeNode);
-        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+
+        TreePath path = tree.getSelectionPath();
+        FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
+        tree.setModel(null);
+        treeModel.setNode(treeNode);
         tree.setModel(treeModel);
+        tree.setSelectionPath(path);
+        tree.expandPath(path);
         fsStructure.generateJson(directoryTree);
+
     }
 
 
@@ -482,7 +496,10 @@ public class MainUI extends JFrame {
 
         try {
             String ufid = fileService.create(netNodeLocation.getName(), currentNode);
-            directoryService.addName(currentNode, fileName, ufid, this::updateModels);
+            directoryService.addName(currentNode, fileName, ufid, node -> {
+                isItemCreated = true;
+                updateModels(node.findRoot());
+            });
         } catch (IOException e) {
             e.printStackTrace();
             isCreated = false;
@@ -492,23 +509,33 @@ public class MainUI extends JFrame {
     }
 
     private void newFolder(String folderName) {
-        directoryService.createDirectory(currentNode, folderName, this::updateModels);
+        directoryService.createDirectory(currentNode, folderName, node -> {
+            isItemCreated = true;
+            updateModels(node.findRoot());
+        });
     }
 
     private void renameFolder(FSTreeNode node, String newName) {
 
-        directoryService.renameDirectory(node, newName, (fsTreeNode -> {
-            updateModels(currentNode);
-        }));
+        directoryService.renameDirectory(node, newName, fsNode -> {
+            isItemCreated = true;
+            updateModels(currentNode.findRoot());
+        });
 
     }
 
     private void deleteFile(FileWrapper fileWrapper) {
-        fileService.delete(fileWrapper.getUFID(), currentNode, this::updateModels);
+        fileService.delete(fileWrapper.getUFID(), currentNode, node -> {
+            isItemCreated = true;
+            updateModels(node.findRoot());
+        });
     }
 
     private void deleteFolder(FSTreeNode node) {
-        directoryService.deleteDirectory(node, this::updateModels);
+        directoryService.deleteDirectory(node, treeNode -> {
+            isItemCreated = true;
+            updateModels(treeNode.findRoot());
+        });
     }
 
 
