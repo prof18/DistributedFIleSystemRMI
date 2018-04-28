@@ -7,15 +7,15 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
+/**
+ * A model for the File Table View
+ */
 public class FileViewTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Icon", "Name"};
 
     private FSTreeNode currentTreeNode;
     private ArrayList<TableItem> items = new ArrayList<>();
-
-    //private String[] columnData;
-
 
     public ArrayList<TableItem> getItems() {
         return items;
@@ -49,7 +49,6 @@ public class FileViewTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-
     @Override
     public int getColumnCount() {
         return columnNames.length;
@@ -65,10 +64,12 @@ public class FileViewTableModel extends AbstractTableModel {
         return columnNames[col];
     }
 
+
     @Override
     public Object getValueAt(int row, int col) {
         TableItem item = items.get(row);
 
+        //Setup the columns: icon or name
         switch (col) {
             case 0:
                 if (item.isFile())
@@ -90,46 +91,8 @@ public class FileViewTableModel extends AbstractTableModel {
         }
     }
 
-    /*
-     * JTable uses this method to determine the default renderer/
-     * editor for each cell.  If we didn't implement this method,
-     * then the last column would contain text ("true"/"false"),
-     * rather than a check box.
-     */
     public Class getColumnClass(int c) {
         return getValueAt(0, c).getClass();
     }
-
-    /*
-     * Don't need to implement this method unless your table's
-     * editable.
-     */
-/*    public boolean isCellEditable(int row, int col) {
-        //Note that the data/cell address is constant,
-        return false;
-    }*/
-
-    /*
-     * Don't need to implement this method unless your table's
-     * data can change.
-     */
-    public void setValueAt(Object value, int row, int col) {
-
-      /*  System.out.println("Setting value at " + row + "," + col
-                + " to " + value
-                + " (an instance of "
-                + value.getClass() + ")");
-
-
-        data[row][col] = value;
-        fireTableCellUpdated(row, col);
-
-
-        System.out.println("New value of data:");
-        printDebugData();*/
-
-    }
-
-
 }
 

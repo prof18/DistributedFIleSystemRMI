@@ -6,6 +6,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.FileNotFoundException;
 
+/**
+ * Generate a window to edit a file
+ */
 public class EditFileUI extends JFrame {
 
     private FileService fileService;
@@ -62,9 +65,7 @@ public class EditFileUI extends JFrame {
         menu.add(menuItem);
         //Exit
         menuItem = new JMenuItem("Exit");
-        menuItem.addActionListener((ActionListener) -> {
-            dispose();
-        });
+        menuItem.addActionListener((ActionListener) -> dispose());
         menu.add(menuItem);
 
         menuBar.add(menu);

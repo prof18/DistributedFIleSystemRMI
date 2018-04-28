@@ -9,12 +9,14 @@ import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.Vector;
 
+/**
+ * A model for the File Tree View
+ */
 public class FileViewTreeModel implements TreeModel {
 
     private FSTreeNode node;
 
-    private Vector<TreeModelListener> treeModelListeners =
-            new Vector<TreeModelListener>();
+    private Vector<TreeModelListener> treeModelListeners = new Vector<>();
 
     public FileViewTreeModel(FSTreeNode node) {
         this.node = node;
@@ -39,8 +41,6 @@ public class FileViewTreeModel implements TreeModel {
         return getChildAndFile(node).indexOf((child));
     }
 
-
-    // Returns the child of parent at index index in the parent's child array.
     @Override
     public Object getChild(Object parent, int i) {
         FSTreeNode node = (FSTreeNode) parent;
@@ -59,7 +59,7 @@ public class FileViewTreeModel implements TreeModel {
         return node;
     }
 
-    // Messaged when the user has altered the value for the item identified by path to newValue.
+    // Messaged when the user has altered the value for the item identified by path.
     @Override
     public void valueForPathChanged(TreePath treePath, Object o) {
 

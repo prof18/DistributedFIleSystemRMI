@@ -6,6 +6,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.PrintStream;
 
+/**
+ * Generate a window to show the log
+ */
 public class LogUI extends JFrame {
 
     public LogUI() {

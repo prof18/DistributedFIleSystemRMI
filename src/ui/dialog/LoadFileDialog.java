@@ -4,6 +4,10 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
+/**
+ * Dialog used to load an external file into our File System
+ */
+//TODO: implement this
 public class LoadFileDialog extends JDialog {
 
 

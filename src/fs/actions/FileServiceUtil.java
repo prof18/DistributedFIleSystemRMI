@@ -45,7 +45,7 @@ public class FileServiceUtil {
      * @throws UnknownHostException
      */
 
-    public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) throws NotBoundException, UnknownHostException {
+    public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) throws NotBoundException, NullPointerException {
         System.setProperty("java.rmi.server.hostname", ownIP);
         System.out.println("locationRet = " + locationRet);
         HashMap<Integer, NetNodeLocation> ret = new HashMap<>();

@@ -4,6 +4,9 @@ import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
 
+/**
+ * Renderer for the File Table View Cell: by default shows text, in this implementation it can show also images for the file icon
+ */
 public class TreeCellRenderer extends DefaultTreeCellRenderer {
 
 

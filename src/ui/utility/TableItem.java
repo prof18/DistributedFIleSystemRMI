@@ -3,6 +3,9 @@ package ui.utility;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 
+/**
+ * The element of the File Table View
+ */
 public class TableItem {
 
     private FSTreeNode treeNode;

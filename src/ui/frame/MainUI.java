@@ -30,6 +30,9 @@ import java.util.*;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
+/**
+ * Generate the main UI
+ */
 public class MainUI extends JFrame {
 
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
@@ -48,7 +51,6 @@ public class MainUI extends JFrame {
     private FileService fileService;
     private FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
-    private NetNode netNode;
     private JTextArea connectedNodeTextArea;
 
     private JPanel rightWrapper, rightDownWrapper, filesUI, filesDetail, connectedStatus;
@@ -69,10 +71,10 @@ public class MainUI extends JFrame {
         //Create and show the main UI block
         setLocationRelativeTo(null);
         setSize(1050, 700);
-        //setVisible(true);
         setLocationRelativeTo(null);
         this.setJMenuBar(createMenuBar());
 
+        //exit from the program when the X is clicked
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -80,12 +82,12 @@ public class MainUI extends JFrame {
             }
         });
 
+        //A wrapper that contains Files UI box and rightDownWrapper
         rightWrapper = new JPanel(new GridBagLayout());
+        //A Wrapper that contains Connected Status and File Details boxes
         rightDownWrapper = new JPanel(new GridBagLayout());
 
-        //File UI
         filesUI = new JPanel(new GridLayout());
-        //File Details
         filesDetail = createDetailsUI();
         connectedStatus = createConnectedStatus();
         setLayout(new GridBagLayout());
@@ -173,39 +175,41 @@ public class MainUI extends JFrame {
         cs.fill = GridBagConstraints.BOTH;
     }
 
-    private void connect() throws NotBoundException, UnknownHostException {
+    // Handles the connection of the File System
+    private void connect() throws NotBoundException, NullPointerException {
         String ipHost = PropertiesHelper.getInstance().loadConfig(Constants.IP_HOST_CONFIG);
         String nameServiceHost = PropertiesHelper.getInstance().loadConfig(Constants.HOST_NAME_CONFIG);
         String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
         String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String portRetConfig = PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
         int portRet = -1;
-        if (!portRetConfig.equals("")) {
+        if (portRetConfig != null && !portRetConfig.equals("")) {
             portRet = Integer.parseInt(portRetConfig);
         }
         NetNodeLocation location;
         if (portRet == -1) {
-            System.out.println("primo nodo non si deve connettere a nessuno");
+            System.out.println("The first node doesn't connect to anyone");
             location = null;
         } else {
             location = new NetNodeLocation(ipRet, portRet, nameServiceHost);
-            System.out.println("[MAIN] connessione a location = " + location);
+            System.out.println("[MAIN] Connection to location = " + location);
         }
         WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
         fileService = wrapperFS.getService();
         netNodeLocation = wrapperFS.getOwnLocation();
-        netNode = wrapperFS.getNetNode();
     }
 
+    // Draws the File Tree View
     private void drawTreeView() {
         //Tree View
         FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
         tree = new JTree();
         tree.setModel(treeModel);
-        //Only One Selection
+        //Avoid multiple selections
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.addTreeSelectionListener((TreeSelectionListener) -> {
             if (!isItemCreated) {
+                //The listeners has h
                 clearInfo();
                 //load table ui
                 Object o = tree.getLastSelectedPathComponent();

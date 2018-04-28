@@ -21,6 +21,9 @@ import java.util.Iterator;
 import static java.net.NetworkInterface.getNetworkInterfaces;
 import static javax.swing.JOptionPane.showMessageDialog;
 
+/**
+ * A dialog prompted at start time to provide all the necessary information
+ */
 public class SettingsDialog extends JDialog {
 
     private String ipHost, ipToConnect, portToConnect, fsName, fsDir;
@@ -44,7 +47,7 @@ public class SettingsDialog extends JDialog {
         cs.insets = new Insets(8, 15, 8, 15);
         cs.fill = GridBagConstraints.HORIZONTAL;
 
-        //ipHost host
+        //ip host
         JLabel ipHostLabel = new JLabel("IP Host: ");
         cs.gridx = 0;
         cs.gridy = 0;
@@ -55,7 +58,7 @@ public class SettingsDialog extends JDialog {
         cs.gridy = 0;
         panel.add(petList, cs);
 
-        //ipHost to connect
+        //ip to connect
         JLabel ipToConnectLabel = new JLabel("IP to Connect: ");
         cs.gridx = 0;
         cs.gridy = 1;
@@ -79,8 +82,7 @@ public class SettingsDialog extends JDialog {
         cs.gridy = 2;
         panel.add(portTextField, cs);
 
-        //fs name
-        //file system name
+        //hostname to connect
         JLabel nameFSLabel = new JLabel("Hostname to Connect:");
         cs.gridx = 0;
         cs.gridy = 3;
@@ -128,6 +130,7 @@ public class SettingsDialog extends JDialog {
             }
         });
 
+        //ok button
         JButton okBtn = new JButton("OK");
         okBtn.addActionListener((ActionListener) -> {
             this.ipHost = (String) petList.getSelectedItem();
@@ -144,17 +147,17 @@ public class SettingsDialog extends JDialog {
             helper.writeConfig(Constants.HOST_NAME_CONFIG, fsName);
             helper.writeConfig(Constants.WORKING_DIR_CONFIG, fsDir);
 
-            MainUI main = null;
+            MainUI main;
 
             try {
                 dispose();
                 main = new MainUI();
                 main.showUI(true);
             } catch (NotBoundException | UnknownHostException  | NullPointerException e ) {
+                //if the info aren't correct exit from the program
                 new SettingsDialog(true);
                 showMessageDialog(null, "Settings are incorrect!");
                 System.exit(0);
-
             }
         });
 
@@ -174,6 +177,9 @@ public class SettingsDialog extends JDialog {
         //Util.saveFSExample();
     }
 
+    /**
+     * Shows a pop-up error
+     */
     private void showErrorMessage() {
         showMessageDialog(this,
                 "You have to provide some info to go forward",
