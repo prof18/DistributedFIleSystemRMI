@@ -1,6 +1,5 @@
 package ui.dialog;
 
-import com.sun.tools.javac.Main;
 import ui.frame.MainUI;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -10,7 +9,6 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -152,10 +150,9 @@ public class SettingsDialog extends JDialog {
                 dispose();
                 main = new MainUI();
                 main.showUI(true);
-            } catch (NotBoundException | UnknownHostException e) {
-                System.out.println("Non funzia");
+            } catch (NotBoundException | UnknownHostException  | NullPointerException e ) {
                 new SettingsDialog(true);
-                showMessageDialog(null, "Hostname not correct");
+                showMessageDialog(null, "Settings are incorrect!");
                 System.exit(0);
 
             }
