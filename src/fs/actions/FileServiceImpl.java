@@ -268,12 +268,12 @@ public class FileServiceImpl implements FileService {
 
     public String create(String host, FileAttribute attribute, FSTreeNode curDir) throws IOException {
         String UFID = host + "_" + Date.from(Instant.now()).hashCode();
-        String directoryPath = curDir.getPathWithoutRoot();
+        /*String directoryPath = curDir.getPathWithoutRoot();
         File directory = new File(path + directoryPath);
         if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
             directory.mkdirs();
-        }
-        String filePath = path + directoryPath + UFID;
+        }*/
+        String filePath = path + UFID;
         File file = new File(filePath);
         if (file.exists()) {
             throw new FileNotFoundException();
@@ -331,8 +331,8 @@ public class FileServiceImpl implements FileService {
     public void delete(String fileID, FSTreeNode curDir, DeleteFileCallback callback) {
 
         String directoryPath = curDir.getPathWithoutRoot();
-        File file = new File(path + directoryPath + fileID);
-        File fileAttr = new File(path + directoryPath + fileID + ".attr");
+        File file = new File(path + fileID);
+        File fileAttr = new File(path + fileID + ".attr");
 
         /*ArrayList<NetNodeLocation> list = mediator.getNode().getNetNodeList().get(fileID);
 
@@ -348,9 +348,9 @@ public class FileServiceImpl implements FileService {
             }
         }
 
-        list.remove(j);
+        list.remove(j);*/
 
-        currentNode.removeOneFile(currentNode.getFileName(fileID));*/
+        curDir.removeOneFile(curDir.getFileName(fileID));
 
         //eliminazione negli altri nodi
 

@@ -320,16 +320,16 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public boolean saveFileReplica(ReplicationWrapper rw) {
 
-        String filePath = path + rw.getPath();
+        String filePath = path;
 
-        if (filePath.length() > 1) { //non è la radice
+        /*if (filePath.length() > 1) { //non è la radice
             String directoryPath = filePath.substring(0, filePath.length() - 1);
             File directory = new File(directoryPath);
 
             if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
                 directory.mkdirs();
             }
-        }
+        }*/
 
         File fileAtt = new File(filePath + rw.getUFID() + ".attr");
         File f = new File(filePath + rw.getUFID());
@@ -391,7 +391,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public boolean deleteFile(String UFID, String filePath){
 
-        String totalFilePath = path + filePath + UFID;
+        String totalFilePath = path + UFID;
         System.out.println("Percorso totale file: " + totalFilePath);
         boolean filesDeleted = false;
         File file = new File(totalFilePath);
