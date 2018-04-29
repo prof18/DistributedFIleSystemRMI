@@ -12,6 +12,7 @@ import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import utils.Constants;
+import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -262,7 +263,6 @@ public class FileServiceImpl implements FileService {
             }
         }
 
-
     }
 
 
@@ -315,6 +315,12 @@ public class FileServiceImpl implements FileService {
             replication(rw, mediator.getNode());
         }
 
+        /*//aggiornamento e replicazione del json per l'albero
+
+        mediator.getFsStructure().generateJson(curDir);
+
+        mediator.jsonReplicaton(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));*/
+
         return UFID;
     }
 
@@ -350,8 +356,6 @@ public class FileServiceImpl implements FileService {
 
         list.remove(j);*/
 
-        curDir.removeOneFile(curDir.getFileName(fileID));
-
         //eliminazione negli altri nodi
 
         try {
@@ -380,6 +384,14 @@ public class FileServiceImpl implements FileService {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+
+        curDir.removeOneFile(curDir.getFileName(fileID));
+
+        /*//aggiornamento e replicazione del json per l'albero
+
+        mediator.getFsStructure().generateJson(curDir);
+
+        mediator.jsonReplicaton(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));*/
 
         callback.onItemChanged(curDir);
     }

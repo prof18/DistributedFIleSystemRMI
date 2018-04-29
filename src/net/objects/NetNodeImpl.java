@@ -465,4 +465,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         }
     }
+
+    public void writeJsonReplica(String json){
+        PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+    }
 }

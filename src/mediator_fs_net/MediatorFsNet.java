@@ -1,12 +1,15 @@
 package mediator_fs_net;
 
 import fs.actions.FSStructure;
+import fs.actions.JsonReplicationTask;
+import fs.actions.ReplicationTask;
 import fs.actions.ReplicationWrapper;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FileWrapper;
+import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
 import java.io.File;
@@ -96,6 +99,20 @@ public class MediatorFsNet {
 
     public NetNode getNode() {
         return node;
+    }
+
+    public void jsonReplicaton(String json) {
+
+        System.out.println("Json replication.");
+        try {
+            for (NetNodeLocation nnl : node.getHashMap().values()) {
+                new JsonReplicationTask(nnl, node, json).run();
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     /*public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
