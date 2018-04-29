@@ -66,7 +66,7 @@ public class MainUI extends JFrame {
             setVisible(false);
     }
 
-    public MainUI() throws NotBoundException, UnknownHostException {
+    public MainUI() throws NotBoundException, NullPointerException {
         super("Distributed File System");
         //Create and show the main UI block
         setLocationRelativeTo(null);
@@ -122,9 +122,9 @@ public class MainUI extends JFrame {
         setUIConstraints();
     }
 
+    //UI Constraints for the main UI
     private void setUIConstraints() {
 
-        //Constraints for the main UI
         GridBagConstraints globalCS = new GridBagConstraints();
         GridBagConstraints rwCS = new GridBagConstraints();
         GridBagConstraints rdwCS = new GridBagConstraints();
@@ -201,7 +201,6 @@ public class MainUI extends JFrame {
 
     // Draws the File Tree View
     private void drawTreeView() {
-        //Tree View
         FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
         tree = new JTree();
         tree.setModel(treeModel);
@@ -209,9 +208,8 @@ public class MainUI extends JFrame {
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.addTreeSelectionListener((TreeSelectionListener) -> {
             if (!isItemCreated) {
-                //The listeners has h
+                //The listener is triggered only when a object is not created
                 clearInfo();
-                //load table ui
                 Object o = tree.getLastSelectedPathComponent();
                 if (o instanceof FileWrapper) {
                     //its a file
@@ -237,8 +235,8 @@ public class MainUI extends JFrame {
         treeScroll = new JScrollPane(tree);
     }
 
+    // Draws the File Table View
     private void drawTableView() {
-        //Table UI
         model = new FileViewTableModel();
         final JTable table = new JTable();
         this.table = table;
@@ -291,6 +289,7 @@ public class MainUI extends JFrame {
         });
     }
 
+    // Shows the info of a file in the File Details Box
     private void setFileInfo(FileWrapper fileWrapper) {
         if (fileWrapper != null) {
             fileNameVLabel.setText(fileWrapper.getFileName());
@@ -303,6 +302,7 @@ public class MainUI extends JFrame {
         }
     }
 
+    // Shows the info of a folder in the File Details Box
     private void setFolderInfo(FSTreeNode node) {
         if (node != null) {
             fileNameVLabel.setText(node.getNameNode());
@@ -313,6 +313,7 @@ public class MainUI extends JFrame {
         }
     }
 
+    // Clear the File Detail Box
     private void clearInfo() {
         fileNameVLabel.setText("-");
         typeVLabel.setText("-");
@@ -322,8 +323,8 @@ public class MainUI extends JFrame {
         lastEditVLabel.setText("-");
     }
 
+    // Update the Connected Status Box
     public void updateConnectedNode(HashMap<Integer, NetNodeLocation> connectedNodes) {
-        System.out.println("updateConnectedNode HashMap");
         Util.plot(connectedNodes);
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
@@ -331,12 +332,10 @@ public class MainUI extends JFrame {
             sb.append(node.toString());
             sb.append('\n');
         }
-        System.out.println("updateConnectedNode sb");
-        System.out.println(sb.toString());
-
         connectedNodeTextArea.setText(sb.toString());
     }
 
+    // Create the Connected Status Box
     private JPanel createConnectedStatus() {
         JPanel panel = new JPanel();
 
@@ -463,6 +462,26 @@ public class MainUI extends JFrame {
         return filesDetail;
     }
 
+    /**
+     * This method updates the UI when the File System changes
+     *
+     * @param treeNode The update FSTreeNode Object
+     */
+    public void updateModels(FSTreeNode treeNode) {
+        FileViewTableModel model = (FileViewTableModel) table.getModel();
+        model.setNode(treeNode);
+
+        TreePath path = tree.getSelectionPath();
+        FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
+        tree.setModel(null);
+        treeModel.setNode(treeNode);
+        tree.setModel(treeModel);
+        tree.setSelectionPath(path);
+        tree.expandPath(path);
+        fsStructure.generateJson(directoryTree);
+
+    }
+
     private boolean openFile(FileWrapper fileWrapper) {
         boolean isOpen = true;
 
@@ -478,22 +497,6 @@ public class MainUI extends JFrame {
 
         return isOpen;
     }
-
-    private void updateModels(FSTreeNode treeNode) {
-        FileViewTableModel model = (FileViewTableModel) table.getModel();
-        model.setNode(treeNode);
-
-        TreePath path = tree.getSelectionPath();
-        FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
-        tree.setModel(null);
-        treeModel.setNode(treeNode);
-        tree.setModel(treeModel);
-        tree.setSelectionPath(path);
-        tree.expandPath(path);
-        fsStructure.generateJson(directoryTree);
-
-    }
-
 
     private boolean newFile(String fileName) {
         boolean isCreated = true;
@@ -525,7 +528,6 @@ public class MainUI extends JFrame {
             isItemCreated = true;
             updateModels(currentNode.findRoot());
         });
-
     }
 
     private void deleteFile(FileWrapper fileWrapper) {
@@ -562,7 +564,6 @@ public class MainUI extends JFrame {
             if (item.isFile()) {
                 if (!openFile(item.getFileWrapper()))
                     showMessageDialog(null, "An error has occurred during file opening!");
-
             }
         });
         menu.add(menuItem);
