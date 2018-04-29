@@ -40,7 +40,10 @@ public interface NetNode extends Remote, Serializable {
 
     boolean deleteFile(String UFID, String filePath) throws RemoteException;
 
+    void writeJsonReplica(String json) throws RemoteException;
+
     NetNodeLocation getOwnLocation() throws RemoteException;
+
     /**
      * This method is used to get the own ip address
      *

@@ -107,9 +107,9 @@ public class FSTreeNode {
 
     private int findFilePos(String fileName) {
         int pos = 0;
-        for (FileWrapper fw : this.files) {
-            if (!(fw.getFileName().compareTo(fileName) == 0)) {
-                pos++;
+        for (int i = 0; i < files.size(); i++) {
+            if (files.get(i).getFileName().compareTo(fileName) == 0) {
+                pos = i;
                 break;
             }
         }
