@@ -8,13 +8,16 @@ import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
+import ui.frame.MainUI;
 
 import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MediatorFsNet {
@@ -101,12 +104,17 @@ public class MediatorFsNet {
         return node;
     }
 
-    public void jsonReplicaton(String json) {
+    public void jsonReplicaton(FSTreeNode directory) {
 
-        System.out.println("Json replication.");
         try {
-            for (NetNodeLocation nnl : node.getHashMap().values()) {
-                new JsonReplicationTask(nnl, node, json).run();
+            HashMap<Integer, NetNodeLocation> tmpHashMap =  new HashMap<>(node.getHashMap());
+
+            tmpHashMap.remove((node.getOwnIp() + node.getOwnPort()).hashCode());
+
+            System.out.println("Json replication.");
+
+            for (NetNodeLocation nnl : tmpHashMap.values()) {
+                new JsonReplicationTask(nnl, node, directory).run();
             }
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -114,6 +122,11 @@ public class MediatorFsNet {
 
 
     }
+
+    public void updateJson(FSTreeNode treeNode){
+        MainUI.updateModels(treeNode);
+    }
+
 
     /*public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
         System.out.println("[MEDIATOR] entrato in fileReplication");

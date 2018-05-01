@@ -3,6 +3,7 @@ package net.objects.interfaces;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
@@ -40,9 +41,9 @@ public interface NetNode extends Remote, Serializable {
 
     boolean deleteFile(String UFID, String filePath) throws RemoteException;
 
-    void writeJsonReplica(String json) throws RemoteException;
-
     NetNodeLocation getOwnLocation() throws RemoteException;
+
+    void updateUI(FSTreeNode directory) throws RemoteException;
 
     /**
      * This method is used to get the own ip address
@@ -52,6 +53,15 @@ public interface NetNode extends Remote, Serializable {
      */
 
     String getOwnIp() throws RemoteException;
+
+    /**
+     * This method is used to get the own port number
+     *
+     * @return own port number
+     * @throws RemoteException
+     */
+
+    int getOwnPort() throws RemoteException;
 
     /**
      * This method returns the instance of the related mediator

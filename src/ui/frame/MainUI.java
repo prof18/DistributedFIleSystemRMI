@@ -38,18 +38,18 @@ public class MainUI extends JFrame {
     private JLabel fileNameVLabel, typeVLabel, pathVLabel, fileSizeVLabel, ownerVLabel, lastEditVLabel;
 
     private JButton navigateUpBtn;
-    private JTable table;
-    private JTree tree;
+    private static JTable table;
+    private static JTree tree;
     private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
     private FSTreeNode currentNode;
-    private FSTreeNode directoryTree;
+    private static FSTreeNode directoryTree;
 
     private JMenuItem rename, delete;
     private FileViewTableModel model;
 
     private DirectoryService directoryService;
     private FileService fileService;
-    private FSStructure fsStructure;
+    private static FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
     private JTextArea connectedNodeTextArea;
 
@@ -467,7 +467,7 @@ public class MainUI extends JFrame {
      *
      * @param treeNode The update FSTreeNode Object
      */
-    public void updateModels(FSTreeNode treeNode) {
+    public static void updateModels(FSTreeNode treeNode) {
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         model.setNode(treeNode);
 

@@ -1,6 +1,7 @@
 package fs.actions;
 
 
+import fs.objects.structure.FSTreeNode;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
@@ -15,12 +16,12 @@ public class JsonReplicationTask extends TimerTask implements Serializable {
 
     private NetNodeLocation netNode;
     private NetNode nNode;
-    String json;
+    private FSTreeNode directory;
 
-    public JsonReplicationTask(NetNodeLocation node, NetNode nNode, String json) {
+    public JsonReplicationTask(NetNodeLocation node, NetNode nNode, FSTreeNode directory) {
         netNode = node;
         this.nNode = nNode;
-        this.json = json;
+        this.directory = directory;
     }
 
     @Override
@@ -31,7 +32,7 @@ public class JsonReplicationTask extends TimerTask implements Serializable {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             System.out.println("Node URL: " + netNode.toUrl());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
-            node.writeJsonReplica(json);
+            node.updateUI(directory);
 
             /*if (node.saveFileReplica(repWr)) {
 

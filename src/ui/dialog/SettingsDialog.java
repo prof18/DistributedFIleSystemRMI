@@ -153,7 +153,7 @@ public class SettingsDialog extends JDialog {
                 dispose();
                 main = new MainUI();
                 main.showUI(true);
-            } catch (NotBoundException | UnknownHostException  | NullPointerException e ) {
+            } catch (NotBoundException | NullPointerException e ) {
                 //if the info aren't correct exit from the program
                 new SettingsDialog(true);
                 showMessageDialog(null, "Settings are incorrect!");

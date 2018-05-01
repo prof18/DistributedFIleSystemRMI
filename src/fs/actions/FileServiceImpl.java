@@ -315,11 +315,11 @@ public class FileServiceImpl implements FileService {
             replication(rw, mediator.getNode());
         }
 
-        /*//aggiornamento e replicazione del json per l'albero
+        //aggiornamento e replicazione del json per l'albero
 
-        mediator.getFsStructure().generateJson(curDir);
+        mediator.updateJson(curDir);
 
-        mediator.jsonReplicaton(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));*/
+        mediator.jsonReplicaton(curDir);
 
         return UFID;
     }
@@ -387,11 +387,9 @@ public class FileServiceImpl implements FileService {
 
         curDir.removeOneFile(curDir.getFileName(fileID));
 
-        /*//aggiornamento e replicazione del json per l'albero
+        mediator.updateJson(curDir);
 
-        mediator.getFsStructure().generateJson(curDir);
-
-        mediator.jsonReplicaton(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));*/
+        mediator.jsonReplicaton(curDir);
 
         callback.onItemChanged(curDir);
     }
@@ -543,6 +541,7 @@ public class FileServiceImpl implements FileService {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+
         NetNodeLocation selectedNode;
 
         System.out.println("Ricerca nodo per la replicazione");

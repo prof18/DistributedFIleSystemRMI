@@ -3,6 +3,7 @@ package net.objects;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
@@ -144,6 +145,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     @Override
     public String getHostName() {
         return ownLocation.getName();
+    }
+
+    public int getOwnPort() {
+        return ownLocation.getPort();
     }
 
 
@@ -466,7 +471,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }
 
-    public void writeJsonReplica(String json){
-        PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+    public void updateUI(FSTreeNode directory){
+        mediatorFsNet.updateJson(directory);
     }
 }

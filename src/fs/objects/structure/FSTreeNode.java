@@ -1,10 +1,11 @@
 package fs.objects.structure;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class FSTreeNode {
+public class FSTreeNode implements Serializable {
 
 
     private String UFID;
