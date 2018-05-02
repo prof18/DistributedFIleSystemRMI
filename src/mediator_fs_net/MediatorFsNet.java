@@ -128,7 +128,7 @@ public class MediatorFsNet {
     }
 
     public void removeFileFromTree(String UFID, FSTreeNode treeFileDirectory){
-        fsStructure.getTree().findNode(treeFileDirectory.getNameNode()).removeOneFile(UFID);
+        fsStructure.getTree().findNode(fsStructure.getTree().findRoot(),treeFileDirectory.getNameNode()).removeOneFile(UFID);
     }
 
 
