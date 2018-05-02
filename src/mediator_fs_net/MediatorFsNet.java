@@ -127,6 +127,10 @@ public class MediatorFsNet {
         MainUI.updateModels(treeNode);
     }
 
+    public void removeFileFromTree(String UFID, FSTreeNode treeFileDirectory){
+        fsStructure.getTree().findNode(treeFileDirectory.getNameNode()).removeOneFile(UFID);
+    }
+
 
     /*public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
         System.out.println("[MEDIATOR] entrato in fileReplication");

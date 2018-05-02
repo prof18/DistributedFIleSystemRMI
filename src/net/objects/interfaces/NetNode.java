@@ -39,7 +39,7 @@ public interface NetNode extends Remote, Serializable {
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
-    boolean deleteFile(String UFID, String filePath) throws RemoteException;
+    boolean deleteFile(String UFID, String filePath, FSTreeNode treeFileDirectory) throws RemoteException;
 
     NetNodeLocation getOwnLocation() throws RemoteException;
 

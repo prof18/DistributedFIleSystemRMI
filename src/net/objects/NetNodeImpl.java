@@ -394,7 +394,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }*/
 
-    public boolean deleteFile(String UFID, String filePath){
+    public boolean deleteFile(String UFID, String filePath, FSTreeNode treeFileDirectory){
 
         String totalFilePath = path + UFID;
         System.out.println("Percorso totale file: " + totalFilePath);
@@ -409,7 +409,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         if (fileDelete && attrDelete) {
             filesDeleted = true;
-            //mediatorFsNet.getFsStructure().getTree().removeOneFile(UFID);
+            mediatorFsNet.removeFileFromTree(UFID, treeFileDirectory);
         }
 
         if (filesDeleted && fileNodeList.containsKey(UFID)){

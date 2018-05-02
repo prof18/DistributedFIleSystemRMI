@@ -4,15 +4,14 @@ import fs.actions.cache.ReadingNodeCache;
 import fs.actions.cache.WritingNodeCache;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
-import fs.actions.object.WrapperFileServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
+import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import utils.Constants;
-import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -367,7 +366,7 @@ public class FileServiceImpl implements FileService {
         try {
             if (mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
                 for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID)) {
-                    new RemoveTask(fileID, directoryPath, nnl).run();
+                    new DeleteFileTask(fileID, directoryPath, nnl, curDir).run();
                 }
             }
 

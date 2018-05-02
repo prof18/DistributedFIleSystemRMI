@@ -118,6 +118,20 @@ public class FSTreeNode implements Serializable {
         return pos;
     }
 
+    public FSTreeNode findNode(FSTreeNode node, String nodeName) {
+        if (node.getNameNode().compareTo(nodeName) == 0) {
+            return node;
+        } else {
+            for (FSTreeNode child: node.getChildren()) {
+                FSTreeNode result = findNode(child, nodeName);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
     public void removeOneFile(String fileName) {
 
         int pos = findFilePos(fileName);

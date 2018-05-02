@@ -12,16 +12,18 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.TimerTask;
 
-public class RemoveTask extends TimerTask {
+public class DeleteFileTask extends TimerTask {
 
     private String fileID;
     String filePath;
     private NetNodeLocation netNode;
+    FSTreeNode treeFileDirectory;
 
-    public RemoveTask(String fileID, String filePath, NetNodeLocation node) {
+    public DeleteFileTask(String fileID, String filePath, NetNodeLocation node, FSTreeNode treeFileDirectory) {
         this.fileID = fileID;
         this.filePath = filePath;
         netNode = node;
+        this.treeFileDirectory = treeFileDirectory;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class RemoveTask extends TimerTask {
             System.out.println("Nel nodo: " + netNode.toUrl());
 
 
-            if (node.deleteFile(fileID, filePath)) {
+            if (node.deleteFile(fileID, filePath, treeFileDirectory)) {
                 System.out.println("File e attributi eliminati con successo");
             } else {
                 System.out.println("File e attributi non sono stati eliminati");
