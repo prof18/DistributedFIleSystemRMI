@@ -468,6 +468,8 @@ public class MainUI extends JFrame {
      * @param treeNode The update FSTreeNode Object
      */
     public static void updateModels(FSTreeNode treeNode) {
+        System.out.println("MainUI updateModels");
+
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         model.setNode(treeNode);
 
@@ -478,8 +480,8 @@ public class MainUI extends JFrame {
         tree.setModel(treeModel);
         tree.setSelectionPath(path);
         tree.expandPath(path);
-        fsStructure.generateJson(directoryTree);
 
+        fsStructure.generateJson(directoryTree);
     }
 
     private boolean openFile(FileWrapper fileWrapper) {
@@ -502,7 +504,7 @@ public class MainUI extends JFrame {
         boolean isCreated = true;
 
         try {
-            String ufid = fileService.create(netNodeLocation.getName(), currentNode);
+            String ufid = fileService.create(netNodeLocation.getName(), currentNode, fileName);
             directoryService.addName(currentNode, fileName, ufid, node -> {
                 isItemCreated = true;
                 updateModels(node.findRoot());

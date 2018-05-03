@@ -50,10 +50,11 @@ public interface FileService extends Remote, Serializable {
      *
      * @param host   is the host that creates the new file
      * @param curDir is the current directory where saving the file
+     * @param fileName
      * @return the unique identifier UFID of the new file
      * @throws IOException
      */
-    String create(String host, FSTreeNode curDir) throws IOException;
+    String create(String host, FSTreeNode curDir, String fileName) throws IOException;
 
     /**
      * This method returns a wrapper that contains both the file and own attribute

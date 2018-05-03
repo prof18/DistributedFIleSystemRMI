@@ -5,6 +5,7 @@ import fs.actions.interfaces.FileService;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
+import mediator_fs_net.MediatorFsNet;
 import utils.Constants;
 import utils.PropertiesHelper;
 
@@ -63,6 +64,10 @@ public class DirectoryServiceImpl implements DirectoryService {
         node.updateAncestorTime();
 
         callback.onItemChanged(currentNode);
+
+        MediatorFsNet mediator = MediatorFsNet.getInstance();
+        mediator.jsonReplicaton(node);
+
     }
 
     @Override

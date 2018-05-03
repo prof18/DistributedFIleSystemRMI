@@ -13,6 +13,7 @@ import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import ui.frame.MainUI;
+import utils.PropertiesHelper;
 
 import java.io.File;
 import java.rmi.RemoteException;
@@ -25,8 +26,16 @@ public class MediatorFsNet {
     private FileService service;
     private FSStructure fsStructure;
 
-    public MediatorFsNet() {
+    private static MediatorFsNet INSTANCE = null;
 
+    public static MediatorFsNet getInstance() {
+        if (INSTANCE == null)
+            INSTANCE = new MediatorFsNet();
+        return INSTANCE;
+    }
+
+    public MediatorFsNet() {
+        PropertiesHelper.getInstance();
     }
 
     /**
@@ -111,10 +120,11 @@ public class MediatorFsNet {
 
             tmpHashMap.remove((node.getOwnIp() + node.getOwnPort()).hashCode());
 
-            System.out.println("Json replication.");
+            System.out.println("Json replication");
 
             for (NetNodeLocation nnl : tmpHashMap.values()) {
-                new JsonReplicationTask(nnl, node, directory).run();
+                System.out.println("Nodo: " + nnl.toUrl());
+                new JsonReplicationTask(nnl, directory).run();
             }
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -124,12 +134,14 @@ public class MediatorFsNet {
     }
 
     public void updateJson(FSTreeNode treeNode){
+        System.out.println("Mediator updateJson");
         MainUI.updateModels(treeNode);
     }
 
     public void removeFileFromTree(String UFID, FSTreeNode treeFileDirectory){
         fsStructure.getTree().findNode(fsStructure.getTree().findRoot(),treeFileDirectory.getNameNode()).removeOneFile(UFID);
     }
+
 
 
     /*public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare

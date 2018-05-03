@@ -15,6 +15,7 @@ public class FSTreeNode implements Serializable {
     private ArrayList<FileWrapper> files;
     private long lastEditTime;
 
+
     public FSTreeNode(String UFID, String nameNode, ArrayList<FSTreeNode> childrens, FSTreeNode parent, ArrayList<FileWrapper> files) {
         this.UFID = UFID;
         this.nameNode = nameNode;

@@ -5,6 +5,7 @@ import fs.actions.cache.WritingNodeCache;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
@@ -12,6 +13,7 @@ import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import utils.Constants;
+import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -33,8 +35,9 @@ public class FileServiceImpl implements FileService {
     private ReadingNodeCache readingCache;
     private WritingNodeCache writingNodeCache;
 
-    public FileServiceImpl(String path, MediatorFsNet mediatorFsNet) {
-        mediator = mediatorFsNet;
+
+    public FileServiceImpl(String path) {
+        mediator = MediatorFsNet.getInstance();
         mediator.setFsStructure();
         this.path = path;
         System.out.println("sono tornato al costruttore");
@@ -265,7 +268,7 @@ public class FileServiceImpl implements FileService {
     }
 
 
-    public String create(String host, FileAttribute attribute, FSTreeNode curDir) throws IOException {
+    public String create(String host, FileAttribute attribute, FSTreeNode curDir, String fileName) throws IOException {
         String UFID = host + "_" + Date.from(Instant.now()).hashCode();
         /*String directoryPath = curDir.getPathWithoutRoot();
         File directory = new File(path + directoryPath);
@@ -282,9 +285,17 @@ public class FileServiceImpl implements FileService {
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
+        byte[] ftb = fileToBytes(filePath);
         ArrayList<NetNodeLocation> nl = new ArrayList<>();
         nl.add(mediator.getNode().getOwnLocation());
         mediator.getNode().getFileNodeList().put(UFID, nl);
+        FileWrapper fw = new FileWrapper(UFID, fileName);
+        fw.setAttribute(attribute);
+        fw.setPath(path);
+        fw.setChecksum(Util.getChecksum(ftb));
+
+        curDir.getFiles().add(fw);
+        //curDir.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
 
         //la replicazione
         System.out.println("Eseguo la replicazione del file creato");
@@ -293,8 +304,6 @@ public class FileServiceImpl implements FileService {
         System.out.println("Dimensione Hashmap nodi collegati " + mediator.getNode().getHashMap().size());
         if (mediator.getNode().getFileNodeList().size() > 1 || mediator.getNode().getHashMap().size() > 1) {
             Date creationDate = new Date().from(Instant.now());
-
-            byte[] ftb = fileToBytes(filePath);
 
             mediator.setFsStructure();
 
@@ -305,8 +314,7 @@ public class FileServiceImpl implements FileService {
             System.out.println("Set path file from file system root:" + rw.getPath());
             rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
             rw.setContent(ftb);
-            rw.setChecksum(Util.getChecksum(ftb));
-            mediator.getFsStructure().generateTreeStructure();
+            rw.setChecksum(fw.getChecksum());
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Creazione contenitore riuscita");
 
@@ -316,7 +324,7 @@ public class FileServiceImpl implements FileService {
 
         //aggiornamento e replicazione del json per l'albero
 
-        mediator.updateJson(curDir);
+        System.out.println("Replicazione del json per l'albero dopo creazione file");
 
         mediator.jsonReplicaton(curDir);
 
@@ -324,11 +332,11 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String create(String host, FSTreeNode curDir) throws IOException { //crea il file (nomehost+timestamp) in locale
+    public String create(String host, FSTreeNode curDir, String fileName) throws IOException { //crea il file (nomehost+timestamp) in locale
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
         //TODO andrea controlla questa cosa aggiungendo un pò di sout
-        return create(host, attribute, curDir);
+        return create(host, attribute, curDir, fileName);
 
     }
 
@@ -386,7 +394,13 @@ public class FileServiceImpl implements FileService {
 
         curDir.removeOneFile(curDir.getFileName(fileID));
 
-        mediator.updateJson(curDir);
+        //mediator.updateJson(curDir);
+
+        System.out.println("Replicazione del json per l'albero dopo eliminazione file");
+
+        //mediator.getFsStructure().generateJson(curDir);
+
+        //curDir.setGson(Constants.FOLDERS_CONFIG);
 
         mediator.jsonReplicaton(curDir);
 

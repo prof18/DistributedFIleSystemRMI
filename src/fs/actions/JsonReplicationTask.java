@@ -15,18 +15,16 @@ import java.util.TimerTask;
 public class JsonReplicationTask extends TimerTask implements Serializable {
 
     private NetNodeLocation netNode;
-    private NetNode nNode;
     private FSTreeNode directory;
 
-    public JsonReplicationTask(NetNodeLocation node, NetNode nNode, FSTreeNode directory) {
+    public JsonReplicationTask(NetNodeLocation node,  FSTreeNode directory) {
         netNode = node;
-        this.nNode = nNode;
         this.directory = directory;
     }
 
     @Override
     public void run() {
-        System.out.println("ReplicattionTask");
+        System.out.println("JsonReplicationTask nel nodo " + netNode.toUrl());
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());

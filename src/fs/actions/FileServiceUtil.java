@@ -49,7 +49,7 @@ public class FileServiceUtil {
         System.setProperty("java.rmi.server.hostname", ownIP);
         System.out.println("locationRet = " + locationRet);
         HashMap<Integer, NetNodeLocation> ret = new HashMap<>();
-        MediatorFsNet mediatorFsNet = new MediatorFsNet();
+        MediatorFsNet mediatorFsNet = MediatorFsNet.getInstance();
         RegistryWrapper rw = Util.getNextFreePort();
         Registry registry = rw.getRegistry();
         int port = rw.getPort();
@@ -61,7 +61,7 @@ public class FileServiceUtil {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        FileService service = new FileServiceImpl(path, mediatorFsNet);
+        FileService service = new FileServiceImpl(path);
         mediatorFsNet.addNetService(node);
         mediatorFsNet.addService(service);
         try {

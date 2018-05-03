@@ -1,12 +1,23 @@
 package fs.objects.structure;
 
-public class FileWrapper {
+import java.io.Serializable;
+
+public class FileWrapper implements Serializable {
 
     private String fileName;
     private String UFID;
     private String path;
     private FileAttribute attribute;
-    private byte[] content; //fare checksum per verificare correttezza messaggio
+    private byte[] content;
+    private String checksum;
+
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
+    }
 
     public FileWrapper() {
     }
