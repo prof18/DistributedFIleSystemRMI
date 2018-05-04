@@ -66,6 +66,9 @@ public class DirectoryServiceImpl implements DirectoryService {
         callback.onItemChanged(currentNode);
 
         MediatorFsNet mediator = MediatorFsNet.getInstance();
+        FSTreeNode root = node.findRoot();
+        FSStructure.getInstance().generateJson(root);
+        root.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
         mediator.jsonReplicaton(node);
 
     }
@@ -122,8 +125,14 @@ public class DirectoryServiceImpl implements DirectoryService {
                 wrapper.setPath(currentNode.getPath() + "/" + name);
             else
                 wrapper.setPath(currentNode.getPath() + name);
-            currentNode.addFile(wrapper);
-            callback.onItemChanged(currentNode);
+            
+            FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
+            FSTreeNode curNode = treeRoot.findNode(treeRoot, currentNode.getNameNode());
+            curNode.addFile(wrapper);
+            callback.onItemChanged(curNode);
+            FSStructure.getInstance().generateJson(treeRoot);
+            treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

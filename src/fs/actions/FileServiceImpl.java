@@ -291,11 +291,8 @@ public class FileServiceImpl implements FileService {
         mediator.getNode().getFileNodeList().put(UFID, nl);
         FileWrapper fw = new FileWrapper(UFID, fileName);
         fw.setAttribute(attribute);
-        fw.setPath(path);
+        fw.setPath(curDir.getPath());
         fw.setChecksum(Util.getChecksum(ftb));
-
-        curDir.getFiles().add(fw);
-        //curDir.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
 
         //la replicazione
         System.out.println("Eseguo la replicazione del file creato");
@@ -304,8 +301,6 @@ public class FileServiceImpl implements FileService {
         System.out.println("Dimensione Hashmap nodi collegati " + mediator.getNode().getHashMap().size());
         if (mediator.getNode().getFileNodeList().size() > 1 || mediator.getNode().getHashMap().size() > 1) {
             Date creationDate = new Date().from(Instant.now());
-
-            mediator.setFsStructure();
 
             System.out.println("Creazione contenitore per il file da replicare");
             ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
@@ -321,12 +316,6 @@ public class FileServiceImpl implements FileService {
             System.out.println("Esecuzione metodo replication");
             replication(rw, mediator.getNode());
         }
-
-        //aggiornamento e replicazione del json per l'albero
-
-        System.out.println("Replicazione del json per l'albero dopo creazione file");
-
-        mediator.jsonReplicaton(curDir);
 
         return UFID;
     }

@@ -29,8 +29,10 @@ public class MediatorFsNet {
     private static MediatorFsNet INSTANCE = null;
 
     public static MediatorFsNet getInstance() {
-        if (INSTANCE == null)
+        if (INSTANCE == null){
             INSTANCE = new MediatorFsNet();
+        }
+
         return INSTANCE;
     }
 
@@ -116,7 +118,7 @@ public class MediatorFsNet {
     public void jsonReplicaton(FSTreeNode directory) {
 
         try {
-            HashMap<Integer, NetNodeLocation> tmpHashMap =  new HashMap<>(node.getHashMap());
+            HashMap<Integer, NetNodeLocation> tmpHashMap = new HashMap<>(node.getHashMap());
 
             tmpHashMap.remove((node.getOwnIp() + node.getOwnPort()).hashCode());
 
@@ -133,13 +135,13 @@ public class MediatorFsNet {
 
     }
 
-    public void updateJson(FSTreeNode treeNode){
+    public void updateJson(FSTreeNode treeRoot) {
         System.out.println("Mediator updateJson");
-        MainUI.updateModels(treeNode);
+        MainUI.updateModels(treeRoot, false);
     }
 
-    public void removeFileFromTree(String UFID, FSTreeNode treeFileDirectory){
-        fsStructure.getTree().findNode(fsStructure.getTree().findRoot(),treeFileDirectory.getNameNode()).removeOneFile(UFID);
+    public void removeFileFromTree(String UFID, FSTreeNode treeFileDirectory) {
+        fsStructure.getTree().findNode(fsStructure.getTree().findRoot(), treeFileDirectory.getNameNode()).removeOneFile(UFID);
     }
 
 

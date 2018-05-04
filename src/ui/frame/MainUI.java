@@ -8,10 +8,12 @@ import fs.actions.interfaces.FileService;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import ui.utility.*;
 import utils.Constants;
+import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -467,7 +469,7 @@ public class MainUI extends JFrame {
      *
      * @param treeNode The update FSTreeNode Object
      */
-    public static void updateModels(FSTreeNode treeNode) {
+    public static void updateModels(FSTreeNode treeNode, boolean local) {
         System.out.println("MainUI updateModels");
 
         FileViewTableModel model = (FileViewTableModel) table.getModel();
@@ -481,7 +483,14 @@ public class MainUI extends JFrame {
         tree.setSelectionPath(path);
         tree.expandPath(path);
 
-        fsStructure.generateJson(directoryTree);
+        if (local){
+            fsStructure.generateJson(directoryTree);
+        }else{
+            String gson = treeNode.getGson();
+            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, gson);
+            FSStructure.getInstance().generateTreeStructure();
+        }
+
     }
 
     private boolean openFile(FileWrapper fileWrapper) {
@@ -507,8 +516,11 @@ public class MainUI extends JFrame {
             String ufid = fileService.create(netNodeLocation.getName(), currentNode, fileName);
             directoryService.addName(currentNode, fileName, ufid, node -> {
                 isItemCreated = true;
-                updateModels(node.findRoot());
+                updateModels(node, true);
             });
+            System.out.println("Replicazione del json per l'albero dopo creazione file");
+
+
         } catch (IOException e) {
             e.printStackTrace();
             isCreated = false;
@@ -520,7 +532,7 @@ public class MainUI extends JFrame {
     private void newFolder(String folderName) {
         directoryService.createDirectory(currentNode, folderName, node -> {
             isItemCreated = true;
-            updateModels(node.findRoot());
+            updateModels(node, true);
         });
     }
 
@@ -528,21 +540,21 @@ public class MainUI extends JFrame {
 
         directoryService.renameDirectory(node, newName, fsNode -> {
             isItemCreated = true;
-            updateModels(currentNode.findRoot());
+            updateModels(currentNode.findRoot(), true);
         });
     }
 
     private void deleteFile(FileWrapper fileWrapper) {
         fileService.delete(fileWrapper.getUFID(), currentNode, node -> {
             isItemCreated = true;
-            updateModels(node.findRoot());
+            updateModels(node.findRoot(), true);
         });
     }
 
     private void deleteFolder(FSTreeNode node) {
         directoryService.deleteDirectory(node, treeNode -> {
             isItemCreated = true;
-            updateModels(treeNode.findRoot());
+            updateModels(treeNode.findRoot(), true);
         });
     }
 
