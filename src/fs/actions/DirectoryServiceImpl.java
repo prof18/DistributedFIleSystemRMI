@@ -50,26 +50,26 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public void createDirectory(FSTreeNode currentNode, String dirName, NewItemCallback callback) {
 
-        //FSTreeNode tree = FSStructure.getInstance().getTree();
+        FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
+        FSTreeNode directoryParent = treeRoot.findNode(treeRoot, currentNode.getNameNode());
         FSTreeNode node = new FSTreeNode();
-        node.setParent(currentNode);
+        node.setParent(directoryParent);
         node.setNameNode(dirName);
         //TODO; change UUID
         node.setUFID(UUID.randomUUID().toString());
         node.setChildrens(new ArrayList<>());
         node.setFiles(new ArrayList<>());
-        currentNode.addChild(node);
+        directoryParent.addChild(node);
         //long editTime = System.currentTimeMillis();
         node.setLastEditTime(System.currentTimeMillis());
         node.updateAncestorTime();
 
-        callback.onItemChanged(currentNode);
+        callback.onItemChanged(directoryParent);
 
-        MediatorFsNet mediator = MediatorFsNet.getInstance();
-        FSTreeNode root = node.findRoot();
-        FSStructure.getInstance().generateJson(root);
-        root.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-        mediator.jsonReplicaton(node);
+        System.out.println("Replicazione del json per l'albero dopo creazione file");
+        FSStructure.getInstance().generateJson(treeRoot);
+        treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+        MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
 
     }
 
@@ -94,6 +94,7 @@ public class DirectoryServiceImpl implements DirectoryService {
                 nodeToDelete.setLastEditTime(System.currentTimeMillis());
                 nodeToDelete.updateAncestorTime();
                 parent.getChildren().remove(nodeToDelete);
+
                 callback.onItemChanged(parent);
             }
         } else {
@@ -125,11 +126,14 @@ public class DirectoryServiceImpl implements DirectoryService {
                 wrapper.setPath(currentNode.getPath() + "/" + name);
             else
                 wrapper.setPath(currentNode.getPath() + name);
-            
+
+            System.out.println("Replicazione del json per l'albero dopo creazione file");
             FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
             FSTreeNode curNode = treeRoot.findNode(treeRoot, currentNode.getNameNode());
             curNode.addFile(wrapper);
+
             callback.onItemChanged(curNode);
+
             FSStructure.getInstance().generateJson(treeRoot);
             treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             MediatorFsNet.getInstance().jsonReplicaton(treeRoot);

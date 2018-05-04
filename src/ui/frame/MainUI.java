@@ -518,8 +518,6 @@ public class MainUI extends JFrame {
                 isItemCreated = true;
                 updateModels(node, true);
             });
-            System.out.println("Replicazione del json per l'albero dopo creazione file");
-
 
         } catch (IOException e) {
             e.printStackTrace();

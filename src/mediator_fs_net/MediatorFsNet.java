@@ -107,6 +107,10 @@ public class MediatorFsNet {
     }
 
     public FSStructure getFsStructure() {
+
+        if (fsStructure == null){
+            fsStructure= FSStructure.getInstance();
+        }
         return fsStructure;
     }
 
@@ -115,7 +119,7 @@ public class MediatorFsNet {
         return node;
     }
 
-    public void jsonReplicaton(FSTreeNode directory) {
+    public void jsonReplicaton(FSTreeNode treeRoot) {
 
         try {
             HashMap<Integer, NetNodeLocation> tmpHashMap = new HashMap<>(node.getHashMap());
@@ -126,7 +130,7 @@ public class MediatorFsNet {
 
             for (NetNodeLocation nnl : tmpHashMap.values()) {
                 System.out.println("Nodo: " + nnl.toUrl());
-                new JsonReplicationTask(nnl, directory).run();
+                new JsonReplicationTask(nnl, treeRoot).run();
             }
         } catch (RemoteException e) {
             e.printStackTrace();

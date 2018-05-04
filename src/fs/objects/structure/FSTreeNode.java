@@ -129,7 +129,7 @@ public class FSTreeNode implements Serializable {
     }
 
     public FSTreeNode findNode(FSTreeNode node, String nodeName) {
-        if (node.getNameNode().compareTo(nodeName) == 0) {
+        if ((node.getNameNode()).compareTo(nodeName) == 0) {
             return node;
         } else {
             for (FSTreeNode child: node.getChildren()) {

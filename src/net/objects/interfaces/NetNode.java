@@ -43,7 +43,7 @@ public interface NetNode extends Remote, Serializable {
 
     NetNodeLocation getOwnLocation() throws RemoteException;
 
-    void updateUI(FSTreeNode directory) throws RemoteException;
+    void updateUI(FSTreeNode treeRoot) throws RemoteException;
 
     /**
      * This method is used to get the own ip address
