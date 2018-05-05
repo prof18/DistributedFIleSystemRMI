@@ -249,15 +249,16 @@ public class FSTreeNode implements Serializable {
     }
 
     public FSTreeNode findRoot() {
-        FSTreeNode root = null;
+        FSTreeNode root;
         if (isRoot()) {
             root = this;
             System.out.println("E' la radice");
         } else {
             FSTreeNode node = parent;
             while (!node.isRoot()) {
-                root = node.getParent();
+                node = node.getParent();
             }
+            root = node;
         }
 
         return root;

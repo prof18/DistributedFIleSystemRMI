@@ -478,14 +478,14 @@ public class MainUI extends JFrame {
         TreePath path = tree.getSelectionPath();
         FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
         tree.setModel(null);
-        treeModel.setNode(treeNode);
+        treeModel.setNode(treeNode.findRoot());
         tree.setModel(treeModel);
         tree.setSelectionPath(path);
         tree.expandPath(path);
 
-        if (local){
+        if (local) {
             fsStructure.generateJson(directoryTree);
-        }else{
+        } else {
             String gson = treeNode.getGson();
             PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, gson);
             FSStructure.getInstance().generateTreeStructure();
