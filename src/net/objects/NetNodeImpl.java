@@ -327,6 +327,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         String filePath = path;
 
+        System.out.println("saveFileReplica");
+        System.out.println(rw.getUFID());
         /*if (filePath.length() > 1) { //non è la radice
             String directoryPath = filePath.substring(0, filePath.length() - 1);
             File directory = new File(directoryPath);
@@ -370,6 +372,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         String checksum = Util.getChecksum(bytesArray);
+        System.out.println("checksum : "+checksum);
+        System.out.println(rw.getChecksum());
         if (checksum.compareTo(rw.getChecksum()) != 0) {
             return false;
         }

@@ -34,6 +34,7 @@ public class ReplicationTask extends TimerTask implements Serializable {
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
             boolean rep;
             do {
+                System.out.println(repWr.getUFID());
                 rep = node.saveFileReplica(repWr);
 
                 if (rep) {

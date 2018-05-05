@@ -110,18 +110,26 @@ public class FileServiceImpl implements FileService {
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         byte[] repContent = null;
         int oldLength = 0; //file length before write the new content
-        String localHost = null;
+        NetNodeLocation localHost = null;
         try {
-            localHost = mediator.getNode().getOwnIp();
+            localHost = mediator.getNode().getOwnLocation();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
 
         try {
             if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
+                //debug
+                System.out.println(localHost);
+                for(int i=0;i<nodeList.size();i++){
+                    System.out.println(nodeList.get(i).toUrl());
+                }
+
+
+                //fine debug
                 if (nodeList.get(nodeList.indexOf(localHost)).canWrite()) {
                     for (int i = 0; i < nodeList.size(); i++) {
-                        if (nodeList.get(i).getIp().compareTo(localHost) == 0) { //trovo il nodo locale
+                        if (nodeList.get(i).equals(localHost)) { //trovo il nodo locale
                             tempNodeList.remove(i);
                             nodeList.get(i).unlockWriting();
                             break;
@@ -246,18 +254,21 @@ public class FileServiceImpl implements FileService {
             ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
             rw.setAttribute(cacheFileWrapper.getAttribute());
             rw.setContent(repContent);
+            //TODO: modificato verificare se è giusto
+            rw.setChecksum(Util.getChecksum(repContent));
             System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
             rw.setPath(mediator.getFsStructure().getTree().getPath());
             mediator.getFsStructure().generateTreeStructure();
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Set path file:" + rw.getPath());
 
-            for (NetNodeLocation ndl : nodeList) {
-                ndl.reduceOccupiedSpace(oldLength);
-                new ReplicationTask(ndl, rw, mediator.getNode()).run();
+                for (NetNodeLocation ndl : nodeList) {
+                    ndl.reduceOccupiedSpace(oldLength);
+                    System.out.println("chiamato il replication task da riga 265");
+                    new ReplicationTask(ndl, rw, mediator.getNode()).run();
 
 
-            }
+                }
 
             for (NetNodeLocation nnl : tempNodeList) {
                 int pos = nodeList.indexOf(nnl);
@@ -584,6 +595,7 @@ public class FileServiceImpl implements FileService {
         //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
         //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
         System.out.println("Nodo trovato, avvio task replicazione");
+        System.out.println("chiamato il replication task da riga 596");
         new ReplicationTask(selectedNode, repWr, node).run();
     }
 
