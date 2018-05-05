@@ -255,7 +255,9 @@ public class FileServiceImpl implements FileService {
             rw.setAttribute(cacheFileWrapper.getAttribute());
             rw.setContent(repContent);
             //TODO: modificato verificare se è giusto
-            rw.setChecksum(Util.getChecksum(repContent));
+            byte[] fatb = fileToBytes(path + fileID + ".attr");
+            byte[] tftb = Util.append(repContent, fatb);
+            rw.setChecksum(Util.getChecksum(tftb));
             System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
             rw.setPath(mediator.getFsStructure().getTree().getPath());
             mediator.getFsStructure().generateTreeStructure();
@@ -297,13 +299,15 @@ public class FileServiceImpl implements FileService {
         oout.writeObject(attribute);
         oout.flush();
         byte[] ftb = fileToBytes(filePath);
+        byte[] fatb = fileToBytes(filePath + ".attr");
+        byte[] tftb = Util.append(ftb, fatb);
         ArrayList<NetNodeLocation> nl = new ArrayList<>();
         nl.add(mediator.getNode().getOwnLocation());
         mediator.getNode().getFileNodeList().put(UFID, nl);
         FileWrapper fw = new FileWrapper(UFID, fileName);
         fw.setAttribute(attribute);
         fw.setPath(curDir.getPath());
-        fw.setChecksum(Util.getChecksum(ftb));
+        fw.setChecksum(Util.getChecksum(tftb));
 
         //la replicazione
         System.out.println("Eseguo la replicazione del file creato");
@@ -319,7 +323,7 @@ public class FileServiceImpl implements FileService {
             rw.setPath(curDir.getPath());
             System.out.println("Set path file from file system root:" + rw.getPath());
             rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
-            rw.setContent(ftb);
+            rw.setContent(tftb);
             rw.setChecksum(fw.getChecksum());
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Creazione contenitore riuscita");

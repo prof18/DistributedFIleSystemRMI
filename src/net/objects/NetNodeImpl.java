@@ -74,10 +74,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public void updateFileNodeList(String UFID, ArrayList<NetNodeLocation> nodeList) {
         System.out.println("UPDATE FILE NODE LIST");
-        if (fileNodeList.size() == 0){
+        if (fileNodeList.size() == 0) {
             fileNodeList.put(UFID, nodeList);
-        }else{
-            if (fileNodeList.containsKey(UFID) && fileNodeList.get(UFID).size() < nodeList.size()){
+        } else {
+            if (fileNodeList.containsKey(UFID) && fileNodeList.get(UFID).size() < nodeList.size()) {
                 fileNodeList.replace(UFID, fileNodeList.get(UFID), nodeList);
             }
         }
@@ -363,16 +363,17 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         byte[] bytesArray = null;
-        Path path = Paths.get(f.getPath());
 
         try {
-            bytesArray = Files.readAllBytes(path);
+            byte[] ftb = Files.readAllBytes(Paths.get(f.getPath()));
+            byte[] fatb = Files.readAllBytes(Paths.get(fileAtt.getPath()));
+            bytesArray = Util.append(ftb, fatb);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         String checksum = Util.getChecksum(bytesArray);
-        System.out.println("checksum : "+checksum);
+        System.out.println("checksum : " + checksum);
         System.out.println(rw.getChecksum());
         if (checksum.compareTo(rw.getChecksum()) != 0) {
             return false;
@@ -398,7 +399,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }*/
 
-    public boolean deleteFile(String UFID, String filePath, FSTreeNode treeFileDirectory){
+    public boolean deleteFile(String UFID, String filePath, FSTreeNode treeFileDirectory) {
 
         String totalFilePath = path + UFID;
         System.out.println("Percorso totale file: " + totalFilePath);
@@ -416,7 +417,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             mediatorFsNet.removeFileFromTree(UFID, treeFileDirectory);
         }
 
-        if (filesDeleted && fileNodeList.containsKey(UFID)){
+        if (filesDeleted && fileNodeList.containsKey(UFID)) {
             fileNodeList.remove(UFID);
         }
 
@@ -457,7 +458,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             fileNodeList.get(UFID).add(netNode);
         }
 
-        for (NetNodeLocation nnl:connectedNodes.values()) {
+        for (NetNodeLocation nnl : connectedNodes.values()) {
             Registry registry = null;
             try {
                 registry = LocateRegistry.getRegistry(nnl.getIp(), nnl.getPort());
@@ -475,7 +476,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }
 
-    public void updateUI(FSTreeNode treeRoot){
+    public void updateUI(FSTreeNode treeRoot) {
         mediatorFsNet.updateJson(treeRoot);
     }
 }

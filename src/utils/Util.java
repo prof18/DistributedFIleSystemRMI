@@ -232,4 +232,10 @@ public class Util {
         return new String(hexChars);
     }
 
+    public static byte[] append(byte[] a1, byte[] a2) {
+        byte[] ret = new byte[a1.length + a2.length];
+        System.arraycopy(a1, 0, ret, 0, a1.length);
+        System.arraycopy(a2, 0, ret, a1.length, a2.length);
+        return ret;
+    }
 }
