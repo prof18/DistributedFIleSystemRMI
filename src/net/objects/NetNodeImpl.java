@@ -338,8 +338,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }*/
 
-        File fileAtt = new File(filePath + rw.getUFID() + ".attr");
         File f = new File(filePath + rw.getUFID());
+        File fileAtt = new File(filePath + rw.getUFID() + ".attr");
 
         try {
 

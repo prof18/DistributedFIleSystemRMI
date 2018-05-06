@@ -121,7 +121,7 @@ public class FileServiceImpl implements FileService {
             if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
                 //debug
                 System.out.println(localHost);
-                for(int i=0;i<nodeList.size();i++){
+                for (int i = 0; i < nodeList.size(); i++) {
                     System.out.println(nodeList.get(i).toUrl());
                 }
 
@@ -264,13 +264,13 @@ public class FileServiceImpl implements FileService {
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Set path file:" + rw.getPath());
 
-                for (NetNodeLocation ndl : nodeList) {
-                    ndl.reduceOccupiedSpace(oldLength);
-                    System.out.println("chiamato il replication task da riga 265");
-                    new ReplicationTask(ndl, rw, mediator.getNode()).run();
+            for (NetNodeLocation ndl : nodeList) {
+                ndl.reduceOccupiedSpace(oldLength);
+                System.out.println("chiamato il replication task da riga 265");
+                new ReplicationTask(ndl, rw, mediator.getNode()).run();
 
 
-                }
+            }
 
             for (NetNodeLocation nnl : tempNodeList) {
                 int pos = nodeList.indexOf(nnl);
@@ -322,8 +322,8 @@ public class FileServiceImpl implements FileService {
             System.out.println("Local path file:" + filePath);
             rw.setPath(curDir.getPath());
             System.out.println("Set path file from file system root:" + rw.getPath());
-            rw.setAttribute(new FileAttribute(file.length(), creationDate, creationDate, 0));
-            rw.setContent(tftb);
+            rw.setAttribute(attribute);
+            rw.setContent(ftb);
             rw.setChecksum(fw.getChecksum());
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Creazione contenitore riuscita");
