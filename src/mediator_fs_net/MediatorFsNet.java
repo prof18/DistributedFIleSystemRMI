@@ -38,6 +38,7 @@ public class MediatorFsNet {
 
     public MediatorFsNet() {
         PropertiesHelper.getInstance();
+        setFsStructure();
     }
 
     /**

@@ -308,6 +308,7 @@ public class FileServiceImpl implements FileService {
         mediator.getNode().getFileNodeList().put(UFID, nl);
         FileWrapper fw = new FileWrapper(UFID, fileName);
         fw.setAttribute(attribute);
+        System.out.println("Directory path " + curDir.getPathWithoutRoot());
         fw.setPath(curDir.getPath());
         fw.setChecksum(Util.getChecksum(tftb));
 
