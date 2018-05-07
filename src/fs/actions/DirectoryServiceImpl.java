@@ -136,6 +136,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
             FSStructure.getInstance().generateJson(treeRoot);
             treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            System.out.println("Gson: " + PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
         } catch (FileNotFoundException e) {
             e.printStackTrace();

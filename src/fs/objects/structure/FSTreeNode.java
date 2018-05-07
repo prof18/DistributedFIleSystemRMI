@@ -240,7 +240,7 @@ public class FSTreeNode implements Serializable {
         if (!isRoot()) {
             FSTreeNode node = parent;
             while (!node.isRoot()) {
-                path = "/" + node.getNameNode() + path;
+                path = node.getNameNode() + "/" + path;
                 node = node.getParent();
             }
             path = path + nameNode;
