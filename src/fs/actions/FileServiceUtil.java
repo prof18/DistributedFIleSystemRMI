@@ -118,6 +118,9 @@ public class FileServiceUtil {
                     }
                 }
 
+                String node1Gson = node1.getJson();
+                node.updateJson(node1Gson);
+
                 mainUI.updateConnectedNode(node.getHashMap());
 
 

@@ -3,12 +3,14 @@ package net.objects;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
 import net.actions.GarbageService;
 import net.objects.interfaces.NetNode;
 import ui.frame.MainUI;
 import utils.Constants;
+import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -480,5 +482,66 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public void updateUI(FSTreeNode treeRoot) {
         mediatorFsNet.updateJson(treeRoot);
+    }
+
+    //TODO
+
+    public String getJson() {
+        return PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
+    }
+
+    public synchronized void setJson(String json) {
+        PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+    }
+
+    public synchronized void updateJson(String json) {
+
+        GSONHelper helpJson = GSONHelper.getInstance();
+
+        HashMap<String, JsonFolder> receivedFolder = helpJson.jsonToFolders(json);
+
+        String thisJson = this.getJson();
+
+        if (thisJson != null) {
+
+            HashMap<String, JsonFolder> ownFolder = helpJson.jsonToFolders(thisJson);
+
+            boolean changed = false;
+
+            for (Map.Entry<String, JsonFolder> entry : ownFolder.entrySet()) {
+
+                if (receivedFolder.containsKey(entry.getKey())) {
+
+                    long ownTime = entry.getValue().getLastEditTime();
+                    long receivedTime = receivedFolder.get(entry.getKey()).getLastEditTime();
+
+                    if (ownTime > receivedTime) {
+                        changed = true;
+                        receivedFolder.replace(entry.getKey(),
+                                ownFolder.get(entry.getKey()), entry.getValue());
+                    }
+
+                } else {
+                    changed = true;
+                    receivedFolder.put(entry.getKey(), entry.getValue());
+                }
+
+            }
+
+            String newJson = helpJson.foldersToJson(receivedFolder);
+            this.setJson(newJson);
+
+//            if (changed) {
+//                // Aggiorno tutti i json
+//                this.callUpdateAllJson(newJson);
+//
+//            }
+
+        } else {
+            // Non è presente il file Json nel nodo attuale
+            // quindi copio direttamente quello importato
+            this.setJson(json);
+        }
+
     }
 }

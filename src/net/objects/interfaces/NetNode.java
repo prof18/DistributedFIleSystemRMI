@@ -207,4 +207,14 @@ public interface NetNode extends Remote, Serializable {
 
     String verify() throws RemoteException;
 
+
+    //TODO
+
+    String getJson() throws  RemoteException;
+
+    void setJson(String gson) throws RemoteException;
+
+    void updateJson(String gson) throws RemoteException;
+
+
 }
