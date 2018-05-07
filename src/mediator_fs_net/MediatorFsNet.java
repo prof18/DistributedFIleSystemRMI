@@ -58,6 +58,7 @@ public class MediatorFsNet {
         service = service1;
     }
 
+
     public void setFsStructure() {
         this.fsStructure = FSStructure.getInstance();
     }

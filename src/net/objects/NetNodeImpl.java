@@ -192,7 +192,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
                         System.out.println("[replaceFileFromFS]visitando il nodo : " + location.toUrl());
                         NetNode node = (NetNode) registry.lookup(location.toUrl());
-                        System.out.println(node.replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID()));
+                        System.out.println(node.
+                                replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID()));
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     } catch (NotBoundException e) {
@@ -213,7 +214,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         System.out.println("entrato in replaceFile del nodo : " + ownLocation.toUrl());
         CacheFileWrapper file = getFile(UFID);
         try {
-            FileInputStream fis = new FileInputStream(UFID);
+            //bisogna aggiungere il path del file;
+            FileInputStream fis = new FileInputStream(path+UFID);
             System.out.println("file obsoleto è" + new String(fis.readAllBytes()));
         } catch (FileNotFoundException e) {
             e.printStackTrace();

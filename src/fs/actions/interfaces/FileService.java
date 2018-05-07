@@ -21,7 +21,10 @@ public interface FileService extends Remote, Serializable {
      * @param count  is the number of byte to read
      * @return the array of byte to read
      * @throws FileNotFoundException
+     *
+     *
      */
+
     byte[] read(String fileID, int offset, int count) throws FileNotFoundException;
 
     /**
