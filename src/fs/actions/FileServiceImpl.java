@@ -90,7 +90,6 @@ public class FileServiceImpl implements FileService {
 
     public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
         System.out.println("entrato nel write");
-        boolean canReplicate = true;
         ArrayList<NetNodeLocation> nodeList = null;
         try {
             nodeList = mediator.getNode().getFileNodeList().get(fileID);
@@ -100,6 +99,17 @@ public class FileServiceImpl implements FileService {
         if (nodeList.size() == 0) {
             System.out.println("nessun file trovato");
             return;
+        }
+
+        boolean canReplicate = false;
+        for (NetNodeLocation nnl:nodeList) {
+            try {
+                if((nnl.toUrl()).compareTo(mediator.getNode().getOwnLocation().toUrl()) == 0){
+                    canReplicate = nnl.canWrite();
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
         try {
             if (mediator.getNode().getFileNodeList().get(fileID).size() <= 1) {
@@ -203,7 +213,6 @@ public class FileServiceImpl implements FileService {
                 e.printStackTrace();
             }
 
-
         } else {
             System.out.println("il file che si vuole sovrascrivere non è locale");
             FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
@@ -258,7 +267,8 @@ public class FileServiceImpl implements FileService {
             rw.setContent(repContent);
             //TODO: modificato verificare se è giusto
             byte[] fatb = fileToBytes(path + fileID + ".attr");
-            byte[] tftb = Util.append(repContent, fatb);
+            byte[] ftb = fileToBytes(path + fileID);
+            byte[] tftb = Util.append(ftb, fatb);
             rw.setChecksum(Util.getChecksum(tftb));
             System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
             rw.setPath(mediator.getFsStructure().getTree().getPath());
