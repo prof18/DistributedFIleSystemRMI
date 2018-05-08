@@ -2,43 +2,37 @@ package mediator_fs_net;
 
 import fs.actions.FSStructure;
 import fs.actions.JsonReplicationTask;
-import fs.actions.ReplicationTask;
-import fs.actions.ReplicationWrapper;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
-import fs.actions.object.WrapperFileServiceUtil;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
-import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import ui.frame.MainUI;
 import utils.PropertiesHelper;
 
-import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
 public class MediatorFsNet {
+    private static MediatorFsNet INSTANCE = null;
     private NetNode node;
     private FileService service;
     private FSStructure fsStructure;
 
-    private static MediatorFsNet INSTANCE = null;
+    public MediatorFsNet() {
+        PropertiesHelper.getInstance();
+        setFsStructure();
+    }
 
     public static MediatorFsNet getInstance() {
-        if (INSTANCE == null){
+        if (INSTANCE == null) {
             INSTANCE = new MediatorFsNet();
         }
 
         return INSTANCE;
-    }
-
-    public MediatorFsNet() {
-        PropertiesHelper.getInstance();
-        setFsStructure();
     }
 
     /**
@@ -110,8 +104,8 @@ public class MediatorFsNet {
 
     public FSStructure getFsStructure() {
 
-        if (fsStructure == null){
-            fsStructure= FSStructure.getInstance();
+        if (fsStructure == null) {
+            fsStructure = FSStructure.getInstance();
         }
         return fsStructure;
     }

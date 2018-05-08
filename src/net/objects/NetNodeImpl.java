@@ -4,6 +4,7 @@ import fs.actions.FSStructure;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
+import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
@@ -17,14 +18,16 @@ import utils.Util;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
@@ -48,6 +51,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         //creation of a random name for the new nodes
         String name = "host" + new Random().nextInt(1000);
+
+        this.ownIP = ownIP;
+        this.port = port;
 
         ownLocation = new NetNodeLocation(ownIP, port, name);
         connectedNodes = new HashMap<>();
@@ -218,7 +224,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         CacheFileWrapper file = getFile(UFID);
         try {
             //bisogna aggiungere il path del file;
-            FileInputStream fis = new FileInputStream(path+UFID);
+            FileInputStream fis = new FileInputStream(path + UFID);
             //TODO: aggiungere cattura del file
             System.out.println("file obsoleto è" + new String(fis.readAllBytes()));
         } catch (FileNotFoundException e) {
@@ -492,11 +498,17 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
     }
 
-    public synchronized void setJson(String json) {
+    public synchronized void setJson(String json, boolean up) {
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+
+        if (up) {
+            FSStructure.getInstance().generateTreeStructure();
+            MainUI.updateModels(FSStructure.getInstance().getTree().findRoot(), false);
+        }
+
     }
 
-    public synchronized void updateJson(String json, boolean t) {
+    public synchronized void updateJson(String json) {
 
         System.out.println("[UPDATE JSON]");
 
@@ -514,24 +526,38 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             boolean changed = false;
 
+            ArrayList<JsonFile> ownChildRoot = ownFolder.get("root").getFiles();
+
+            if (ownChildRoot.size() != 0) {
+
+                for (int i = 0; i < ownChildRoot.size(); i++) {
+
+                    if (!receivedFolder.get("root").getFiles().contains(ownChildRoot.get(i))) ;
+                    receivedFolder.get("root").getFiles().add(ownChildRoot.get(i));
+
+                }
+            }
+
+            ownFolder.remove("root");
+
             for (Map.Entry<String, JsonFolder> entry : ownFolder.entrySet()) {
 
                 if (!receivedFolder.containsKey(entry.getKey())) {
 
                     changed = true;
-                    receivedFolder.put(entry.getKey(), entry.getValue());
 
-                    receivedFolder.get("root").getChildren().add(entry.getKey());
+                    receivedFolder.put(entry.getKey(), entry.getValue());
+                    if (entry.getValue().getParentUFID().equals("root"))
+                        receivedFolder.get("root").getChildren().add(entry.getKey());
 
                 }
 
             }
 
             String newJson = helpJson.foldersToJson(receivedFolder);
-            this.setJson(newJson);
+            this.setJson(newJson,false);
 
-            if (changed && !t) {
-                // Aggiorno tutti i json
+            if (changed) {
                 this.callUpdateAllJson(newJson);
             }
 
@@ -539,12 +565,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             System.out.println("[Json non presente]");
             // Non è presente il file Json nel nodo attuale
             // quindi copio direttamente quello importato
-            this.setJson(json);
+            this.setJson(json,false);
         }
-        if(t) {
-            FSStructure.getInstance().generateTreeStructure();
-            MainUI.updateModels(FSStructure.getInstance().getTree().findRoot(), false);
-        }
+
     }
 
 
@@ -573,7 +596,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
 
                     NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
-                    nodeTemp.updateJson(json, true);
+                    //nodeTemp.updateJson(json, true);
+                    nodeTemp.setJson(json,true);
 
                 } catch (RemoteException e) {
                     System.out.println("[callUpdateAllJson] problemi connessione" + tmpPort + "; Ip: " + tmpIp);
@@ -586,7 +610,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             }
         }
-
 
 
     }

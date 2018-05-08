@@ -212,9 +212,9 @@ public interface NetNode extends Remote, Serializable {
 
     String getJson() throws  RemoteException;
 
-    void setJson(String gson) throws RemoteException;
+    void setJson(String gson, boolean up) throws RemoteException;
 
-    void updateJson(String gson, boolean t) throws RemoteException;
+    void updateJson(String gson) throws RemoteException;
 
     void callUpdateAllJson(String json) throws RemoteException;
 
