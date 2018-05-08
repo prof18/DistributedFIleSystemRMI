@@ -219,6 +219,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         try {
             //bisogna aggiungere il path del file;
             FileInputStream fis = new FileInputStream(path+UFID);
+            //TODO: aggiungere cattura del file
             System.out.println("file obsoleto è" + new String(fis.readAllBytes()));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
