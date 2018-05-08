@@ -1,5 +1,6 @@
 package net.objects;
 
+import fs.actions.FSStructure;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
@@ -494,7 +495,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
     }
 
-    public synchronized void updateJson(String json) {
+    public synchronized void updateJson(String json, boolean t) {
+
+        System.out.println("[UPDATE JSON]");
 
         GSONHelper helpJson = GSONHelper.getInstance();
 
@@ -504,26 +507,21 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         if (thisJson != null) {
 
+            System.out.println("[Json già presente]");
+
             HashMap<String, JsonFolder> ownFolder = helpJson.jsonToFolders(thisJson);
 
             boolean changed = false;
 
             for (Map.Entry<String, JsonFolder> entry : ownFolder.entrySet()) {
 
-                if (receivedFolder.containsKey(entry.getKey())) {
+                if (!receivedFolder.containsKey(entry.getKey())) {
 
-                    long ownTime = entry.getValue().getLastEditTime();
-                    long receivedTime = receivedFolder.get(entry.getKey()).getLastEditTime();
-
-                    if (ownTime > receivedTime) {
-                        changed = true;
-                        receivedFolder.replace(entry.getKey(),
-                                ownFolder.get(entry.getKey()), entry.getValue());
-                    }
-
-                } else {
                     changed = true;
                     receivedFolder.put(entry.getKey(), entry.getValue());
+
+                    receivedFolder.get("root").getChildren().add(entry.getKey());
+
                 }
 
             }
@@ -531,17 +529,65 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             String newJson = helpJson.foldersToJson(receivedFolder);
             this.setJson(newJson);
 
-//            if (changed) {
-//                // Aggiorno tutti i json
-//                this.callUpdateAllJson(newJson);
-//
-//            }
+            if (changed && !t) {
+                // Aggiorno tutti i json
+                this.callUpdateAllJson(newJson);
+            }
 
         } else {
+            System.out.println("[Json non presente]");
             // Non è presente il file Json nel nodo attuale
             // quindi copio direttamente quello importato
             this.setJson(json);
         }
+        if(t) {
+            FSStructure.getInstance().generateTreeStructure();
+            MainUI.updateModels(FSStructure.getInstance().getTree().findRoot(), false);
+        }
+    }
+
+
+    public void callUpdateAllJson(String json) {
+
+        for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
+
+            if ((ownIP + port).hashCode() != entry.getKey()) {
+
+                System.out.println("[callUpdateAllJson]");
+
+                Registry registry = null;
+
+                String tmpIp = "-NOT UPDATE-";
+                int tmpPort = -1;
+                String tmpName = "-NOT UPDATE-";
+
+                try {
+
+                    tmpIp = entry.getValue().getIp();
+                    tmpPort = entry.getValue().getPort();
+                    tmpName = entry.getValue().getName();
+
+                    registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
+                    String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
+
+                    NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+                    nodeTemp.updateJson(json, true);
+
+                } catch (RemoteException e) {
+                    System.out.println("[callUpdateAllJson] problemi connessione" + tmpPort + "; Ip: " + tmpIp);
+
+                } catch (NotBoundException e) {
+                    System.out.println("[NotBoundException-callUpdateAllJson] problemi connessione\" + tmpPort + \"; Ip: \" + tmpIp");
+                    e.printStackTrace();
+
+                }
+
+            }
+        }
+
+
 
     }
+
 }

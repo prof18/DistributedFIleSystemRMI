@@ -163,8 +163,8 @@ public class FSStructure {
             //generate the tree with only the root
             tree = new FSTreeNode();
             tree.setParent(null);
-            //TODO: change UUID
-            tree.setUFID(UUID.randomUUID().toString());
+            //TODO: change UUID set to root for everyone
+            tree.setUFID("root");
             tree.setNameNode("root");
             tree.setChildrens(new ArrayList<>());
             tree.setFiles(new ArrayList<>());
