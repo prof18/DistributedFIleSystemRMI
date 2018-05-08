@@ -29,6 +29,7 @@ public class ReplicationTask extends TimerTask implements Serializable {
         System.out.println("ReplicattionTask");
         Registry registry;
         try {
+            int it = 0;
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             System.out.println("Node URL: " + netNode.toUrl());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
@@ -44,8 +45,9 @@ public class ReplicationTask extends TimerTask implements Serializable {
 
                 } else {
                     System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
+                    it++;
                 }
-            } while (!rep);
+            } while (!rep && it <=10);
 
             /*if (node.saveFileReplica(repWr)) {
 
