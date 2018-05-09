@@ -499,12 +499,20 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public synchronized void setJson(String json, boolean up) {
+        System.out.println("SETJSON");
+
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
 
+        System.out.println("writed new config");
         if (up) {
+            System.out.println("generating treeStructure");
             FSStructure.getInstance().generateTreeStructure();
+            System.out.println("NetNodeImpl.setJson findRoot : "+FSStructure.getInstance().getTree().findRoot());
+            System.out.println("prima aggiornamento UI");
             MainUI.updateModels(FSStructure.getInstance().getTree().findRoot(), false);
+            System.out.println("dop aggiornamento UI");
         }
+        System.out.println("FINE SETJSON");
 
     }
 
@@ -558,6 +566,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             this.setJson(newJson,false);
 
             if (changed) {
+                System.out.println(" called callUpdateAllJson");
                 this.callUpdateAllJson(newJson);
             }
 
@@ -596,8 +605,13 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
 
                     NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+                    System.out.println("nodeTemp = " + nodeTemp);
+                    System.out.println("json = " + json);
                     //nodeTemp.updateJson(json, true);
+
+                    System.out.println("trying to set json");
                     nodeTemp.setJson(json,true);
+                    System.out.println("setted json");
 
                 } catch (RemoteException e) {
                     System.out.println("[callUpdateAllJson] problemi connessione" + tmpPort + "; Ip: " + tmpIp);

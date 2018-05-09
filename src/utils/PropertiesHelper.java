@@ -64,6 +64,9 @@ public class PropertiesHelper {
      */
     public void writeConfig(String key, String value) {
         try {
+            System.out.println("PropertiesHelper.writeConfig props: "+props);
+            System.out.println("PropertiesHelper.writeConfig key: "+key);
+            System.out.println("PropertiesHelper.writeConfig value: "+value);
             props.setProperty(key, value);
             OutputStream outputStream = new FileOutputStream(propFile);
             props.store(outputStream, "DFS settings");

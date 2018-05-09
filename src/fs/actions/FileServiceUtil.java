@@ -118,8 +118,13 @@ public class FileServiceUtil {
                     }
                 }
 
+                System.out.println("aggiornamento json in create del fileServiceUtil");
+                System.out.println("called getJson");
                 String node1Gson = node1.getJson();
+                System.out.println("called updateJson");
+                System.out.println("node1Gson = " + node1Gson);
                 node.updateJson(node1Gson);
+                System.out.println("called get updateConnectNode");
                 mainUI.updateConnectedNode(node.getHashMap());
 
 

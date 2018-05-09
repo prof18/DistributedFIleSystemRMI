@@ -153,10 +153,17 @@ public class SettingsDialog extends JDialog {
                 dispose();
                 main = new MainUI();
                 main.showUI(true);
-            } catch (NotBoundException | NullPointerException e ) {
+            } catch (NotBoundException e ) {
                 //if the info aren't correct exit from the program
                 new SettingsDialog(true);
-                showMessageDialog(null, "Settings are incorrect!");
+                showMessageDialog(null, "Settings are incorrect! [NotBoundException]");
+                e.printStackTrace();
+                System.exit(0);
+            }
+            catch (NullPointerException e){
+                new SettingsDialog(true);
+                showMessageDialog(null, "Settings are incorrect! [NullPointerException]");
+                e.printStackTrace();
                 System.exit(0);
             }
         });

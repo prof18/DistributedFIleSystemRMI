@@ -184,6 +184,15 @@ public class MainUI extends JFrame {
         String ipRet = PropertiesHelper.getInstance().loadConfig(Constants.IP_FS_CONFIG);
         String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String portRetConfig = PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
+
+        System.out.println("checkValue connect()");
+        System.out.println("ipHost = " + ipHost);
+        System.out.println("nameServiceHost = " + nameServiceHost);
+        System.out.println("ipRet = " + ipRet);
+        System.out.println("path = " + path);
+        System.out.println("portRetConfig = " + portRetConfig);
+        System.out.println();
+        System.out.println();
         int portRet = -1;
         if (portRetConfig != null && !portRetConfig.equals("")) {
             portRet = Integer.parseInt(portRetConfig);
@@ -223,6 +232,7 @@ public class MainUI extends JFrame {
                     TableItem item = new TableItem();
                     item.setTreeNode(node);
                     item.setFile(false);
+                    System.out.println("MainUI.drawTreeView ITEM : "+item);
                     changeTableView(false, item);
                     setFolderInfo(node);
                 }
@@ -365,7 +375,7 @@ public class MainUI extends JFrame {
     private void changeTableView(boolean goingUp, TableItem item) {
         clearInfo();
         FileViewTableModel model = (FileViewTableModel) table.getModel();
-
+        System.out.println("MainUI.changeTableView");
         if (!goingUp) {
             int row = table.getSelectedRow();
             //selected table item
@@ -376,7 +386,10 @@ public class MainUI extends JFrame {
                 openFile(item.getFileWrapper());
             } else {
                 //update the table with the new directory
+                System.out.println("MainUI.changeTableView  ELSE");
                 FSTreeNode node = item.getTreeNode();
+                System.out.println("MainUI.changeTableView  currentNode : "+currentNode);
+                System.out.println("MainUI.changeTableView  Node : "+node);
                 currentNode = node;
                 if (!node.isRoot())
                     navigateUpBtn.setEnabled(true);
@@ -477,19 +490,37 @@ public class MainUI extends JFrame {
 
         TreePath path = tree.getSelectionPath();
         FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
+        System.out.println("DEBUG");
+        FSTreeNode root=(FSTreeNode)treeModel.getRoot();
+        System.out.println("la radice : "+root.toString());
+        for(FSTreeNode figli:root.getChildren()){
+            System.out.println("figlio : "+figli.toString());
+        }
+        System.out.println("END DEBUG");
+        //problema in questo punto
         tree.setModel(null);
+        System.out.println("setted model to null");
         treeModel.setNode(treeNode.findRoot());
+        System.out.println("setted root ");
         tree.setModel(treeModel);
+        System.out.println("setted model");
         tree.setSelectionPath(path);
+        System.out.println("setted selection path");
         tree.expandPath(path);
+        System.out.println("setted expand path");
 
+        System.out.println("GENERATION JSON");
         if (local) {
+            System.out.println("local generation");
             fsStructure.generateJson(directoryTree);
         } else {
+            System.out.println("remote generation");
             String gson = treeNode.getGson();
             PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, gson);
             FSStructure.getInstance().generateTreeStructure();
+            System.out.println("ended remote generation");
         }
+        System.out.println("ENDED UPDATE MODELS");
 
     }
 
