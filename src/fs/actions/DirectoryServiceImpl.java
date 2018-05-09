@@ -105,11 +105,11 @@ public class DirectoryServiceImpl implements DirectoryService {
             callback.onItemChanged(parent);
         }
 
-//        System.out.println("Replicazione del json per l'albero dopo creazione file");
-//        FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
-//        FSStructure.getInstance().generateJson(treeRoot);
-//        treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-//        MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
+        System.out.println("Replicazione del json per l'albero dopo eliminazione del file");
+        FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
+        FSStructure.getInstance().generateJson(treeRoot);
+        treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+        MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
 
     }
 

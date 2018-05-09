@@ -74,6 +74,8 @@ public class PropertiesHelper {
             System.out.println("Configuration saved");
         } catch (IOException e) {
             System.out.println("Configuration not Saved");
+        } catch ( NullPointerException f){
+            System.out.println("BAMBA");
         }
     }
 

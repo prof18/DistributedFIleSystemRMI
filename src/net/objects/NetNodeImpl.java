@@ -502,7 +502,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
 
         if (up) {
-
+            System.out.println("[MONA SONO NELL ALTRO TERMINALE PER QUELLO NON MI VEDI]");
             FSStructure.getInstance().generateTreeStructure();
             mediatorFsNet.updateJson(FSStructure.getInstance().getTree().findRoot());
             //MainUI.updateModels(FSStructure.getInstance().getTree().findRoot(), false);
@@ -539,7 +539,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     String tmp = ownFilesRoot.get(i).getFileName();
                     boolean contained = false;
                     for (int j =0; j <receivedFolder.get("root").getFiles().size(); j++) {
-//
+
                         if(receivedFolder.get("root").getFiles().get(j).getFileName().equals(tmp) ){
                             contained = true;
                             break;
@@ -621,11 +621,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     e.printStackTrace();
 
                 }
-
             }
         }
-
-
     }
-
 }
