@@ -385,8 +385,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         String checksum = Util.getChecksum(bytesArray);
-        System.out.println("checksum : " + checksum);
-        System.out.println(rw.getChecksum());
+        System.out.println("Checksum in saveFileReplica: " + checksum);
+        System.out.println("Checksum contenuto nel replicationWrapper: " + rw.getChecksum());
         if (checksum.compareTo(rw.getChecksum()) != 0) {
             return false;
         }

@@ -26,7 +26,7 @@ public class ReplicationTask extends TimerTask implements Serializable {
 
     @Override
     public void run() {
-        System.out.println("ReplicattionTask");
+        System.out.println("ReplicationTask");
         Registry registry;
         try {
             int it = 0;

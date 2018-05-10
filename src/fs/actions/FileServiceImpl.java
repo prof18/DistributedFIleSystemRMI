@@ -182,7 +182,8 @@ public class FileServiceImpl implements FileService {
                 e.printStackTrace();
                 System.exit(-1);
             }
-            repContent = newContent = joinArray(content, data, offset, count);
+            newContent = joinArray(content, data, offset, count);
+            repContent = newContent.clone();
             System.out.println("[WRITE] nuovo contenuto da sovrascrivere : " + new String(newContent));
             ObjectInputStream ois = null;
             Date lastModified = null;
@@ -233,7 +234,6 @@ public class FileServiceImpl implements FileService {
             File newFile = new File(cacheFileWrapper.getUFID());
             FileOutputStream fos = new FileOutputStream(newFile);
             byte[] newctx = joinArray(context, data, offset, count);
-            repContent = newctx;
             System.out.println("contenuto da scrivere : " + new String(newctx));
             try {
                 fos.write(newctx);
@@ -245,6 +245,7 @@ public class FileServiceImpl implements FileService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            repContent = newctx.clone();
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
             WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
             writingNodeCache.add(wcfw);
@@ -262,15 +263,16 @@ public class FileServiceImpl implements FileService {
         System.out.println("Can replicate: " + canReplicate);
 
         if (canReplicate) {
-            ReplicationWrapper rw = new ReplicationWrapper(fileID, mediator.getFsStructure().getTree().getFileName(fileID));
+            String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
+            ReplicationWrapper rw = new ReplicationWrapper(fileID, fileName);
             rw.setAttribute(cacheFileWrapper.getAttribute());
             rw.setContent(repContent);
             //TODO: modificato verificare se è giusto
             byte[] fatb = fileToBytes(path + fileID + ".attr");
-            byte[] ftb = fileToBytes(path + fileID);
+            byte[] ftb = fileToBytes(path + fileID);//provare a sostituire con repContent
             byte[] tftb = Util.append(ftb, fatb);
             rw.setChecksum(Util.getChecksum(tftb));
-            System.out.println("mediator: " + mediator.getFsStructure().getTree().getPath());
+            System.out.println("Path " + mediator.getFsStructure().getTree().getPath());
             rw.setPath(mediator.getFsStructure().getTree().getPath());
             mediator.getFsStructure().generateTreeStructure();
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
