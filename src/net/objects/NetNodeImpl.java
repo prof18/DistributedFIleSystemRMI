@@ -360,7 +360,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             fos.flush();
             fos.close();
 
-            fos = new FileOutputStream(fileAtt);
+            fos = new FileOutputStream(fileAtt, false);
             ObjectOutputStream oot = new ObjectOutputStream(fos);
             oot.writeObject(rw.getAttribute());
             oot.flush();

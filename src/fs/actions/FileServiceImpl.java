@@ -52,7 +52,6 @@ public class FileServiceImpl implements FileService {
      */
 
 
-
     public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
         System.out.println("entrato nel READ");
         byte[] ret = read(fileID, offset);
@@ -102,9 +101,9 @@ public class FileServiceImpl implements FileService {
         }
 
         boolean canReplicate = false;
-        for (NetNodeLocation nnl:nodeList) {
+        for (NetNodeLocation nnl : nodeList) {
             try {
-                if((nnl.toUrl()).compareTo(mediator.getNode().getOwnLocation().toUrl()) == 0){
+                if ((nnl.toUrl()).compareTo(mediator.getNode().getOwnLocation().toUrl()) == 0) {
                     canReplicate = nnl.canWrite();
                 }
             } catch (RemoteException e) {
@@ -262,14 +261,20 @@ public class FileServiceImpl implements FileService {
 
         System.out.println("Can replicate: " + canReplicate);
 
+        //file content and attributes replication
         if (canReplicate) {
             String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
             ReplicationWrapper rw = new ReplicationWrapper(fileID, fileName);
             rw.setAttribute(cacheFileWrapper.getAttribute());
             rw.setContent(repContent);
             //TODO: modificato verificare se è giusto
-            byte[] fatb = fileToBytes(path + fileID + ".attr");
-            byte[] ftb = fileToBytes(path + fileID);//provare a sostituire con repContent
+            byte[] fatb = new byte[0];
+            try {
+                fatb = toByteArray(cacheFileWrapper.getAttribute());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            byte[] ftb = repContent;
             byte[] tftb = Util.append(ftb, fatb);
             rw.setChecksum(Util.getChecksum(tftb));
             System.out.println("Path " + mediator.getFsStructure().getTree().getPath());
@@ -278,12 +283,10 @@ public class FileServiceImpl implements FileService {
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Set path file:" + rw.getPath());
 
-            for (NetNodeLocation ndl : nodeList) {
-                ndl.reduceOccupiedSpace(oldLength);
-                System.out.println("chiamato il replication task da riga 265");
-                new ReplicationTask(ndl, rw, mediator.getNode()).run();
-
-
+            for (int i = 0; i < tempNodeList.size(); i++) {
+                tempNodeList.get(i).reduceOccupiedSpace(oldLength);
+                System.out.println("chiamato il replication task da riga 284");
+                new ReplicationTask(tempNodeList.get(i), rw, mediator.getNode()).run();
             }
 
             for (NetNodeLocation nnl : tempNodeList) {
@@ -710,6 +713,27 @@ public class FileServiceImpl implements FileService {
         }
 
         return nodeList;
+    }
+
+    private static byte[] toByteArray(Object obj) throws IOException {
+        byte[] bytes = null;
+        ByteArrayOutputStream bos = null;
+        ObjectOutputStream oos = null;
+        try {
+            bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            oos.flush();
+            bytes = bos.toByteArray();
+        } finally {
+            if (oos != null) {
+                oos.close();
+            }
+            if (bos != null) {
+                bos.close();
+            }
+        }
+        return bytes;
     }
 
 }
