@@ -531,7 +531,7 @@ public class MainUI extends JFrame {
             String id = fileWrapper.getUFID();
             byte[] content = fileService.read(id, 0);
             String contentS = new String(content);
-            new EditFileUI(this, contentS, fileService, id);
+            new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             isOpen = false;

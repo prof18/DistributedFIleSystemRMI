@@ -17,12 +17,11 @@ public class FSTreeNode implements Serializable {
     private String gsonTree;
 
 
-    public FSTreeNode(String UFID, String nameNode, ArrayList<FSTreeNode> childrens, FSTreeNode parent, ArrayList<FileWrapper> files) {
+    public FSTreeNode(String UFID, String nameNode, ArrayList<FSTreeNode> childrens, FSTreeNode parent) {
         this.UFID = UFID;
         this.nameNode = nameNode;
         this.childrens = childrens;
         this.parent = parent;
-        this.files = files;
     }
 
     public FSTreeNode() {
@@ -101,7 +100,10 @@ public class FSTreeNode implements Serializable {
     }
 
     public void addFile(FileWrapper file) {
-        this.files.add(file);
+        if (files == null) {
+            files = new ArrayList<>();
+        }
+        files.add(file);
     }
 
    /* public FileWrapper findFile(String fileName){
@@ -129,17 +131,14 @@ public class FSTreeNode implements Serializable {
     }
 
     public FSTreeNode findNode(FSTreeNode node, String nodeName) {
-        if ((node.getNameNode()).compareTo(nodeName) == 0) {
+        if (node.getNameNode().compareTo(nodeName) == 0)
             return node;
-        } else {
-            for (FSTreeNode child : node.getChildren()) {
-                FSTreeNode result = findNode(child, nodeName);
-                if (result != null) {
-                    return result;
-                }
-            }
+        ArrayList<FSTreeNode> children = node.getChildren();
+        FSTreeNode res = null;
+        for (int i = 0; res == null && i < children.size(); i++) {
+            res = findNode(children.get(i), nodeName);
         }
-        return null;
+        return res;
     }
 
     public void removeOneFile(String fileName) {
@@ -167,15 +166,16 @@ public class FSTreeNode implements Serializable {
     }
 
     public boolean hasChild(String nodeName) {
+        boolean result = false;
         if (hasChild()) {
             for (FSTreeNode node : childrens) {
                 if (node.getNameNode().compareTo(nodeName) == 0) {
-                    return true;
+                    result = true;
                 }
             }
         }
 
-        return false;
+        return result;
     }
 
     public FSTreeNode getChild(String nodeName) {
@@ -184,7 +184,6 @@ public class FSTreeNode implements Serializable {
             for (FSTreeNode node : childrens) {
                 if (node.hasChild(nodeName)) {
                     findNode = node;
-                    break;
                 }
             }
         }
@@ -193,16 +192,13 @@ public class FSTreeNode implements Serializable {
     }
 
     public boolean hasFile(String fileName) {
-
-
+        boolean hasfile = false;
         for (FileWrapper fw : files) {
             if (fw.getFileName().compareTo(fileName) == 0) {
-                return true;
+                hasfile = true;
             }
         }
-
-
-        return false;
+        return hasfile;
     }
 
     public FileWrapper getFile(String fileName) {
@@ -218,16 +214,15 @@ public class FSTreeNode implements Serializable {
     }
 
     public String getFileName(String UFID) {
-        FileWrapper fileFound;
-        if (hasFile(UFID)) {
-            for (FileWrapper fw : files) {
-                if (fw.getUFID().compareTo(UFID) == 0) {
-                    fileFound = fw;
-                    return fileFound.getFileName();
-                }
+        String name = null;
+
+        for (FileWrapper fw : files) {
+            if ((fw.getUFID()).compareTo(UFID) == 0) {
+                name = fw.getFileName();
             }
         }
-        return "";
+
+        return name;
     }
 
     public String getPath() {
@@ -262,38 +257,6 @@ public class FSTreeNode implements Serializable {
         }
 
         return root;
-    }
-
-    public String printAll() {
-        String stringTree = "";
-        ArrayList<String> tree = T_BFS(findRoot());
-
-        for (String n : tree) {
-            stringTree = stringTree + " " + n;
-        }
-        return stringTree;
-    }
-
-    public ArrayList<String> T_BFS(FSTreeNode root) {
-        ArrayList<String> tree = new ArrayList<>();
-        Queue<FSTreeNode> nodeQueue = new LinkedList<>();
-        if (root == null) {
-            tree = null;
-        } else {
-            nodeQueue.add(root);
-            while (!nodeQueue.isEmpty()) {
-                FSTreeNode node = nodeQueue.remove();
-                tree.add(node.getNameNode());
-
-                if (node.hasChild()) {
-                    for (FSTreeNode n : node.getChildren()) {
-                        nodeQueue.add(n);
-                    }
-                }
-            }
-        }
-
-        return tree;
     }
 
     public String printTree() {

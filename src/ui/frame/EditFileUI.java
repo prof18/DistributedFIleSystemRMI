@@ -1,6 +1,7 @@
 package ui.frame;
 
 import fs.actions.interfaces.FileService;
+import fs.objects.structure.FSTreeNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,11 +15,15 @@ public class EditFileUI extends JFrame {
     private FileService fileService;
     private String fileID;
     private JTextArea textArea;
+    private String[] filePath;
 
-    public EditFileUI(MainUI mainUI, String text, FileService fileService, String fileID) {
+
+    public EditFileUI(MainUI mainUI, String text, FileService fileService, String fileID, String filePath) {
         super("Edit File");
         this.fileService = fileService;
         this.fileID = fileID;
+        this.filePath = filePath.split("/");
+
 
         setSize(600, 600);
         setLocationRelativeTo(mainUI);
@@ -56,7 +61,9 @@ public class EditFileUI extends JFrame {
             System.out.println("Clicked Save");
             byte[] content = textArea.getText().getBytes();
             try {
-                fileService.write(fileID, 0, content.length, content);
+                String fileDirectoryName = filePath[filePath.length-2];
+                System.out.println("File directory name: " + fileDirectoryName);
+                fileService.write(fileID, 0, content.length, content, fileDirectoryName);
                 dispose();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

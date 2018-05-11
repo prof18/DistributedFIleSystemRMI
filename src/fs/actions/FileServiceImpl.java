@@ -87,7 +87,7 @@ public class FileServiceImpl implements FileService {
         return content;
     }
 
-    public void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException {
+    public void write(String fileID, int offset, int count, byte[] data, String fileDirectoryName) throws FileNotFoundException {
         System.out.println("entrato nel write");
         ArrayList<NetNodeLocation> nodeList = null;
         try {
@@ -164,6 +164,7 @@ public class FileServiceImpl implements FileService {
         }
 
         if (cacheFileWrapper == null) throw new FileNotFoundException();
+
         if (cacheFileWrapper.isLocal()) {
             System.out.println("il file che si vuole sovrascrivere è locale");
             byte[] newContent = null;
@@ -200,9 +201,9 @@ public class FileServiceImpl implements FileService {
             FileOutputStream fileOutputStream = null;
             try {
                 File file = new File(path + fileID);
-                System.out.println("File delete: " + file.delete());
-                file = new File(path + fileID);
-                fileOutputStream = new FileOutputStream(file);
+                //System.out.println("File delete: " + file.delete());
+                //file = new File(path + fileID);
+                fileOutputStream = new FileOutputStream(file, false);
                 fileAttribute.setFileLength(file.length());
                 fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
                 setAttributes(fileID, fileAttribute);
@@ -259,6 +260,29 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
+
+        FSStructure.getInstance().generateTreeStructure();
+
+        System.out.println("fileDirectoryName is: " + fileDirectoryName);
+        System.out.println("Instance tree: " + FSStructure.getInstance().getTree().toString());
+        FSTreeNode fileNode;
+        if(fileDirectoryName.compareTo("root") != 0 && fileDirectoryName != null && fileDirectoryName.compareTo("") != 0 ){
+            fileNode = FSStructure.getInstance().getTree().findNode(FSStructure.getInstance().getTree(), fileDirectoryName);
+
+        }else{
+            System.out.println("fileDirectoryName is null.");
+            fileNode = FSStructure.getInstance().getTree();
+        }
+        System.out.println("fileNode: "+ fileNode);
+        String fName = fileNode.getFileName(fileID);
+        System.out.println("File name: "+ fName);
+        FileWrapper fileInTree = fileNode.getFile(fName);
+        fileInTree.setAttribute(cacheFileWrapper.getAttribute());
+        fileInTree.setContent(repContent);
+
+
+        FSStructure.getInstance().generateJson(FSStructure.getInstance().getTree());
+
         System.out.println("Can replicate: " + canReplicate);
 
         //file content and attributes replication
@@ -282,6 +306,7 @@ public class FileServiceImpl implements FileService {
             mediator.getFsStructure().generateTreeStructure();
             rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Set path file:" + rw.getPath());
+
 
             for (int i = 0; i < tempNodeList.size(); i++) {
                 tempNodeList.get(i).reduceOccupiedSpace(oldLength);

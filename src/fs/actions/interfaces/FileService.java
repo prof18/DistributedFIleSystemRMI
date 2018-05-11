@@ -46,7 +46,7 @@ public interface FileService extends Remote, Serializable {
      * @param data   is the array of byte to write
      * @throws FileNotFoundException
      */
-    void write(String fileID, int offset, int count, byte[] data) throws FileNotFoundException;
+    void write(String fileID, int offset, int count, byte[] data, String fileDirectoryName) throws FileNotFoundException;
 
     /**
      * This method is used to create a new file in the filesystem
