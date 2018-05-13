@@ -1,10 +1,8 @@
 package fs.actions;
 
 import fs.actions.cache.ReadingNodeCache;
-import fs.actions.cache.WritingNodeCache;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
-import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
@@ -31,7 +29,7 @@ public class FileServiceImpl implements FileService {
     private MediatorFsNet mediator;
     private final String path;
     private ReadingNodeCache readingCache;
-    private WritingNodeCache writingNodeCache;
+
 
 
     public FileServiceImpl(String path) {
@@ -40,7 +38,6 @@ public class FileServiceImpl implements FileService {
         this.path = path;
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
-        writingNodeCache = new WritingNodeCache(mediator);
     }
 
     /**
@@ -206,7 +203,6 @@ public class FileServiceImpl implements FileService {
                 fileAttribute.setFileLength(file.length());
                 fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
                 setAttributes(fileID, fileAttribute);
-                writingNodeCache.add(new WritingCacheFileWrapper(file, fileAttribute, lastModified, fileID, true));
                 System.out.println("newContent = " + new String(newContent));
                 fileOutputStream.write(newContent, 0, newContent.length);
             } catch (IOException e) {
@@ -246,8 +242,7 @@ public class FileServiceImpl implements FileService {
             }
             repContent = newctx.clone();
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
-            WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
-            writingNodeCache.add(wcfw);
+
         }
 
         try {
