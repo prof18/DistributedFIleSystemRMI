@@ -51,7 +51,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     public void createDirectory(FSTreeNode currentNode, String dirName, NewItemCallback callback) {
 
         FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
-        FSTreeNode directoryParent = treeRoot.findNode(treeRoot, currentNode.getNameNode());
+        FSTreeNode directoryParent = treeRoot.findNode(treeRoot, currentNode.getUFID());
         FSTreeNode node = new FSTreeNode();
         node.setParent(directoryParent);
         node.setNameNode(dirName);
@@ -135,8 +135,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
             System.out.println("Replicazione del json per l'albero dopo creazione file");
             FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
-            FSTreeNode curNode = treeRoot.findNode(treeRoot, currentNode.getNameNode());
-            curNode.addFile(wrapper);
+            FSTreeNode curNode = treeRoot.findNode(treeRoot, currentNode.getUFID());
+            curNode.addFiles(wrapper);
 
             callback.onItemChanged(curNode);
 
@@ -199,8 +199,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     }
 
-    public void addFile(FileWrapper file){
-        currentDir.addFile(file);
+    public void addFiles(FileWrapper file){
+        currentDir.addFiles(file);
     }
 
     public void deleteDirectory(String dirName){
@@ -226,7 +226,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     public void deleteFile(FileWrapper file){
-        currentDir.removeOneFile(file.getFileName());
+        currentDir.removeOneFile(file.getFileUFID());
     }
 
     public void renameDirectory(String name, String newName){
