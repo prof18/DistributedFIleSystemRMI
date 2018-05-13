@@ -523,8 +523,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             HashMap<String, JsonFolder> ownFolder = helpJson.jsonToFolders(thisJson);
 
-            boolean changed = false;
-
             ArrayList<JsonFile> ownFilesRoot = ownFolder.get("root").getFiles();
 
             Date date = new Date();
@@ -532,37 +530,47 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             if (ownFilesRoot.size() != 0) {
 
-                changed = true;
-
                 for (int i = 0; i < ownFilesRoot.size(); i++) {
 
                     String currentName = ownFilesRoot.get(i).getFileName();
-                    boolean contained = false;
+                    String currentUFID = ownFilesRoot.get(i).getUFID();
+                    boolean sameUFID = false;
 
                     for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
 
-                        if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
-                            contained = true;
+                        if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(currentUFID)) {
+                            sameUFID = true;
                             break;
                         }
 
                     }
-                    if (contained) {
 
-                        String addName = ownFilesRoot.get(i).getAttribute().getOwner();
-                        System.out.println("OWNER FILE" + addName);
-//                        String newName = currentName +" ( "  +addName + " ) ";
+                    boolean sameName = false;
+                    if(!sameUFID) {
+                        for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
+
+                            if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
+                                sameName = true;
+                                break;
+                            }
+
+                        }
+                    }
+
+                    if (sameUFID) {
+
                         String newName = currentName + " ( " + "offline version" + " " + time + " ) ";
                         ownFilesRoot.get(i).setFileName(newName);
-
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
 
-                        System.out.println("NEWNAME FILE" + newName);
+                    } else if(sameName){
 
-                    } else {
-
+                        String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
+                        ownFilesRoot.get(i).setFileName(newName);
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
-
+                    }
+                    else{
+                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
                     }
 
                 }
@@ -574,20 +582,18 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 if (!receivedFolder.containsKey(entry.getKey())) {
 
-                    changed = true;
+
                     String currentName = entry.getValue().getFolderName();
 
                     for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
 
-                        if( entry2.getValue().getFolderName().equals(currentName) ){
+                        if (entry2.getValue().getFolderName().equals(currentName)) {
 
-                            String newName = currentName + " ( offline different folder " + time + " )"  ;
+                            String newName = currentName + " ( offline different folder " + time + " )";
                             entry.getValue().setFolderName(newName);
-
+                            break;
                         }
-
                     }
-
 
                     receivedFolder.put(entry.getKey(), entry.getValue());
                     if (entry.getValue().getParentUFID().equals("root"))
@@ -611,14 +617,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             String newJson = helpJson.foldersToJson(receivedFolder);
             this.setJson(newJson, false);
 
-            if (changed) {
-                this.callUpdateAllJson(newJson);
-            }
+            this.callUpdateAllJson(newJson);
+
 
         } else {
             System.out.println("[Json non presente]");
-            // Non è presente il file Json nel nodo attuale
-            // quindi copio direttamente quello importato
             this.setJson(json, false);
         }
 
