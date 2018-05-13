@@ -24,10 +24,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
@@ -449,16 +446,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        if (nodeLocations != null) {
-            for (NetNodeLocation nnl : nodeLocations) {
-                if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
-                    nnl.lockWriting();
-                } else {
-                    nnl.unlockWriting();
-                }
+        for (NetNodeLocation nnl : nodeLocations) {
+            if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
+                nnl.lockWriting();
+            } else {
+                nnl.unlockWriting();
             }
-        } else {
-            return false;
         }
 
         return true;
@@ -534,25 +527,44 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             ArrayList<JsonFile> ownFilesRoot = ownFolder.get("root").getFiles();
 
+            Date date = new Date();
+            String time = date.toString();
+
             if (ownFilesRoot.size() != 0) {
 
                 changed = true;
 
                 for (int i = 0; i < ownFilesRoot.size(); i++) {
 
-                    String tmp = ownFilesRoot.get(i).getUFID();
+                    String currentName = ownFilesRoot.get(i).getFileName();
                     boolean contained = false;
+
                     for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
 
-                        if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(tmp)) {
+                        if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
                             contained = true;
                             break;
                         }
 
                     }
-                    if (!contained) {
+                    if (contained) {
+
+                        String addName = ownFilesRoot.get(i).getAttribute().getOwner();
+                        System.out.println("OWNER FILE" + addName);
+//                        String newName = currentName +" ( "  +addName + " ) ";
+                        String newName = currentName + " ( " + "offline version" + " " + time + " ) ";
+                        ownFilesRoot.get(i).setFileName(newName);
+
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+
+                        System.out.println("NEWNAME FILE" + newName);
+
+                    } else {
+
+                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+
                     }
+
                 }
             }
 
@@ -563,8 +575,32 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 if (!receivedFolder.containsKey(entry.getKey())) {
 
                     changed = true;
+                    String currentName = entry.getValue().getFolderName();
+
+                    for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
+
+                        if( entry2.getValue().getFolderName().equals(currentName) ){
+
+                            String newName = currentName + " ( offline different folder " + time + " )"  ;
+                            entry.getValue().setFolderName(newName);
+
+                        }
+
+                    }
+
 
                     receivedFolder.put(entry.getKey(), entry.getValue());
+                    if (entry.getValue().getParentUFID().equals("root"))
+                        receivedFolder.get("root").getChildren().add(entry.getKey());
+
+                } else {
+
+                    String currentName = receivedFolder.get(entry).getFolderName();
+                    String newName = currentName + " ( offline version " + " " + time + ")";
+
+                    ownFolder.get(entry).setFolderName(newName);
+                    receivedFolder.put(entry.getKey(), entry.getValue());
+
                     if (entry.getValue().getParentUFID().equals("root"))
                         receivedFolder.get("root").getChildren().add(entry.getKey());
 
