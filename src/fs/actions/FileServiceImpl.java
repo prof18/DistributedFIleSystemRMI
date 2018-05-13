@@ -5,7 +5,6 @@ import fs.actions.cache.WritingNodeCache;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
-import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
@@ -13,7 +12,6 @@ import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import utils.Constants;
-import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -87,7 +85,7 @@ public class FileServiceImpl implements FileService {
         return content;
     }
 
-    public void write(String fileID, int offset, int count, byte[] data, String fileDirectoryName) throws FileNotFoundException {
+    public void write(String fileID, int offset, int count, byte[] data, String fileDirectoryUFID) throws FileNotFoundException {
         System.out.println("entrato nel write");
         ArrayList<NetNodeLocation> nodeList = null;
         try {
@@ -263,20 +261,17 @@ public class FileServiceImpl implements FileService {
 
         FSStructure.getInstance().generateTreeStructure();
 
-        System.out.println("fileDirectoryName is: " + fileDirectoryName);
+        System.out.println("fileDirectoryUFID is: " + fileDirectoryUFID);
         System.out.println("Instance tree: " + FSStructure.getInstance().getTree().toString());
         FSTreeNode fileNode;
-        if(fileDirectoryName.compareTo("root") != 0 && fileDirectoryName != null && fileDirectoryName.compareTo("") != 0 ){
-            fileNode = FSStructure.getInstance().getTree().findNode(FSStructure.getInstance().getTree(), fileDirectoryName);
-
-        }else{
+        if (fileDirectoryUFID.compareTo("root") != 0 && fileDirectoryUFID != null && fileDirectoryUFID.compareTo("") != 0) {
+            fileNode = FSStructure.getInstance().getTree().findNodeByUFID(FSStructure.getInstance().getTree(), fileDirectoryUFID);
+        } else {
             System.out.println("fileDirectoryName is null.");
             fileNode = FSStructure.getInstance().getTree();
         }
-        System.out.println("fileNode: "+ fileNode);
-        String fName = fileNode.getFileName(fileID);
-        System.out.println("File name: "+ fName);
-        FileWrapper fileInTree = fileNode.getFile(fName);
+        System.out.println("fileNode: " + fileNode);
+        FileWrapper fileInTree = fileNode.getFile(fileID);
         fileInTree.setAttribute(cacheFileWrapper.getAttribute());
         fileInTree.setContent(repContent);
 
@@ -439,7 +434,7 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
-        curDir.removeOneFile(curDir.getFileName(fileID));
+        curDir.removeOneFile(fileID);
 
         //mediator.updateJson(curDir);
 

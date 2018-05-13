@@ -449,12 +449,16 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        for (NetNodeLocation nnl : nodeLocations) {
-            if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
-                nnl.lockWriting();
-            } else {
-                nnl.unlockWriting();
+        if (nodeLocations != null) {
+            for (NetNodeLocation nnl : nodeLocations) {
+                if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
+                    nnl.lockWriting();
+                } else {
+                    nnl.unlockWriting();
+                }
             }
+        } else {
+            return false;
         }
 
         return true;
@@ -536,17 +540,17 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 for (int i = 0; i < ownFilesRoot.size(); i++) {
 
-                    String tmp = ownFilesRoot.get(i).getFileName();
+                    String tmp = ownFilesRoot.get(i).getUFID();
                     boolean contained = false;
-                    for (int j =0; j <receivedFolder.get("root").getFiles().size(); j++) {
+                    for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
 
-                        if(receivedFolder.get("root").getFiles().get(j).getFileName().equals(tmp) ){
+                        if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(tmp)) {
                             contained = true;
                             break;
                         }
 
                     }
-                    if(!contained){
+                    if (!contained) {
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
                     }
                 }

@@ -99,7 +99,7 @@ public class FSTreeNode implements Serializable {
         childrens.add(child);
     }
 
-    public void addFile(FileWrapper file) {
+    public void addFiles(FileWrapper file) {
         if (files == null) {
             files = new ArrayList<>();
         }
@@ -109,7 +109,7 @@ public class FSTreeNode implements Serializable {
    /* public FileWrapper findFile(String fileName){
         FileWrapper file = null;
         for(FileWrapper fw: this.files){
-            if(fw.getFileName().compareTo(fileName) == 0){
+            if(fw.getFileUFID().compareTo(fileName) == 0){
                 file = fw;
                 break;
             }
@@ -118,10 +118,10 @@ public class FSTreeNode implements Serializable {
         return file;
     }*/
 
-    private int findFilePos(String fileName) {
+    private int findFilePos(String UFID) {
         int pos = 0;
         for (int i = 0; i < files.size(); i++) {
-            if (files.get(i).getFileName().compareTo(fileName) == 0) {
+            if (files.get(i).getUFID().compareTo(UFID) == 0) {
                 pos = i;
                 break;
             }
@@ -130,20 +130,31 @@ public class FSTreeNode implements Serializable {
         return pos;
     }
 
-    public FSTreeNode findNode(FSTreeNode node, String nodeName) {
-        if (node.getNameNode().compareTo(nodeName) == 0)
+    public FSTreeNode findNodeByUFID(FSTreeNode node, String UFID) {
+        if (node.getUFID().compareTo(UFID) == 0)
             return node;
         ArrayList<FSTreeNode> children = node.getChildren();
         FSTreeNode res = null;
         for (int i = 0; res == null && i < children.size(); i++) {
-            res = findNode(children.get(i), nodeName);
+            res = findNodeByUFID(children.get(i), UFID);
         }
         return res;
     }
 
-    public void removeOneFile(String fileName) {
+    public FSTreeNode findNodeByName(FSTreeNode node, String name) {
+        if (node.getNameNode().compareTo(name) == 0)
+            return node;
+        ArrayList<FSTreeNode> children = node.getChildren();
+        FSTreeNode res = null;
+        for (int i = 0; res == null && i < children.size(); i++) {
+            res = findNodeByName(children.get(i), name);
+        }
+        return res;
+    }
 
-        int pos = findFilePos(fileName);
+    public void removeOneFile(String UFID) {
+
+        int pos = findFilePos(UFID);
         files.remove(pos);
     }
 
@@ -165,11 +176,11 @@ public class FSTreeNode implements Serializable {
         return node.hasChild();
     }
 
-    public boolean hasChild(String nodeName) {
+    public boolean hasChild(String UFID) {
         boolean result = false;
         if (hasChild()) {
             for (FSTreeNode node : childrens) {
-                if (node.getNameNode().compareTo(nodeName) == 0) {
+                if (node.getUFID().compareTo(UFID) == 0) {
                     result = true;
                 }
             }
@@ -178,11 +189,11 @@ public class FSTreeNode implements Serializable {
         return result;
     }
 
-    public FSTreeNode getChild(String nodeName) {
+    public FSTreeNode getChild(String UFID) {
         FSTreeNode findNode = null;
         if (hasChild()) {
             for (FSTreeNode node : childrens) {
-                if (node.hasChild(nodeName)) {
+                if (node.hasChild(UFID)) {
                     findNode = node;
                 }
             }
@@ -191,26 +202,38 @@ public class FSTreeNode implements Serializable {
         return findNode;
     }
 
-    public boolean hasFile(String fileName) {
+    public boolean hasFile(String UFID) {
         boolean hasfile = false;
         for (FileWrapper fw : files) {
-            if (fw.getFileName().compareTo(fileName) == 0) {
+            if (fw.getUFID().compareTo(UFID) == 0) {
                 hasfile = true;
             }
         }
         return hasfile;
     }
 
-    public FileWrapper getFile(String fileName) {
+    public FileWrapper getFile(String UFID) {
         FileWrapper fileFound = null;
-        if (hasFile(fileName)) {
-            for (FileWrapper fw : files) {
-                if (fw.getFileName().compareTo(fileName) == 0) {
-                    fileFound = fw;
-                }
+
+        for (FileWrapper fw : files) {
+            if (fw.getUFID().compareTo(UFID) == 0) {
+                fileFound = fw;
             }
         }
+
         return fileFound;
+    }
+
+    public String getFileUFID(String name) {
+        String UFID = null;
+
+        for (FileWrapper fw : files) {
+            if ((fw.getFileName()).compareTo(name) == 0) {
+                UFID = fw.getUFID();
+            }
+        }
+
+        return UFID;
     }
 
     public String getFileName(String UFID) {
@@ -218,7 +241,7 @@ public class FSTreeNode implements Serializable {
 
         for (FileWrapper fw : files) {
             if ((fw.getUFID()).compareTo(UFID) == 0) {
-                name = fw.getFileName();
+                name = fw.getUFID();
             }
         }
 

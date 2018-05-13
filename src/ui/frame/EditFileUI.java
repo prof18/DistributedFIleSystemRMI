@@ -1,5 +1,6 @@
 package ui.frame;
 
+import fs.actions.FSStructure;
 import fs.actions.interfaces.FileService;
 import fs.objects.structure.FSTreeNode;
 
@@ -61,9 +62,14 @@ public class EditFileUI extends JFrame {
             System.out.println("Clicked Save");
             byte[] content = textArea.getText().getBytes();
             try {
-                String fileDirectoryName = filePath[filePath.length-2];
+                String fileDirectoryName = filePath[filePath.length - 2];
                 System.out.println("File directory name: " + fileDirectoryName);
-                fileService.write(fileID, 0, content.length, content, fileDirectoryName);
+                FSTreeNode root = FSStructure.getInstance().getTree();
+                String fileDirectoryUFID = root.getUFID();
+                if (fileDirectoryName.compareTo("") != 0) {
+                    fileDirectoryUFID = root.findNodeByName(root, fileDirectoryName).getUFID();
+                }
+                fileService.write(fileID, 0, content.length, content, fileDirectoryUFID);
                 dispose();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
