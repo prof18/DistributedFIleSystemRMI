@@ -62,6 +62,7 @@ public class FileServiceImpl implements FileService {
      * This method differs from the previous one
      * because the lenght of the file is automatically assigned to the count.
      */
+    //TODO: controllare il flag per accesso
     public byte[] read(String fileID, int offset) throws FileNotFoundException {
         System.out.println("Entrato nel read senza parametri");
         CacheFileWrapper wrapper = getFile(fileID);

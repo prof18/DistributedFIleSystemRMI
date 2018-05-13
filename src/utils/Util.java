@@ -12,7 +12,7 @@ import java.rmi.registry.Registry;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import javax.xml.bind.DatatypeConverter;
+
 
 /**
  * This class contains a list of util methods used in the code
