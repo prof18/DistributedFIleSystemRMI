@@ -225,6 +225,18 @@ public class FSTreeNode implements Serializable {
         return UFID;
     }
 
+    public String getFileName(String UFID) {
+        String name = null;
+
+        for (FileWrapper fw : files) {
+            if ((fw.getUFID()).compareTo(UFID) == 0) {
+                name = fw.getUFID();
+            }
+        }
+
+        return name;
+    }
+
     public String getPath() {
 
         return "/" + getPathWithoutRoot();

@@ -272,8 +272,6 @@ public class FileServiceImpl implements FileService {
             fileNode = FSStructure.getInstance().getTree();
         }
         System.out.println("fileNode: "+ fileNode);
-        String fName = fileNode.getFileUFID(fileID);
-        System.out.println("File name: "+ fName);
         FileWrapper fileInTree = fileNode.getFile(fileID);
         fileInTree.setAttribute(cacheFileWrapper.getAttribute());
         fileInTree.setContent(repContent);
@@ -285,7 +283,7 @@ public class FileServiceImpl implements FileService {
 
         //file content and attributes replication
         if (canReplicate) {
-            String fileName = mediator.getFsStructure().getTree().getFileUFID(fileID);
+            String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
             ReplicationWrapper rw = new ReplicationWrapper(fileID, fileName);
             rw.setAttribute(cacheFileWrapper.getAttribute());
             rw.setContent(repContent);
