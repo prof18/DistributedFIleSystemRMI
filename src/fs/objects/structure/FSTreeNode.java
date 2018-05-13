@@ -10,9 +10,9 @@ public class FSTreeNode implements Serializable {
 
     private String UFID;
     private String nameNode;
-    private ArrayList<FSTreeNode> childrens;
+    private ArrayList<FSTreeNode> childrens = new ArrayList<>();
     private FSTreeNode parent;
-    private ArrayList<FileWrapper> files;
+    private ArrayList<FileWrapper> files = new ArrayList<>();
     private long lastEditTime;
     private String gsonTree;
 
@@ -257,6 +257,32 @@ public class FSTreeNode implements Serializable {
         }
 
         return root;
+    }
+
+    public String getFolderSize() {
+
+        long size = 0;
+
+        ArrayList<FileWrapper> fileWrappers = new ArrayList<>();
+        Queue<FSTreeNode> queue = new LinkedList<>();
+
+        queue.add(this);
+
+        while(!queue.isEmpty()) {
+            FSTreeNode node = queue.poll();
+
+            if (node != null) {
+                queue.addAll(node.getChildren());
+                fileWrappers.addAll(node.getFiles());
+            }
+        }
+
+        for (FileWrapper wrapper : fileWrappers) {
+            size += wrapper.getAttribute().getFileLength();
+        }
+
+        return String.valueOf(size);
+
     }
 
     public String printTree() {

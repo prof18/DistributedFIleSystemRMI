@@ -26,7 +26,7 @@ import static javax.swing.JOptionPane.showMessageDialog;
  */
 public class SettingsDialog extends JDialog {
 
-    private String ipHost, ipToConnect, portToConnect, fsName, fsDir;
+    private String ipHost, ipToConnect, portToConnect, fsName, fsDir, username;
 
     public SettingsDialog(boolean exit) {
 
@@ -94,21 +94,33 @@ public class SettingsDialog extends JDialog {
         panel.add(nameFSTextField, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
+        //username folder
+        JLabel userLabel = new JLabel("Username:");
+        cs.gridx = 0;
+        cs.gridy = 4;
+        panel.add(userLabel, cs);
+
+        JTextField userTF = new JTextField(20);
+        cs.gridx = 1;
+        cs.gridy = 4;
+        panel.add(userTF, cs);
+        panel.setBorder(new LineBorder(Color.GRAY));
+
         //fs folder
         JLabel folderChooserLabel = new JLabel("Working directory:");
         cs.gridx = 0;
-        cs.gridy = 4;
+        cs.gridy = 5;
         panel.add(folderChooserLabel, cs);
 
         JTextField folderChooserTF = new JTextField(20);
         cs.gridx = 1;
-        cs.gridy = 4;
+        cs.gridy = 5;
         panel.add(folderChooserTF, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
 
         JButton chooseFolderBtn = new JButton("Choose");
         cs.gridx = 3;
-        cs.gridy = 4;
+        cs.gridy = 5;
         cs.gridwidth = 2;
         panel.add(chooseFolderBtn, cs);
         panel.setBorder(new LineBorder(Color.GRAY));
@@ -130,6 +142,8 @@ public class SettingsDialog extends JDialog {
             }
         });
 
+
+
         //ok button
         JButton okBtn = new JButton("OK");
         okBtn.addActionListener((ActionListener) -> {
@@ -138,6 +152,7 @@ public class SettingsDialog extends JDialog {
             this.portToConnect = portTextField.getText();
             this.fsName = nameFSTextField.getText();
             this.fsDir = folderChooserTF.getText();
+            this.username = userTF.getText();
 
             PropertiesHelper helper = PropertiesHelper.getInstance();
             PropertiesHelper.setPropFile(fsDir + "/" + "config.properties");
@@ -146,6 +161,7 @@ public class SettingsDialog extends JDialog {
             helper.writeConfig(Constants.PORT_RET_CONFIG, portToConnect);
             helper.writeConfig(Constants.HOST_NAME_CONFIG, fsName);
             helper.writeConfig(Constants.WORKING_DIR_CONFIG, fsDir);
+            helper.writeConfig(Constants.USERNAME_CONFIG, username);
 
             MainUI main;
 
