@@ -196,7 +196,7 @@ public interface NetNode extends Remote, Serializable {
      * @return
      * @throws RemoteException
      */
-    boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
+    boolean updateWritePermissionFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
 
     /**
      * Is used to verify if a nodes is reachable

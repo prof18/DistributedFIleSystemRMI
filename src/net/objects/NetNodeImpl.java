@@ -439,7 +439,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
 
-    public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
+    public boolean updateWritePermissionFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
         ArrayList<NetNodeLocation> nodeLocations = null;
         try {
             nodeLocations = mediatorFsNet.getNode().getFileNodeList().get(fileID);

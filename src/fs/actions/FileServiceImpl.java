@@ -149,7 +149,7 @@ public class FileServiceImpl implements FileService {
                     }
                 }
                 try {
-                    new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), nodeList).run();
+                    ReplicationMethods.getInstance().updateWritePermissonMap(fileID, mediator.getNode().getHashMap().values(), nodeList);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -250,7 +250,7 @@ public class FileServiceImpl implements FileService {
         try {
             if (mediator.getNode().getHashMap().size() > 1 && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
 
-                new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), nodeList).run();
+                ReplicationMethods.getInstance().updateWritePermissonMap(fileID, mediator.getNode().getHashMap().values(), nodeList);
             }
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -305,7 +305,7 @@ public class FileServiceImpl implements FileService {
             for (int i = 0; i < tempNodeList.size(); i++) {
                 tempNodeList.get(i).reduceOccupiedSpace(oldLength);
                 System.out.println("chiamato il replication task da riga 284");
-                new ReplicationTask(tempNodeList.get(i), rw, mediator.getNode()).run();
+                ReplicationMethods.getInstance().fileReplication(tempNodeList.get(i), rw, mediator.getNode());
             }
 
             for (NetNodeLocation nnl : tempNodeList) {
@@ -414,7 +414,7 @@ public class FileServiceImpl implements FileService {
         try {
             if (mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
                 for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID)) {
-                    new DeleteFileTask(fileID, directoryPath, nnl, curDir).run();
+                    ReplicationMethods.getInstance().deleteFile(fileID, directoryPath, nnl, curDir);
                 }
             }
 
@@ -636,7 +636,7 @@ public class FileServiceImpl implements FileService {
         //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
         System.out.println("Nodo trovato, avvio task replicazione");
         System.out.println("chiamato il replication task da riga 596");
-        new ReplicationTask(selectedNode, repWr, node).run();
+        ReplicationMethods.getInstance().fileReplication(selectedNode, repWr, node);
     }
 
     private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {

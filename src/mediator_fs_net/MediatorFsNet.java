@@ -1,7 +1,7 @@
 package mediator_fs_net;
 
 import fs.actions.FSStructure;
-import fs.actions.JsonReplicationTask;
+import fs.actions.ReplicationMethods;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
@@ -127,7 +127,7 @@ public class MediatorFsNet {
 
             for (NetNodeLocation nnl : tmpHashMap.values()) {
                 System.out.println("Nodo: " + nnl.toUrl());
-                new JsonReplicationTask(nnl, treeRoot).run();
+                ReplicationMethods.getInstance().jsonReplication(nnl, treeRoot);
             }
         } catch (RemoteException e) {
             e.printStackTrace();
