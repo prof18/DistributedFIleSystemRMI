@@ -132,7 +132,6 @@ public class FileServiceImpl implements FileService {
                     System.out.println(nodeList.get(i).toUrl());
                 }
 
-
                 //fine debug
                 if (nodeList.get(nodeList.indexOf(localHost)).canWrite()) {
                     for (int i = 0; i < nodeList.size(); i++) {
@@ -200,11 +199,12 @@ public class FileServiceImpl implements FileService {
                 //System.out.println("File delete: " + file.delete());
                 //file = new File(path + fileID);
                 fileOutputStream = new FileOutputStream(file, false);
-                fileAttribute.setFileLength(file.length());
                 fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
+                fileAttribute.setFileLength(newContent.length);
                 setAttributes(fileID, fileAttribute);
                 System.out.println("newContent = " + new String(newContent));
                 fileOutputStream.write(newContent, 0, newContent.length);
+                //cacheFileWrapper.getAttribute().setFileLength(newContent.length);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -243,6 +243,8 @@ public class FileServiceImpl implements FileService {
             repContent = newctx.clone();
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
 
+            cacheFileWrapper.getAttribute().setFileLength(repContent.length);
+            WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
         }
 
         try {
@@ -271,6 +273,7 @@ public class FileServiceImpl implements FileService {
         fileInTree.setAttribute(cacheFileWrapper.getAttribute());
         fileInTree.setContent(repContent);
 
+        System.out.println("File size from attribute: " + cacheFileWrapper.getAttribute().getFileLength());
 
         FSStructure.getInstance().generateJson(FSStructure.getInstance().getTree());
 
@@ -316,11 +319,9 @@ public class FileServiceImpl implements FileService {
 
     public String create(String host, FileAttribute attribute, FSTreeNode curDir, String fileName) throws IOException {
         String UFID = host + "_" + Date.from(Instant.now()).hashCode();
-        /*String directoryPath = curDir.getPathWithoutRoot();
-        File directory = new File(path + directoryPath);
-        if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
-            directory.mkdirs();
-        }*/
+        attribute.setOwner(PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
+        attribute.setType("Text (.txt)");
+        attribute.setFileLength(0);
         String filePath = path + UFID;
         File file = new File(filePath);
         if (file.exists()) {
@@ -373,6 +374,7 @@ public class FileServiceImpl implements FileService {
     public String create(String host, FSTreeNode curDir, String fileName) throws IOException { //crea il file (nomehost+timestamp) in locale
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
+
         //TODO andrea controlla questa cosa aggiungendo un pò di sout
         return create(host, attribute, curDir, fileName);
 
