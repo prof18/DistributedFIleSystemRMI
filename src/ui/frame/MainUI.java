@@ -222,6 +222,7 @@ public class MainUI extends JFrame {
                 //The listener is triggered only when a object is not created
                 clearInfo();
                 Object o = tree.getLastSelectedPathComponent();
+                if (o != null) {
                 if (o instanceof FileWrapper) {
                     //its a file
                     FileWrapper fileWrapper = (FileWrapper) o;
@@ -232,20 +233,26 @@ public class MainUI extends JFrame {
                     TableItem item = new TableItem();
                     item.setTreeNode(node);
                     item.setFile(false);
-                    System.out.println("MainUI.drawTreeView ITEM : "+item);
+                    System.out.println("MainUI.drawTreeView ITEM : " + item);
                     changeTableView(false, item);
                     setFolderInfo(node);
                 }
-            } else {
-                isItemCreated = false;
             }
-        });
+        } else{
+            isItemCreated = false;
+        }
+    });
 
-        tree.setCellRenderer(new TreeCellRenderer());
+        tree.setCellRenderer(new
 
-        tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        treeScroll = new JScrollPane(tree);
-    }
+    TreeCellRenderer());
+
+        tree.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+    treeScroll =new
+
+    JScrollPane(tree);
+
+}
 
     // Draws the File Table View
     private void drawTableView() {
@@ -388,8 +395,8 @@ public class MainUI extends JFrame {
                 //update the table with the new directory
                 System.out.println("MainUI.changeTableView  ELSE");
                 FSTreeNode node = item.getTreeNode();
-                System.out.println("MainUI.changeTableView  currentNode : "+currentNode);
-                System.out.println("MainUI.changeTableView  Node : "+node);
+                System.out.println("MainUI.changeTableView  currentNode : " + currentNode);
+                System.out.println("MainUI.changeTableView  Node : " + node);
                 currentNode = node;
                 if (!node.isRoot())
                     navigateUpBtn.setEnabled(true);
@@ -491,10 +498,10 @@ public class MainUI extends JFrame {
         TreePath path = tree.getSelectionPath();
         FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
         System.out.println("DEBUG");
-        FSTreeNode root=(FSTreeNode)treeModel.getRoot();
-        System.out.println("la radice : "+root.toString());
-        for(FSTreeNode figli:root.getChildren()){
-            System.out.println("figlio : "+figli.toString());
+        FSTreeNode root = (FSTreeNode) treeModel.getRoot();
+        System.out.println("la radice : " + root.toString());
+        for (FSTreeNode figli : root.getChildren()) {
+            System.out.println("figlio : " + figli.toString());
         }
         System.out.println("END DEBUG");
         //problema in questo punto
