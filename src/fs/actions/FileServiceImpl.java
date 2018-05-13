@@ -244,8 +244,8 @@ public class FileServiceImpl implements FileService {
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
 
             cacheFileWrapper.getAttribute().setFileLength(repContent.length);
-            WritingCacheFileWrapper wcfw = new WritingCacheFileWrapper(newFile, cacheFileWrapper.getAttribute(), Date.from(Instant.now()), fileID, false);
-        }
+
+            }
 
         try {
             if (mediator.getNode().getHashMap().size() > 1 && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
