@@ -261,17 +261,16 @@ public class FileServiceImpl implements FileService {
 
         FSStructure.getInstance().generateTreeStructure();
 
-        System.out.println("fileDirectoryName is: " + fileDirectoryUFID);
+        System.out.println("fileDirectoryUFID is: " + fileDirectoryUFID);
         System.out.println("Instance tree: " + FSStructure.getInstance().getTree().toString());
         FSTreeNode fileNode;
-        if(fileDirectoryUFID.compareTo("root") != 0 && fileDirectoryUFID != null && fileDirectoryUFID.compareTo("") != 0 ){
+        if (fileDirectoryUFID.compareTo("root") != 0 && fileDirectoryUFID != null && fileDirectoryUFID.compareTo("") != 0) {
             fileNode = FSStructure.getInstance().getTree().findNodeByUFID(FSStructure.getInstance().getTree(), fileDirectoryUFID);
-
-        }else{
+        } else {
             System.out.println("fileDirectoryName is null.");
             fileNode = FSStructure.getInstance().getTree();
         }
-        System.out.println("fileNode: "+ fileNode);
+        System.out.println("fileNode: " + fileNode);
         FileWrapper fileInTree = fileNode.getFile(fileID);
         fileInTree.setAttribute(cacheFileWrapper.getAttribute());
         fileInTree.setContent(repContent);

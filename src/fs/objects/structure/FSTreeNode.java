@@ -147,7 +147,7 @@ public class FSTreeNode implements Serializable {
         ArrayList<FSTreeNode> children = node.getChildren();
         FSTreeNode res = null;
         for (int i = 0; res == null && i < children.size(); i++) {
-            res = findNodeByUFID(children.get(i), name);
+            res = findNodeByName(children.get(i), name);
         }
         return res;
     }
@@ -214,13 +214,13 @@ public class FSTreeNode implements Serializable {
 
     public FileWrapper getFile(String UFID) {
         FileWrapper fileFound = null;
-        if (hasFile(UFID)) {
-            for (FileWrapper fw : files) {
-                if (fw.getUFID().compareTo(UFID) == 0) {
-                    fileFound = fw;
-                }
+
+        for (FileWrapper fw : files) {
+            if (fw.getUFID().compareTo(UFID) == 0) {
+                fileFound = fw;
             }
         }
+
         return fileFound;
     }
 
