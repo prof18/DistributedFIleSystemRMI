@@ -99,7 +99,7 @@ public class MainUI extends JFrame {
 
         //set Window Title
         this.setTitle(this.getTitle() + " - Address: " + netNodeLocation.getIp() + " | Port: " + netNodeLocation.getPort()
-                + " | Hostname: " + netNodeLocation.getName());
+                + " | Hostname: " + netNodeLocation.getName() + " | Username: " + PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
 
         //Loading file system structure
         System.out.println("Loading structure");
@@ -327,7 +327,7 @@ public class MainUI extends JFrame {
             fileNameVLabel.setText(node.getNameNode());
             typeVLabel.setText("folder");
             pathVLabel.setText(node.getPath());
-            fileSizeVLabel.setText("<to compute>");
+            fileSizeVLabel.setText(node.getFolderSize());
             lastEditVLabel.setText(sdf.format(node.getLastEditTime()));
         }
     }
@@ -538,7 +538,8 @@ public class MainUI extends JFrame {
             String id = fileWrapper.getUFID();
             byte[] content = fileService.read(id, 0);
             String contentS = new String(content);
-            new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath());
+            //TODO: pass the boolean
+            new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath(), true);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             isOpen = false;
@@ -663,6 +664,7 @@ public class MainUI extends JFrame {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
                 if (newName != null && !newName.equals("")) {
                     item.getFileWrapper().setFileName(newName);
+                    updateModels(currentNode, true);
                     fsStructure.generateJson(directoryTree);
                 }
             }
