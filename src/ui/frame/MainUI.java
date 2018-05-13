@@ -223,36 +223,36 @@ public class MainUI extends JFrame {
                 clearInfo();
                 Object o = tree.getLastSelectedPathComponent();
                 if (o != null) {
-                if (o instanceof FileWrapper) {
-                    //its a file
-                    FileWrapper fileWrapper = (FileWrapper) o;
-                    setFileInfo(fileWrapper);
-                } else {
-                    //its a folder
-                    FSTreeNode node = (FSTreeNode) o;
-                    TableItem item = new TableItem();
-                    item.setTreeNode(node);
-                    item.setFile(false);
-                    System.out.println("MainUI.drawTreeView ITEM : " + item);
-                    changeTableView(false, item);
-                    setFolderInfo(node);
+                    if (o instanceof FileWrapper) {
+                        //its a file
+                        FileWrapper fileWrapper = (FileWrapper) o;
+                        setFileInfo(fileWrapper);
+                    } else {
+                        //its a folder
+                        FSTreeNode node = (FSTreeNode) o;
+                        TableItem item = new TableItem();
+                        item.setTreeNode(node);
+                        item.setFile(false);
+                        System.out.println("MainUI.drawTreeView ITEM : " + item);
+                        changeTableView(false, item);
+                        setFolderInfo(node);
+                    }
                 }
+            } else {
+                isItemCreated = false;
             }
-        } else{
-            isItemCreated = false;
-        }
-    });
+        });
 
         tree.setCellRenderer(new
 
-    TreeCellRenderer());
+                TreeCellRenderer());
 
-        tree.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-    treeScroll =new
+        tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        treeScroll = new
 
-    JScrollPane(tree);
+                JScrollPane(tree);
 
-}
+    }
 
     // Draws the File Table View
     private void drawTableView() {

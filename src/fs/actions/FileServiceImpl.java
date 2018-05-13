@@ -154,7 +154,7 @@ public class FileServiceImpl implements FileService {
                     }
                 }
                 try {
-                    new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), nodeList);
+                    new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), nodeList).run();
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
