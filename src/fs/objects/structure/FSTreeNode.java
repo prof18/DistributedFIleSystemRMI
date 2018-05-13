@@ -130,13 +130,24 @@ public class FSTreeNode implements Serializable {
         return pos;
     }
 
-    public FSTreeNode findNode(FSTreeNode node, String UFID) {
+    public FSTreeNode findNodeByUFID(FSTreeNode node, String UFID) {
         if (node.getUFID().compareTo(UFID) == 0)
             return node;
         ArrayList<FSTreeNode> children = node.getChildren();
         FSTreeNode res = null;
         for (int i = 0; res == null && i < children.size(); i++) {
-            res = findNode(children.get(i), UFID);
+            res = findNodeByUFID(children.get(i), UFID);
+        }
+        return res;
+    }
+
+    public FSTreeNode findNodeByName(FSTreeNode node, String name) {
+        if (node.getNameNode().compareTo(name) == 0)
+            return node;
+        ArrayList<FSTreeNode> children = node.getChildren();
+        FSTreeNode res = null;
+        for (int i = 0; res == null && i < children.size(); i++) {
+            res = findNodeByUFID(children.get(i), name);
         }
         return res;
     }

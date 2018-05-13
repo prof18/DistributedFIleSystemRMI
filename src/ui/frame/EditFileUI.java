@@ -1,5 +1,6 @@
 package ui.frame;
 
+import fs.actions.FSStructure;
 import fs.actions.interfaces.FileService;
 import fs.objects.structure.FSTreeNode;
 
@@ -63,7 +64,9 @@ public class EditFileUI extends JFrame {
             try {
                 String fileDirectoryName = filePath[filePath.length-2];
                 System.out.println("File directory name: " + fileDirectoryName);
-                fileService.write(fileID, 0, content.length, content, fileDirectoryName);
+                FSTreeNode root = FSStructure.getInstance().getTree();
+                String fileDirectoryUFID = root.findNodeByName(root, fileDirectoryName).getUFID();
+                fileService.write(fileID, 0, content.length, content, fileDirectoryUFID);
                 dispose();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

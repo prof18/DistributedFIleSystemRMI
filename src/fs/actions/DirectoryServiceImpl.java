@@ -51,7 +51,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     public void createDirectory(FSTreeNode currentNode, String dirName, NewItemCallback callback) {
 
         FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
-        FSTreeNode directoryParent = treeRoot.findNode(treeRoot, currentNode.getUFID());
+        FSTreeNode directoryParent = treeRoot.findNodeByUFID(treeRoot, currentNode.getUFID());
         FSTreeNode node = new FSTreeNode();
         node.setParent(directoryParent);
         node.setNameNode(dirName);
@@ -135,7 +135,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
             System.out.println("Replicazione del json per l'albero dopo creazione file");
             FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
-            FSTreeNode curNode = treeRoot.findNode(treeRoot, currentNode.getUFID());
+            FSTreeNode curNode = treeRoot.findNodeByUFID(treeRoot, currentNode.getUFID());
             curNode.addFiles(wrapper);
 
             callback.onItemChanged(curNode);

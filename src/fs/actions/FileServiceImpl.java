@@ -265,7 +265,7 @@ public class FileServiceImpl implements FileService {
         System.out.println("Instance tree: " + FSStructure.getInstance().getTree().toString());
         FSTreeNode fileNode;
         if(fileDirectoryUFID.compareTo("root") != 0 && fileDirectoryUFID != null && fileDirectoryUFID.compareTo("") != 0 ){
-            fileNode = FSStructure.getInstance().getTree().findNode(FSStructure.getInstance().getTree(), fileDirectoryUFID);
+            fileNode = FSStructure.getInstance().getTree().findNodeByUFID(FSStructure.getInstance().getTree(), fileDirectoryUFID);
 
         }else{
             System.out.println("fileDirectoryName is null.");
