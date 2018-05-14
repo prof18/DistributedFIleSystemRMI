@@ -532,7 +532,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     }
 
                     boolean sameName = false;
-                    if(!sameUFID) {
+                    if (!sameUFID) {
                         for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
 
                             if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
@@ -543,19 +543,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         }
                     }
 
-                    if (sameUFID) {
-
-                        String newName = currentName + " ( " + "offline version" + " " + time + " ) ";
-                        ownFilesRoot.get(i).setFileName(newName);
-                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
-
-                    } else if(sameName){
-
+                    if (sameName) {
                         String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
                         ownFilesRoot.get(i).setFileName(newName);
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
-                    }
-                    else{
+                    } else {
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
                     }
 
@@ -567,7 +559,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             for (Map.Entry<String, JsonFolder> entry : ownFolder.entrySet()) {
 
                 if (!receivedFolder.containsKey(entry.getKey())) {
-
 
                     String currentName = entry.getValue().getFolderName();
 
@@ -582,22 +573,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     }
 
                     receivedFolder.put(entry.getKey(), entry.getValue());
-                    if (entry.getValue().getParentUFID().equals("root"))
+                    if (entry.getValue().getParentUFID().equals("root")) {
                         receivedFolder.get("root").getChildren().add(entry.getKey());
-
-                } else {
-
-                    String currentName = receivedFolder.get(entry).getFolderName();
-                    String newName = currentName + " ( offline version " + " " + time + ")";
-
-                    ownFolder.get(entry).setFolderName(newName);
-                    receivedFolder.put(entry.getKey(), entry.getValue());
-
-                    if (entry.getValue().getParentUFID().equals("root"))
-                        receivedFolder.get("root").getChildren().add(entry.getKey());
+                    }
 
                 }
-
             }
 
             String newJson = helpJson.foldersToJson(receivedFolder);
