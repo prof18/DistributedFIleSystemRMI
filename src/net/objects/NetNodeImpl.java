@@ -24,10 +24,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
@@ -526,29 +523,48 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             HashMap<String, JsonFolder> ownFolder = helpJson.jsonToFolders(thisJson);
 
-            boolean changed = false;
-
             ArrayList<JsonFile> ownFilesRoot = ownFolder.get("root").getFiles();
+
+            Date date = new Date();
+            String time = date.toString();
 
             if (ownFilesRoot.size() != 0) {
 
-                changed = true;
-
                 for (int i = 0; i < ownFilesRoot.size(); i++) {
 
-                    String tmp = ownFilesRoot.get(i).getFileName();
-                    boolean contained = false;
-                    for (int j =0; j <receivedFolder.get("root").getFiles().size(); j++) {
+                    String currentName = ownFilesRoot.get(i).getFileName();
+                    String currentUFID = ownFilesRoot.get(i).getUFID();
+                    boolean sameUFID = false;
 
-                        if(receivedFolder.get("root").getFiles().get(j).getFileName().equals(tmp) ){
-                            contained = true;
+                    for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
+
+                        if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(currentUFID)) {
+                            sameUFID = true;
                             break;
                         }
 
                     }
-                    if(!contained){
+
+                    boolean sameName = false;
+                    if (!sameUFID) {
+                        for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
+
+                            if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
+                                sameName = true;
+                                break;
+                            }
+
+                        }
+                    }
+
+                    if (sameName) {
+                        String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
+                        ownFilesRoot.get(i).setFileName(newName);
+                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+                    } else {
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
                     }
+
                 }
             }
 
@@ -558,27 +574,34 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 if (!receivedFolder.containsKey(entry.getKey())) {
 
-                    changed = true;
+                    String currentName = entry.getValue().getFolderName();
+
+                    for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
+
+                        if (entry2.getValue().getFolderName().equals(currentName)) {
+
+                            String newName = currentName + " ( offline different folder " + time + " )";
+                            entry.getValue().setFolderName(newName);
+                            break;
+                        }
+                    }
 
                     receivedFolder.put(entry.getKey(), entry.getValue());
-                    if (entry.getValue().getParentUFID().equals("root"))
+                    if (entry.getValue().getParentUFID().equals("root")) {
                         receivedFolder.get("root").getChildren().add(entry.getKey());
+                    }
 
                 }
-
             }
 
             String newJson = helpJson.foldersToJson(receivedFolder);
             this.setJson(newJson, false);
 
-            if (changed) {
-                this.callUpdateAllJson(newJson);
-            }
+            this.callUpdateAllJson(newJson);
+
 
         } else {
             System.out.println("[Json non presente]");
-            // Non è presente il file Json nel nodo attuale
-            // quindi copio direttamente quello importato
             this.setJson(json, false);
         }
 
