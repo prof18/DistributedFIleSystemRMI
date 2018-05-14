@@ -25,10 +25,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -315,17 +312,22 @@ public class MainUI extends JFrame {
     // Shows the info of a file in the File Details Box
     private void setFileInfo(FileWrapper fileWrapper) {
         if (fileWrapper != null) { //secondo me funziona solo se presente il file attribute in locale
-            FileAttribute fileAttribute = null;
             String fileID = fileWrapper.getUFID();
             String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-            try {
-                System.out.println("[WRITE] " + path + fileID);
-                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
-                fileAttribute = (FileAttribute) ois.readObject();
-                fileWrapper.setAttribute(fileAttribute);
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+            File fileAttr = new File(path+fileID);
+            if (fileAttr.exists()){
+                FileAttribute fileAttribute = null;
+
+                try {
+                    System.out.println("[WRITE] " + path + fileID);
+                    ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
+                    fileAttribute = (FileAttribute) ois.readObject();
+                    fileWrapper.setAttribute(fileAttribute);
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
+            
             fileNameVLabel.setText(fileWrapper.getFileName());
             typeVLabel.setText(fileWrapper.getAttribute().getType());
             pathVLabel.setText(fileWrapper.getPath());
