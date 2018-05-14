@@ -194,6 +194,16 @@ public interface NetNode extends Remote, Serializable {
 
 
     /**
+     * This method is used to lock the writing of a specific file
+     *
+     * @param fileID   is the unique identifier of the file
+     * @param nodeList is the list of nodes that stores the specific file
+     * @return
+     * @throws RemoteException
+     */
+    boolean updateWritePermissionFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
+
+    /**
      * Is used to verify if a nodes is reachable
      *
      * @return a string with a message

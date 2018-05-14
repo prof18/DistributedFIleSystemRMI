@@ -25,10 +25,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
@@ -445,6 +442,25 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return mediatorFsNet;
     }
 
+    @Override
+
+    public boolean updateWritePermissionFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
+        ArrayList<NetNodeLocation> nodeLocations = null;
+        try {
+            nodeLocations = mediatorFsNet.getNode().getFileNodeList().get(fileID);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        for (NetNodeLocation nnl : nodeLocations) {
+            if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
+                nnl.lockWriting();
+            } else {
+                nnl.unlockWriting();
+            }
+        }
+
+        return true;
+    }
 
     public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {
         System.out.println("NODE FILE REPLICATION");
@@ -512,29 +528,56 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             HashMap<String, JsonFolder> ownFolder = helpJson.jsonToFolders(thisJson);
 
-            boolean changed = false;
-
             ArrayList<JsonFile> ownFilesRoot = ownFolder.get("root").getFiles();
+
+            Date date = new Date();
+            String time = date.toString();
 
             if (ownFilesRoot.size() != 0) {
 
-                changed = true;
-
                 for (int i = 0; i < ownFilesRoot.size(); i++) {
 
-                    String tmp = ownFilesRoot.get(i).getUFID();
-                    boolean contained = false;
+                    String currentName = ownFilesRoot.get(i).getFileName();
+                    String currentUFID = ownFilesRoot.get(i).getUFID();
+                    boolean sameUFID = false;
+
                     for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
 
-                        if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(tmp)) {
-                            contained = true;
+                        if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(currentUFID)) {
+                            sameUFID = true;
                             break;
                         }
 
                     }
-                    if (!contained) {
+
+                    boolean sameName = false;
+                    if(!sameUFID) {
+                        for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
+
+                            if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
+                                sameName = true;
+                                break;
+                            }
+
+                        }
+                    }
+
+                    if (sameUFID) {
+
+                        String newName = currentName + " ( " + "offline version" + " " + time + " ) ";
+                        ownFilesRoot.get(i).setFileName(newName);
+                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+
+                    } else if(sameName){
+
+                        String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
+                        ownFilesRoot.get(i).setFileName(newName);
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
                     }
+                    else{
+                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+                    }
+
                 }
             }
 
@@ -544,9 +587,31 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 if (!receivedFolder.containsKey(entry.getKey())) {
 
-                    changed = true;
+
+                    String currentName = entry.getValue().getFolderName();
+
+                    for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
+
+                        if (entry2.getValue().getFolderName().equals(currentName)) {
+
+                            String newName = currentName + " ( offline different folder " + time + " )";
+                            entry.getValue().setFolderName(newName);
+                            break;
+                        }
+                    }
 
                     receivedFolder.put(entry.getKey(), entry.getValue());
+                    if (entry.getValue().getParentUFID().equals("root"))
+                        receivedFolder.get("root").getChildren().add(entry.getKey());
+
+                } else {
+
+                    String currentName = receivedFolder.get(entry).getFolderName();
+                    String newName = currentName + " ( offline version " + " " + time + ")";
+
+                    ownFolder.get(entry).setFolderName(newName);
+                    receivedFolder.put(entry.getKey(), entry.getValue());
+
                     if (entry.getValue().getParentUFID().equals("root"))
                         receivedFolder.get("root").getChildren().add(entry.getKey());
 
@@ -557,14 +622,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             String newJson = helpJson.foldersToJson(receivedFolder);
             this.setJson(newJson, false);
 
-            if (changed) {
-                this.callUpdateAllJson(newJson);
-            }
+            this.callUpdateAllJson(newJson);
+
 
         } else {
             System.out.println("[Json non presente]");
-            // Non è presente il file Json nel nodo attuale
-            // quindi copio direttamente quello importato
             this.setJson(json, false);
         }
 
