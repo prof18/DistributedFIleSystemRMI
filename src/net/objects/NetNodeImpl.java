@@ -79,7 +79,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return fileNodeList;
     }
 
-    public void updateWritePermissonMap(String UFID,ListFileWrapper listFileWrapper) {
+    public void updateWritePermissionMap(String UFID, ListFileWrapper listFileWrapper) {
         System.out.println("UPDATE FILE NODE LIST");
             if (fileNodeList.containsKey(UFID) ) {
                 fileNodeList.replace(UFID, fileNodeList.get(UFID), listFileWrapper);
@@ -463,7 +463,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             System.out.println("Node URL: " + nnl.toUrl());
             try {
                 NetNode nn = (NetNode) registry.lookup(nnl.toUrl());
-                nn.updateWritePermissonMap(UFID, fileNodeList.get(UFID));
+                nn.updateWritePermissionMap(UFID, fileNodeList.get(UFID));
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
             }

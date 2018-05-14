@@ -8,6 +8,7 @@ import fs.actions.interfaces.FileService;
 import fs.actions.object.ReadWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
+import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
@@ -24,8 +25,10 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.rmi.NotBoundException;
 import java.rmi.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -311,7 +314,18 @@ public class MainUI extends JFrame {
 
     // Shows the info of a file in the File Details Box
     private void setFileInfo(FileWrapper fileWrapper) {
-        if (fileWrapper != null) {
+        if (fileWrapper != null) { //secondo me funziona solo se presente il file attribute in locale
+            FileAttribute fileAttribute = null;
+            String fileID = fileWrapper.getUFID();
+            String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
+            try {
+                System.out.println("[WRITE] " + path + fileID);
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
+                fileAttribute = (FileAttribute) ois.readObject();
+                fileWrapper.setAttribute(fileAttribute);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
             fileNameVLabel.setText(fileWrapper.getFileName());
             typeVLabel.setText(fileWrapper.getAttribute().getType());
             pathVLabel.setText(fileWrapper.getPath());
@@ -320,6 +334,7 @@ public class MainUI extends JFrame {
             if (fileWrapper.getAttribute().getLastModifiedTime() != null)
                 lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
         }
+
     }
 
     // Shows the info of a folder in the File Details Box
@@ -537,8 +552,8 @@ public class MainUI extends JFrame {
 
         try {
             String id = fileWrapper.getUFID();
-            ReadWrapper readWrapper= fileService.read(id, 0);
-            byte[] content =readWrapper.getContent();
+            ReadWrapper readWrapper = fileService.read(id, 0);
+            byte[] content = readWrapper.getContent();
             String contentS = new String(content);
             //TODO: pass the boolean
             new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath(), readWrapper.isWritable());

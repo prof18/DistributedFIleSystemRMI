@@ -40,7 +40,7 @@ public interface NetNode extends Remote, Serializable {
 
     HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
 
-    void updateWritePermissonMap(String UFID, ListFileWrapper list) throws RemoteException;
+    void updateWritePermissionMap(String UFID, ListFileWrapper list) throws RemoteException;
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 

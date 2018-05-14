@@ -89,14 +89,14 @@ public class ReplicationMethods {
         }
     }
 
-    public void updateWritePermittionMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper){
+    public void updateWritePermissionMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper){
         System.out.println("UpdatePermittionMap method");
         Registry registry;
         try {
             for (NetNodeLocation netNode : nodeSet) {
                 registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
                 NetNode node = (NetNode) registry.lookup(netNode.toUrl());
-                node.updateWritePermissonMap(fileID, listFileWrapper);
+                node.updateWritePermissionMap(fileID, listFileWrapper);
             }
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
