@@ -1,6 +1,7 @@
 package fs.actions.interfaces;
 
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.ReadWrapper;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 
@@ -25,7 +26,7 @@ public interface FileService extends Remote, Serializable {
      *
      */
 
-    byte[] read(String fileID, int offset, int count) throws FileNotFoundException;
+    ReadWrapper read(String fileID, int offset, int count) throws FileNotFoundException;
 
     /**
      * This method is used to read all the content of a file
@@ -35,7 +36,14 @@ public interface FileService extends Remote, Serializable {
      * @return the array of byte to read
      * @throws FileNotFoundException
      */
-    byte[] read(String fileId, int offset) throws FileNotFoundException;
+    ReadWrapper read(String fileId, int offset) throws FileNotFoundException;
+
+
+    /**
+     * Close is used to freed the writing privilege
+     * @param fileID is the unique identifier of the file
+     */
+    void close(String fileID);
 
     /**
      * This method is used to write in a file content

@@ -3,6 +3,8 @@ package fs.actions;
 import fs.actions.cache.ReadingNodeCache;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.ListFileWrapper;
+import fs.actions.object.ReadWrapper;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
@@ -29,8 +31,7 @@ public class FileServiceImpl implements FileService {
     private MediatorFsNet mediator;
     private final String path;
     private ReadingNodeCache readingCache;
-
-
+    private boolean inWriting;
 
     public FileServiceImpl(String path) {
         mediator = MediatorFsNet.getInstance();
@@ -47,12 +48,12 @@ public class FileServiceImpl implements FileService {
      */
 
 
-    public byte[] read(String fileID, int offset, int count) throws FileNotFoundException {
+    public ReadWrapper read(String fileID, int offset, int count) throws FileNotFoundException {
         System.out.println("entrato nel READ");
-        byte[] ret = read(fileID, offset);
+        ReadWrapper ret = read(fileID, offset);
         byte[] newRet = new byte[count];
-        System.arraycopy(ret, 0, newRet, 0, count);
-        return newRet;
+        System.arraycopy(ret.getContent(), 0, newRet, 0, count);
+        return new ReadWrapper(newRet, ret.isWritable());
     }
 
     /**
@@ -60,13 +61,33 @@ public class FileServiceImpl implements FileService {
      * because the lenght of the file is automatically assigned to the count.
      */
     //TODO: controllare il flag per accesso
-    public byte[] read(String fileID, int offset) throws FileNotFoundException {
+    public ReadWrapper read(String fileID, int offset) throws FileNotFoundException {
+
+
         System.out.println("Entrato nel read senza parametri");
         CacheFileWrapper wrapper = getFile(fileID);
         System.out.println("ritornato al read senza parametri");
         if (wrapper == null) {
             System.out.println("il file : " + fileID + " non è stato trovato");
             return null;
+        }
+
+        boolean flag = false;
+        try {
+            for (Map.Entry<String,ListFileWrapper> list:mediator.getNode().getFileNodeList().entrySet()) {
+                System.out.println(list.getKey()+"   "+list.getValue().isWritable());
+            }
+            System.out.println("read file flag : " + mediator.getNode().getFileNodeList().get(fileID).isWritable());
+            flag = mediator.getNode().getFileNodeList().get(fileID).isWritable();
+            inWriting=flag;
+            if (flag) {
+                ListFileWrapper listFileWrapper = mediator.getNode().getFileNodeList().get(fileID);
+                listFileWrapper.setWritable(false);
+                mediator.getNode().updateFileNodeList(fileID, listFileWrapper);
+                new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), listFileWrapper).run();
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
         System.out.println("wrapper nel read non null");
         File file = wrapper.getFile();
@@ -80,40 +101,56 @@ public class FileServiceImpl implements FileService {
             e1.printStackTrace();
         }
         System.out.println("content = " + new String(content));
-        return content;
+        return new ReadWrapper(content, flag);
+    }
+
+    public void close(String fileID){
+        System.out.println("rilascio privilegi di scrittura");
+        if(inWriting) {
+            try {
+                mediator.getNode().getFileNodeList().get(fileID).setWritable(true);
+                ListFileWrapper listFileWrapper = mediator.getNode().getFileNodeList().get(fileID);
+                mediator.getNode().updateFileNodeList(fileID, listFileWrapper);
+                new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), listFileWrapper).run();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        inWriting=false;
+
     }
 
     public void write(String fileID, int offset, int count, byte[] data, String fileDirectoryUFID) throws FileNotFoundException {
         System.out.println("entrato nel write");
-        ArrayList<NetNodeLocation> nodeList = null;
+        ListFileWrapper nodeList = null;
         try {
             nodeList = mediator.getNode().getFileNodeList().get(fileID);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        if (nodeList.size() == 0) {
+        if (nodeList.getLocations().size() == 0) {
             System.out.println("nessun file trovato");
             return;
         }
 
-        boolean canReplicate = false;
-        for (NetNodeLocation nnl : nodeList) {
+        boolean canReplicate = true;
+       /* for (NetNodeLocation nnl : nodeList.getLocations()) {
             try {
                 if ((nnl.toUrl()).compareTo(mediator.getNode().getOwnLocation().toUrl()) == 0) {
-                    canReplicate = nnl.canWrite();
+                    canReplicate = nodeList.isWritable();
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
         try {
-            if (mediator.getNode().getFileNodeList().get(fileID).size() <= 1) {
+            if (mediator.getNode().getFileNodeList().get(fileID).getLocations().size() <= 1) {
                 canReplicate = false;
             }
         } catch (RemoteException e) {
             e.printStackTrace();
-        }
-        ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList);
+        }*/
+        ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList.getLocations());
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         byte[] repContent = null;
         int oldLength = 0; //file length before write the new content
@@ -125,27 +162,27 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
+            if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
                 //debug
                 System.out.println(localHost);
-                for (int i = 0; i < nodeList.size(); i++) {
-                    System.out.println(nodeList.get(i).toUrl());
+                for (int i = 0; i < nodeList.getLocations().size(); i++) {
+                    System.out.println(nodeList.getLocations().get(i).toUrl());
                 }
 
                 //fine debug
-                if (nodeList.get(nodeList.indexOf(localHost)).canWrite()) {
-                    for (int i = 0; i < nodeList.size(); i++) {
-                        if (nodeList.get(i).equals(localHost)) { //trovo il nodo locale
+                if (nodeList.getLocations().get(nodeList.getLocations().indexOf(localHost)).canWrite()) {
+                    for (int i = 0; i < nodeList.getLocations().size(); i++) {
+                        if (nodeList.getLocations().get(i).equals(localHost)) { //trovo il nodo locale
                             tempNodeList.remove(i);
-                            nodeList.get(i).unlockWriting();
+                            nodeList.getLocations().get(i).unlockWriting();
                             break;
                         }
                     }
 
 
                     for (NetNodeLocation nnl : tempNodeList) {
-                        int pos = nodeList.indexOf(nnl);
-                        nodeList.get(pos).lockWriting();
+                        int pos = nodeList.getLocations().indexOf(nnl);
+                        nodeList.getLocations().get(pos).lockWriting();
                     }
                 }
                 try {
@@ -166,7 +203,7 @@ public class FileServiceImpl implements FileService {
             byte[] content = null;
             try {
                 System.out.println("[WRITE] lettura del file prima della modifica");
-                content = read(fileID, 0);
+                content = read(fileID, 0).getContent();
                 System.out.println("[WRITE] prima della modifica: " + new String(content));
             } catch (NullPointerException e) {
                 System.out.println("il file ha qualche problema");
@@ -245,10 +282,10 @@ public class FileServiceImpl implements FileService {
 
             cacheFileWrapper.getAttribute().setFileLength(repContent.length);
 
-            }
+        }
 
         try {
-            if (mediator.getNode().getHashMap().size() > 1 && mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
+            if (mediator.getNode().getHashMap().size() > 1 && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
 
                 new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), nodeList).run();
             }
@@ -309,10 +346,21 @@ public class FileServiceImpl implements FileService {
             }
 
             for (NetNodeLocation nnl : tempNodeList) {
-                int pos = nodeList.indexOf(nnl);
-                nodeList.get(pos).unlockWriting();
+                int pos = nodeList.getLocations().indexOf(nnl);
+                nodeList.getLocations().get(pos).unlockWriting();
             }
         }
+
+        System.out.println("rilascio privilegi di scrittura");
+        try {
+            mediator.getNode().getFileNodeList().get(fileID).setWritable(true);
+            ListFileWrapper listFileWrapper = mediator.getNode().getFileNodeList().get(fileID);
+            mediator.getNode().updateFileNodeList(fileID, listFileWrapper);
+            new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), listFileWrapper).run();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -337,8 +385,11 @@ public class FileServiceImpl implements FileService {
         byte[] tftb = Util.append(ftb, fatb);
         ArrayList<NetNodeLocation> nl = new ArrayList<>();
         nl.add(mediator.getNode().getOwnLocation());
-        mediator.getNode().getFileNodeList().put(UFID, nl);
+        mediator.getNode().getFileNodeList().put(UFID, new ListFileWrapper(nl));
         FileWrapper fw = new FileWrapper(UFID, fileName);
+        //devo replicare
+        new MapUpdateTask(UFID, mediator.getNode().getHashMap().values(), mediator.getNode().getFileNodeList().get(UFID)).run();
+
         fw.setAttribute(attribute);
         System.out.println("Directory path " + curDir.getPathWithoutRoot());
         fw.setPath(curDir.getPath());
@@ -406,14 +457,14 @@ public class FileServiceImpl implements FileService {
         //eliminazione negli altri nodi
 
         try {
-            System.out.println("Nodi con il file: " + mediator.getNode().getFileNodeList().get(fileID).size());
+            System.out.println("Nodi con il file: " + mediator.getNode().getFileNodeList().get(fileID).getLocations().size());
         } catch (RemoteException e) {
             e.printStackTrace();
         }
 
         try {
-            if (mediator.getNode().getFileNodeList().get(fileID).size() > 1) {
-                for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID)) {
+            if (mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
+                for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID).getLocations()) {
                     new DeleteFileTask(fileID, directoryPath, nnl, curDir).run();
                 }
             }
@@ -486,8 +537,11 @@ public class FileServiceImpl implements FileService {
             ret[i] = first[i];
             i++;
         }
+
         byte[] cleanRet = cleanArray(ret);
         return cleanRet;
+
+
     }
 
     private byte[] cleanArray(byte[] tmp) {
@@ -588,7 +642,7 @@ public class FileServiceImpl implements FileService {
 
     private void replication(ReplicationWrapper repWr, NetNode node) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
 
-        HashMap<String, ArrayList<NetNodeLocation>> hm = null;
+        HashMap<String, ListFileWrapper> hm = null;
         try {
             hm = node.getFileNodeList();
         } catch (RemoteException e) {
@@ -599,7 +653,7 @@ public class FileServiceImpl implements FileService {
 
         System.out.println("Ricerca nodo per la replicazione");
 
-        if (!hm.containsKey(repWr.getUFID()) || hm.get(repWr.getUFID()).size() <= 1) {
+        if (!hm.containsKey(repWr.getUFID()) || hm.get(repWr.getUFID()).getLocations().size() <= 1) {
             System.out.println("File not found in hashmap file-node");
             ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
             Collection<NetNodeLocation> tmpColl = null;
@@ -618,7 +672,7 @@ public class FileServiceImpl implements FileService {
             ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
             selectedNode = selectedNode(nodeBiggerTime);
         } else {
-            ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID());
+            ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID()).getLocations();
             nodeList = removeLocalNode(nodeList, node);
             ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
             selectedNode = selectedNode(nodeBiggerTime);

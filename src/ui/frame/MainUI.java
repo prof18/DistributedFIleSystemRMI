@@ -5,6 +5,7 @@ import fs.actions.DirectoryServiceImpl;
 import fs.actions.FileServiceUtil;
 import fs.actions.interfaces.DirectoryService;
 import fs.actions.interfaces.FileService;
+import fs.actions.object.ReadWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
@@ -536,10 +537,11 @@ public class MainUI extends JFrame {
 
         try {
             String id = fileWrapper.getUFID();
-            byte[] content = fileService.read(id, 0);
+            ReadWrapper readWrapper= fileService.read(id, 0);
+            byte[] content =readWrapper.getContent();
             String contentS = new String(content);
             //TODO: pass the boolean
-            new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath(), true);
+            new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath(), readWrapper.isWritable());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             isOpen = false;

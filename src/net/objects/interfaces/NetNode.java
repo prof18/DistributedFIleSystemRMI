@@ -2,6 +2,7 @@ package net.objects.interfaces;
 
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.ListFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
@@ -33,9 +34,13 @@ public interface NetNode extends Remote, Serializable {
 
     JoinWrap join(String ipNode, int port, String name) throws RemoteException;
 
-    HashMap<String, ArrayList<NetNodeLocation>> getFileNodeList() throws RemoteException;
 
-    void updateFileNodeList(String UFID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
+
+
+
+    HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
+
+    void updateFileNodeList(String UFID, ListFileWrapper list) throws RemoteException;
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
@@ -187,16 +192,6 @@ public interface NetNode extends Remote, Serializable {
 
     boolean saveFileReplica(ReplicationWrapper rw) throws RemoteException;
 
-
-    /**
-     * This method is used to lock the writing of a specific file
-     *
-     * @param fileID   is the unique identifier of the file
-     * @param nodeList is the list of nodes that stores the specific file
-     * @return
-     * @throws RemoteException
-     */
-    boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
 
     /**
      * Is used to verify if a nodes is reachable

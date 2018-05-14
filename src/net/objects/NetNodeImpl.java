@@ -3,6 +3,7 @@ package net.objects;
 import fs.actions.FSStructure;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.ListFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
@@ -39,7 +40,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private NetNodeLocation ownLocation;
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
-    private HashMap<String, ArrayList<NetNodeLocation>> fileNodeList = new HashMap(); //hashmap file-nodi che possiedono una copia di tale file.
+    private HashMap<String, ListFileWrapper> fileNodeList = new HashMap(); //hashmap file-nodi che possiedono una copia di tale file.
     private MainUI mainUI;
 
     public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
@@ -77,19 +78,23 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
 
-    public HashMap<String, ArrayList<NetNodeLocation>> getFileNodeList() {
+    public HashMap<String, ListFileWrapper> getFileNodeList() {
         return fileNodeList;
     }
 
-    public void updateFileNodeList(String UFID, ArrayList<NetNodeLocation> nodeList) {
+    public void updateFileNodeList(String UFID,ListFileWrapper listFileWrapper) {
         System.out.println("UPDATE FILE NODE LIST");
-        if (fileNodeList.size() == 0) {
-            fileNodeList.put(UFID, nodeList);
-        } else {
-            if (fileNodeList.containsKey(UFID) && fileNodeList.get(UFID).size() < nodeList.size()) {
-                fileNodeList.replace(UFID, fileNodeList.get(UFID), nodeList);
+            if (fileNodeList.containsKey(UFID) ) {
+                fileNodeList.replace(UFID, fileNodeList.get(UFID), listFileWrapper);
             }
-        }
+            else {
+                fileNodeList.put(UFID, listFileWrapper);
+            }
+        System.out.println("VISUALIZZAZIONE DELL'ELENCO FLAG");
+            for (Map.Entry<String,ListFileWrapper> entry:fileNodeList.entrySet()){
+                System.out.println(entry.getKey()+"   "+entry.getValue().isWritable());
+            }
+
     }
 
 
@@ -440,38 +445,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return mediatorFsNet;
     }
 
-    @Override
-
-    public boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
-        ArrayList<NetNodeLocation> nodeLocations = null;
-        try {
-            nodeLocations = mediatorFsNet.getNode().getFileNodeList().get(fileID);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        if (nodeLocations != null) {
-            for (NetNodeLocation nnl : nodeLocations) {
-                if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
-                    nnl.lockWriting();
-                } else {
-                    nnl.unlockWriting();
-                }
-            }
-        } else {
-            return false;
-        }
-
-        return true;
-    }
 
     public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {
         System.out.println("NODE FILE REPLICATION");
         if (!fileNodeList.containsKey(UFID)) {
             ArrayList<NetNodeLocation> a = new ArrayList<>();
             a.add(netNode);
-            fileNodeList.put(UFID, a);
+            fileNodeList.put(UFID, new ListFileWrapper(a));
         } else {
-            fileNodeList.get(UFID).add(netNode);
+            fileNodeList.get(UFID).getLocations().add(netNode);
         }
 
         for (NetNodeLocation nnl : connectedNodes.values()) {

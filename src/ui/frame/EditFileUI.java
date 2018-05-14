@@ -6,6 +6,8 @@ import fs.objects.structure.FSTreeNode;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 
 import static javax.swing.JOptionPane.showMessageDialog;
@@ -58,6 +60,15 @@ public class EditFileUI extends JFrame {
                     "Warning",
                     JOptionPane.WARNING_MESSAGE);
         }
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                fileService.close(fileID);
+            }
+        });
+
     }
 
 
