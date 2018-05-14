@@ -79,7 +79,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return fileNodeList;
     }
 
-    public void updateFileNodeList(String UFID,ListFileWrapper listFileWrapper) {
+    public void updateWritePermissonMap(String UFID,ListFileWrapper listFileWrapper) {
         System.out.println("UPDATE FILE NODE LIST");
             if (fileNodeList.containsKey(UFID) ) {
                 fileNodeList.replace(UFID, fileNodeList.get(UFID), listFileWrapper);
@@ -442,25 +442,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return mediatorFsNet;
     }
 
-    @Override
-
-    public boolean updateWritePermissionFileList(String fileID, ArrayList<NetNodeLocation> nodeList) {
-        ArrayList<NetNodeLocation> nodeLocations = null;
-        try {
-            nodeLocations = mediatorFsNet.getNode().getFileNodeList().get(fileID);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        for (NetNodeLocation nnl : nodeLocations) {
-            if (nodeList.get(nodeList.indexOf(nnl)).canWrite()) {
-                nnl.lockWriting();
-            } else {
-                nnl.unlockWriting();
-            }
-        }
-
-        return true;
-    }
 
     public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {
         System.out.println("NODE FILE REPLICATION");
@@ -482,7 +463,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             System.out.println("Node URL: " + nnl.toUrl());
             try {
                 NetNode nn = (NetNode) registry.lookup(nnl.toUrl());
-                nn.updateFileNodeList(UFID, fileNodeList.get(UFID));
+                nn.updateWritePermissonMap(UFID, fileNodeList.get(UFID));
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
             }

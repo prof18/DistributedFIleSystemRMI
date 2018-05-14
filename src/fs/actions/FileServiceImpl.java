@@ -83,8 +83,8 @@ public class FileServiceImpl implements FileService {
             if (flag) {
                 ListFileWrapper listFileWrapper = mediator.getNode().getFileNodeList().get(fileID);
                 listFileWrapper.setWritable(false);
-                mediator.getNode().updateFileNodeList(fileID, listFileWrapper);
-                new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), listFileWrapper).run();
+                mediator.getNode().updateWritePermissonMap(fileID, listFileWrapper);
+                ReplicationMethods.getInstance().updateWritePermissonMap(fileID, mediator.getNode().getHashMap().values(),listFileWrapper);
             }
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -110,8 +110,8 @@ public class FileServiceImpl implements FileService {
             try {
                 mediator.getNode().getFileNodeList().get(fileID).setWritable(true);
                 ListFileWrapper listFileWrapper = mediator.getNode().getFileNodeList().get(fileID);
-                mediator.getNode().updateFileNodeList(fileID, listFileWrapper);
-                new MapUpdateTask(fileID, mediator.getNode().getHashMap().values(), listFileWrapper).run();
+                mediator.getNode().updateWritePermissonMap(fileID, listFileWrapper);
+                ReplicationMethods.getInstance().updateWritePermissonMap(fileID, mediator.getNode().getHashMap().values(), listFileWrapper);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -355,8 +355,8 @@ public class FileServiceImpl implements FileService {
         try {
             mediator.getNode().getFileNodeList().get(fileID).setWritable(true);
             ListFileWrapper listFileWrapper = mediator.getNode().getFileNodeList().get(fileID);
-            mediator.getNode().updateFileNodeList(fileID, listFileWrapper);
-            ReplicationMethods.getInstance().fileReplication(tempNodeList.get(i), rw, mediator.getNode());
+            mediator.getNode().updateWritePermissonMap(fileID, listFileWrapper);
+            ReplicationMethods.getInstance().updateWritePermissonMap(fileID,mediator.getNode().getHashMap().values(),listFileWrapper);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -387,8 +387,7 @@ public class FileServiceImpl implements FileService {
         nl.add(mediator.getNode().getOwnLocation());
         mediator.getNode().getFileNodeList().put(UFID, new ListFileWrapper(nl));
         FileWrapper fw = new FileWrapper(UFID, fileName);
-        //devo replicare
-        ReplicationMethods.getInstance().fileReplication(tempNodeList.get(i), rw, mediator.getNode());
+        ReplicationMethods.getInstance().updateWritePermissonMap(UFID,mediator.getNode().getHashMap().values(), mediator.getNode().getFileNodeList().get(UFID));
 
         fw.setAttribute(attribute);
         System.out.println("Directory path " + curDir.getPathWithoutRoot());

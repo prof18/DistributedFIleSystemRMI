@@ -1,5 +1,6 @@
 package fs.actions;
 
+import fs.actions.object.ListFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
@@ -89,14 +90,14 @@ public class ReplicationMethods {
         }
     }
 
-    public void updateWritePermissonMap(String fileID, Collection<NetNodeLocation> nodeSet, ArrayList<NetNodeLocation> nodeList){
+    public void updateWritePermissonMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper){
         System.out.println("UpdatePermissionMap method");
         Registry registry;
         try {
             for (NetNodeLocation netNode : nodeSet) {
                 registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
                 NetNode node = (NetNode) registry.lookup(netNode.toUrl());
-                node.updateWritePermissionFileList(fileID, nodeList);
+                node.updateWritePermissonMap(fileID, listFileWrapper);
             }
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
