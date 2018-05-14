@@ -233,12 +233,12 @@ public class FileServiceImpl implements FileService {
             FileOutputStream fileOutputStream = null;
             try {
                 File file = new File(path + fileID);
-                //System.out.println("File delete: " + file.delete());
-                //file = new File(path + fileID);
+                System.out.println("File delete: " + file.delete());
                 fileOutputStream = new FileOutputStream(file, false);
                 fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
                 fileAttribute.setFileLength(newContent.length);
                 setAttributes(fileID, fileAttribute);
+                cacheFileWrapper.getAttribute().setFileLength(repContent.length);
                 System.out.println("newContent = " + new String(newContent));
                 fileOutputStream.write(newContent, 0, newContent.length);
                 //cacheFileWrapper.getAttribute().setFileLength(newContent.length);
