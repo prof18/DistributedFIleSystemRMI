@@ -9,7 +9,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class ReplicationMethods {
@@ -25,22 +24,22 @@ public class ReplicationMethods {
         return INSTANCE;
     }
 
-    public void fileReplication(NetNodeLocation netNode, ReplicationWrapper repWr, NetNode nNode){
+    public void fileReplication(NetNodeLocation netNodeLoc, ReplicationWrapper repWr, NetNode nNode){
         System.out.println("FileReplication method");
         Registry registry;
         try {
             int it = 0;
-            registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
-            System.out.println("Node URL: " + netNode.toUrl());
-            NetNode node = (NetNode) registry.lookup(netNode.toUrl());
+            registry = LocateRegistry.getRegistry(netNodeLoc.getIp(), netNodeLoc.getPort());
+            System.out.println("Node URL: " + netNodeLoc.toUrl());
+            NetNode node = (NetNode) registry.lookup(netNodeLoc.toUrl());
             boolean rep;
             do {
                 System.out.println(repWr.getUFID());
                 rep = node.saveFileReplica(repWr);
 
                 if (rep) {
-                    nNode.nodeFileAssociation(repWr.getUFID(), netNode);
-                    netNode.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
+                    nNode.nodeFileAssociation(repWr.getUFID(), netNodeLoc);
+                    netNodeLoc.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
                     System.out.println("Replicazione file " + repWr.getUFID() + " riuscita.");
                 } else {
                     System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
@@ -90,8 +89,8 @@ public class ReplicationMethods {
         }
     }
 
-    public void updateWritePermissonMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper){
-        System.out.println("UpdatePermissionMap method");
+    public void updateWritePermittionMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper){
+        System.out.println("UpdatePermittionMap method");
         Registry registry;
         try {
             for (NetNodeLocation netNode : nodeSet) {
