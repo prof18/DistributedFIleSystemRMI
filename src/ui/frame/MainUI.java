@@ -313,27 +313,18 @@ public class MainUI extends JFrame {
     private void setFileInfo(FileWrapper fileWrapper) {
         if (fileWrapper != null) { //secondo me funziona solo se presente il file attribute in locale
             String fileID = fileWrapper.getUFID();
-            String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-            File fileAttr = new File(path+fileID);
-            if (fileAttr.exists()){
-                FileAttribute fileAttribute = null;
+            String filePath = fileWrapper.getPath();
+            String[] path = filePath.split("/");
+            String directoryName = path[path.length - 2];
+            FSTreeNode root = FSStructure.getInstance().getTree();
+            FileWrapper fw = root.findNodeByName(root, directoryName).getFile(fileID);
 
-                try {
-                    System.out.println("[WRITE] " + path + fileID);
-                    ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
-                    fileAttribute = (FileAttribute) ois.readObject();
-                    fileWrapper.setAttribute(fileAttribute);
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            fileNameVLabel.setText(fileWrapper.getFileName());
-            typeVLabel.setText(fileWrapper.getAttribute().getType());
-            pathVLabel.setText(fileWrapper.getPath());
-            fileSizeVLabel.setText(String.valueOf(fileWrapper.getAttribute().getFileLength()));
-            ownerVLabel.setText(fileWrapper.getAttribute().getOwner());
-            if (fileWrapper.getAttribute().getLastModifiedTime() != null)
+            fileNameVLabel.setText(fw.getFileName());
+            typeVLabel.setText(fw.getAttribute().getType());
+            pathVLabel.setText(fw.getPath());
+            fileSizeVLabel.setText(String.valueOf(fw.getAttribute().getFileLength()));
+            ownerVLabel.setText(fw.getAttribute().getOwner());
+            if (fw.getAttribute().getLastModifiedTime() != null)
                 lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
         }
 

@@ -150,7 +150,7 @@ public class FileServiceImpl implements FileService {
         } catch (RemoteException e) {
             e.printStackTrace();
         }*/
-        ArrayList<NetNodeLocation> tempNodeList = new ArrayList<>(nodeList.getLocations());
+        ArrayList<NetNodeLocation> tempNodeFileList = new ArrayList<>(nodeList.getLocations());
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         byte[] repContent = null;
         int oldLength = 0; //file length before write the new content
@@ -173,14 +173,14 @@ public class FileServiceImpl implements FileService {
                 if (nodeList.getLocations().get(nodeList.getLocations().indexOf(localHost)).canWrite()) {
                     for (int i = 0; i < nodeList.getLocations().size(); i++) {
                         if (nodeList.getLocations().get(i).equals(localHost)) { //trovo il nodo locale
-                            tempNodeList.remove(i);
+                            tempNodeFileList.remove(i);
                             nodeList.getLocations().get(i).unlockWriting();
                             break;
                         }
                     }
 
 
-                    for (NetNodeLocation nnl : tempNodeList) {
+                    for (NetNodeLocation nnl : tempNodeFileList) {
                         int pos = nodeList.getLocations().indexOf(nnl);
                         nodeList.getLocations().get(pos).lockWriting();
                     }
@@ -234,7 +234,7 @@ public class FileServiceImpl implements FileService {
             try {
                 File file = new File(path + fileID);
                 System.out.println("File delete: " + file.delete());
-                fileOutputStream = new FileOutputStream(file, false);
+                fileOutputStream = new FileOutputStream(file);
                 fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
                 fileAttribute.setFileLength(newContent.length);
                 setAttributes(fileID, fileAttribute);
@@ -296,14 +296,16 @@ public class FileServiceImpl implements FileService {
 
         FSStructure.getInstance().generateTreeStructure();
 
+        FSTreeNode root = FSStructure.getInstance().getTree();
+
         System.out.println("fileDirectoryUFID is: " + fileDirectoryUFID);
-        System.out.println("Instance tree: " + FSStructure.getInstance().getTree().toString());
+        System.out.println("Instance tree: " + root.toString());
         FSTreeNode fileNode;
         if (fileDirectoryUFID.compareTo("root") != 0 && fileDirectoryUFID != null && fileDirectoryUFID.compareTo("") != 0) {
-            fileNode = FSStructure.getInstance().getTree().findNodeByUFID(FSStructure.getInstance().getTree(), fileDirectoryUFID);
+            fileNode = root.findNodeByUFID(root, fileDirectoryUFID);
         } else {
             System.out.println("fileDirectoryName is null.");
-            fileNode = FSStructure.getInstance().getTree();
+            fileNode = root;
         }
         System.out.println("fileNode: " + fileNode);
         FileWrapper fileInTree = fileNode.getFile(fileID);
@@ -339,13 +341,16 @@ public class FileServiceImpl implements FileService {
             System.out.println("Set path file:" + rw.getPath());
 
 
-            for (int i = 0; i < tempNodeList.size(); i++) {
-                tempNodeList.get(i).reduceOccupiedSpace(oldLength);
+            for (int i = 0; i < tempNodeFileList.size(); i++) {
+                tempNodeFileList.get(i).reduceOccupiedSpace(oldLength);
                 System.out.println("chiamato il replication task da riga 284");
-                ReplicationMethods.getInstance().fileReplication(tempNodeList.get(i), rw, mediator.getNode());
+                ReplicationMethods.getInstance().fileReplication(tempNodeFileList.get(i), rw, mediator.getNode());
             }
 
-            for (NetNodeLocation nnl : tempNodeList) {
+            root.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            mediator.jsonReplicaton(root);
+
+            for (NetNodeLocation nnl : tempNodeFileList) {
                 int pos = nodeList.getLocations().indexOf(nnl);
                 nodeList.getLocations().get(pos).unlockWriting();
             }
