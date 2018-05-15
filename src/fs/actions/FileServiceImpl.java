@@ -199,7 +199,7 @@ public class FileServiceImpl implements FileService {
 
         if (cacheFileWrapper.isLocal()) {
             System.out.println("il file che si vuole sovrascrivere è locale");
-            byte[] newContent = null;
+            byte[] newContent;
             byte[] content = null;
             try {
                 System.out.println("[WRITE] lettura del file prima della modifica");
@@ -213,6 +213,9 @@ public class FileServiceImpl implements FileService {
                 System.out.println("problema con gli indici");
                 e.printStackTrace();
                 System.exit(-1);
+            }
+            if(data.length < content.length){
+                content = null;
             }
             newContent = joinArray(content, data, offset, count);
             repContent = newContent.clone();
@@ -230,19 +233,18 @@ public class FileServiceImpl implements FileService {
                 e.printStackTrace();
             }
 
-            FileOutputStream fileOutputStream = null;
             try {
                 File file = new File(path + fileID);
                 System.out.println("File delete: " + file.delete());
-                fileOutputStream = new FileOutputStream(file, false);
+                FileOutputStream fileOutputStream = new FileOutputStream(file,false);
                 fileAttribute.setLastModifiedTime(Date.from(Instant.now()));
                 fileAttribute.setFileLength(newContent.length);
                 setAttributes(fileID, fileAttribute);
                 cacheFileWrapper.getAttribute().setFileLength(repContent.length);
                 System.out.println("newContent = " + new String(newContent));
-                //fileOutputStream.write(newContent, 0, newContent.length);
-                fileOutputStream.write(newContent);
-
+                fileOutputStream.write(newContent, 0, newContent.length);
+                //fileOutputStream.write(newContent);
+                //fileOutputStream.flush();
                 fileOutputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -526,6 +528,9 @@ public class FileServiceImpl implements FileService {
 
 
     private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws IndexOutOfBoundsException {
+        if (first == null){
+            return second;
+        }
         byte[] ret = new byte[first.length + second.length];
         int i = 0;
         if (offset > first.length) throw new IndexOutOfBoundsException();
