@@ -314,10 +314,19 @@ public class MainUI extends JFrame {
         if (fileWrapper != null) { //secondo me funziona solo se presente il file attribute in locale
             String fileID = fileWrapper.getUFID();
             String filePath = fileWrapper.getPath();
-            String[] path = filePath.split("/");
-            String directoryName = path[path.length - 2];
             FSTreeNode root = FSStructure.getInstance().getTree();
-            FileWrapper fw = root.findNodeByName(root, directoryName).getFile(fileID);
+            String[] path = filePath.split("/");
+            FileWrapper fw;
+            if (path.length > 2) {
+                String directoryName = path[path.length - 2];
+                fw = root.findNodeByName(root, directoryName).getFile(fileID);
+            }else{
+                fw = root.getFile(fileID);
+            }
+
+            if(fw == null){
+                fw = fileWrapper;
+            }
 
             fileNameVLabel.setText(fw.getFileName());
             typeVLabel.setText(fw.getAttribute().getType());
