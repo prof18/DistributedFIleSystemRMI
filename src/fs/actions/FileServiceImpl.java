@@ -483,10 +483,13 @@ public class FileServiceImpl implements FileService {
 
         //eliminazione in locale
         try {
-            if (file.delete() && fileAttr.delete() && mediator.getNode().getFileNodeList().containsKey(fileID)) {
-                System.out.println("File cancellati in locale");
-                mediator.getNode().getFileNodeList().remove(fileID);
+            if(file.exists()){
+                if (file.delete() && fileAttr.delete() && mediator.getNode().getFileNodeList().containsKey(fileID)) {
+                    System.out.println("File cancellati in locale");
+                    mediator.getNode().getFileNodeList().remove(fileID);
+                }
             }
+
         } catch (RemoteException e) {
             e.printStackTrace();
         }
