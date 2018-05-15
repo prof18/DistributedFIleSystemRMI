@@ -547,6 +547,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
                         ownFilesRoot.get(i).setFileName(newName);
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+                    } else if(sameUFID){
+                        System.out.println("Non fa nulla");
                     } else {
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
                     }
