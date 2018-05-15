@@ -106,18 +106,6 @@ public class FSTreeNode implements Serializable {
         files.add(file);
     }
 
-   /* public FileWrapper findFile(String fileName){
-        FileWrapper file = null;
-        for(FileWrapper fw: this.files){
-            if(fw.getFileUFID().compareTo(fileName) == 0){
-                file = fw;
-                break;
-            }
-        }
-
-        return file;
-    }*/
-
     private int findFilePos(String UFID) {
         int pos = 0;
         for (int i = 0; i < files.size(); i++) {
