@@ -290,7 +290,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
 
-            if ((ownIP + port).hashCode() == entry.getKey()) {
+            if (!((ownIP + port).hashCode() == entry.getKey())) {
 
                 System.out.println("[ CHECKNODES ]");
 
@@ -316,11 +316,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 } catch (RemoteException e) {
                     System.out.println("NODO non trovato alla porta: " + tmpPort + "; Ip: " + tmpIp);
                     downNodes.put(entry.getKey(), entry.getValue());
-                    e.printStackTrace();
+                    //e.printStackTrace();
 
                 } catch (NotBoundException e) {
                     System.out.println("NotBoundException checkNodes2");
-                    e.printStackTrace();
+                    //e.printStackTrace();
 
                 }
 
