@@ -692,12 +692,14 @@ public class FileServiceImpl implements FileService {
             selectedNode = selectedNode(nodeBiggerTime);
         }
 
-        System.out.println("Nodo scelto: " + selectedNode.toUrl());
+
 
         if (selectedNode == null) {
             System.out.println("Disastro!!! Siamo rovinati!!!");
             System.out.println(" Nessun nodo trovato per la replicazione :( ");
             return;
+        }else{
+            System.out.println("Nodo scelto: " + selectedNode.toUrl());
         }
 
         //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
