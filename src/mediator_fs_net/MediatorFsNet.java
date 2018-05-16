@@ -141,8 +141,11 @@ public class MediatorFsNet {
         MainUI.updateModels(treeRoot, false);
     }
 
-    public void removeFileFromTree(String UFID, FSTreeNode treeFileDirectory) {
-        fsStructure.getTree().findNodeByUFID(fsStructure.getTree().findRoot(), treeFileDirectory.getUFID()).removeOneFile(UFID);
+    public void removeFileFromTree(String UFID, String treeFileDirectoryUFID) {
+        FSTreeNode root = FSStructure.getInstance().getTree();
+        root.findNodeByUFID(root, treeFileDirectoryUFID).removeOneFile(UFID);
+        FSStructure.getInstance().generateJson(root);
+        updateJson(root);
     }
 
 

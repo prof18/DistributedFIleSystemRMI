@@ -4,6 +4,8 @@ import fs.actions.object.ListFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
+import utils.Constants;
+import utils.PropertiesHelper;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -66,9 +68,10 @@ public class ReplicationMethods {
         }
     }
 
-    public void deleteFile(String fileID, String filePath, NetNodeLocation netNode, FSTreeNode treeFileDirectory){
+    public void deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory){
         System.out.println("DeleteFile method");
         Registry registry;
+        String filePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
@@ -78,7 +81,7 @@ public class ReplicationMethods {
             System.out.println("Nel nodo: " + netNode.toUrl());
 
 
-            if (node.deleteFile(fileID, filePath, treeFileDirectory)) {
+            if (node.deleteFile(fileID, treeFileDirectory.getUFID())) {
                 System.out.println("File e attributi eliminati con successo");
             } else {
                 System.out.println("File e attributi non sono stati eliminati");
