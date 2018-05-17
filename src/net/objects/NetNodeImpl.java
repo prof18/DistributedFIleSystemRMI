@@ -81,16 +81,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public void updateWritePermissionMap(String UFID, ListFileWrapper listFileWrapper) {
         System.out.println("UPDATE FILE NODE LIST");
-            if (fileNodeList.containsKey(UFID) ) {
-                fileNodeList.replace(UFID, fileNodeList.get(UFID), listFileWrapper);
-            }
-            else {
-                fileNodeList.put(UFID, listFileWrapper);
-            }
+        if (fileNodeList.containsKey(UFID)) {
+            fileNodeList.replace(UFID, fileNodeList.get(UFID), listFileWrapper);
+        } else {
+            fileNodeList.put(UFID, listFileWrapper);
+        }
         System.out.println("VISUALIZZAZIONE DELL'ELENCO FLAG");
-            for (Map.Entry<String,ListFileWrapper> entry:fileNodeList.entrySet()){
-                System.out.println(entry.getKey()+"   "+entry.getValue().isWritable());
-            }
+        for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
+            System.out.println(entry.getKey() + "   " + entry.getValue().isWritable());
+        }
 
     }
 
@@ -284,7 +283,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return "--COLLEGAMENTO VERIFICATO--";
     }
 
-    public synchronized void checkNodes() {
+    public synchronized void checkNodesAndReplica() {
 
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
 
@@ -335,7 +334,150 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
 
+        //CONTROLLO DELLA REPLICAZIONE
+
+
+//        for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
+//
+//            ListFileWrapper tmp = entry.getValue();
+//            ArrayList<NetNodeLocation> tmpLocations = tmp.getLocations();
+//
+//            if (tmpLocations.size() > 2) {
+//                System.out.println("ERRORE DUPLICAZIONE SBAGLIATA");
+//            }
+//
+//
+//            if (tmpLocations.size() == 2) {
+//                if (tmpLocations.get(0).equals(this.ownLocation)) {
+//
+//                    boolean verified = this.checkSecReplica(tmpLocations.get(2), entry.getKey());
+//                    if (!verified) {
+//                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
+//                        callSaveFile(tmpLocations.get(1), cacheFileWrapper);
+//                    }
+//
+//                } else if (tmpLocations.get(1).equals(this.ownLocation)) {
+//
+//                    boolean verified = this.checkSecReplica(tmpLocations.get(1), entry.getKey());
+//                    if (!verified) {
+//                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
+//                        callSaveFile(tmpLocations.get(0), cacheFileWrapper);
+//                    }
+//
+//                }
+//            } else {
+//
+//                if (tmpLocations.get(0).equals(this.ownLocation)) {
+//                    System.out.println("CREO UNA SECONDA REPLICA");
+//
+//                }
+//
+//
+//            }
+//        }
+
+
     }
+
+    public boolean checkSecReplica(NetNodeLocation e, String fileName) {
+
+        System.out.println("[ CHECKReplica]");
+
+        Registry registry = null;
+
+        String tmpIp = "-NOT UPDATE-";
+        int tmpPort = -1;
+        boolean ver = false;
+
+        try {
+
+            tmpIp = e.getIp();
+            tmpPort = e.getPort();
+            registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
+            String tmpPath = e.toUrl();
+
+            NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+            ver = nodeTemp.verifyFile(fileName);
+
+        } catch (RemoteException er) {
+            System.out.println("checkSecReplica");
+
+        } catch (NotBoundException er) {
+            System.out.println("checkSecReplica2");
+        }
+
+        return ver;
+
+    }
+
+    public boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) {
+
+        System.out.println("[ call Save File ]");
+
+        Registry registry = null;
+
+        String tmpIp = "-NOT UPDATE-";
+        int tmpPort = -1;
+        boolean ver = false;
+
+        try {
+
+            tmpIp = e.getIp();
+            tmpPort = e.getPort();
+            registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
+            String tmpPath = e.toUrl();
+
+            NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+
+            nodeTemp.saveFile(cacheFileWrapper);
+
+        } catch (RemoteException er) {
+            System.out.println("callSaveFileReplica");
+
+        } catch (NotBoundException er) {
+            System.out.println("callSaveFileReplica2");
+        }
+
+        return true;
+    }
+
+    public boolean saveFile(CacheFileWrapper cacheFileWrapper) {
+
+        File f = new File(path + cacheFileWrapper.getUFID());
+        File fileAtt = new File(path + cacheFileWrapper.getUFID() + ".attr");
+
+        try {
+
+            FileOutputStream fos = new FileOutputStream(f, false);
+            fos.write(cacheFileWrapper.getContent());
+            fos.flush();
+            fos.close();
+
+            fos = new FileOutputStream(fileAtt, false);
+            ObjectOutputStream oot = new ObjectOutputStream(fos);
+            oot.writeObject(cacheFileWrapper.getAttribute());
+            oot.flush();
+            fos.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+
+
+    }
+
+    public boolean verifyFile(String fileName) {
+        return new File(path + "/" + fileName).isFile();
+    }
+
 
     public boolean saveFileReplica(ReplicationWrapper rw) {
 
@@ -399,22 +541,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return true;
     }
 
-    /*public static Object deepClone(Object object) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(object);
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return ois.readObject();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }*/
-
-    public boolean deleteFile(String UFID,  String treeFileDirectoryUFID) {
+    public boolean deleteFile(String UFID, String treeFileDirectoryUFID) {
         String filePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String totalFilePath = filePath + UFID;
         System.out.println("Percorso totale file: " + totalFilePath);
@@ -442,7 +569,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     public MediatorFsNet getMediator() {
         return mediatorFsNet;
     }
-
 
     public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {
         System.out.println("NODE FILE REPLICATION");
@@ -475,8 +601,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     public void updateUI(FSTreeNode treeRoot) {
         mediatorFsNet.updateJson(treeRoot);
     }
-
-    //TODO
 
     public String getJson() {
         return PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
@@ -548,7 +672,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
                         ownFilesRoot.get(i).setFileName(newName);
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
-                    } else if(sameUFID){
+                    } else if (sameUFID) {
                         System.out.println("Non fa nulla");
                     } else {
                         receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));

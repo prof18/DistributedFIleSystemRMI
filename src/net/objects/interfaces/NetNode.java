@@ -8,13 +8,14 @@ import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
-//import net.objects.NetNodeWrap;
 
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+//import net.objects.NetNodeWrap;
 
 /**
  * This interface is dedicated in order to manage all the operation related to communication
@@ -33,10 +34,6 @@ public interface NetNode extends Remote, Serializable {
      */
 
     JoinWrap join(String ipNode, int port, String name) throws RemoteException;
-
-
-
-
 
     HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
 
@@ -134,7 +131,15 @@ public interface NetNode extends Remote, Serializable {
      * @throws RemoteException if there are problems in the RMI communication
      */
 
-    void checkNodes() throws RemoteException;
+    void checkNodesAndReplica() throws RemoteException;
+
+    boolean checkSecReplica(NetNodeLocation e, String fileName) throws RemoteException;
+
+    boolean verifyFile(String fileName)throws RemoteException;
+
+    boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) throws RemoteException;
+
+    boolean saveFile( CacheFileWrapper e ) throws RemoteException;
 
     /**
      * When a node connects to a distributed FS , update the list of connected nodes with the more
@@ -202,10 +207,7 @@ public interface NetNode extends Remote, Serializable {
 
     String verify() throws RemoteException;
 
-
-    //TODO
-
-    String getJson() throws  RemoteException;
+    String getJson() throws RemoteException;
 
     void setJson(String gson, boolean up) throws RemoteException;
 
