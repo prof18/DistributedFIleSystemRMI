@@ -485,11 +485,11 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
-        /*System.out.println("Replicazione del json per l'albero dopo eliminazione file");
+        System.out.println("Replicazione del json per l'albero dopo eliminazione file");
 
         FSTreeNode root = mediator.getFsStructure().getTree();
 
-        mediator.getFsStructure().generateJson(root);*/
+        mediator.getFsStructure().generateJson(root);
 
         callback.onItemChanged(curDir);
     }
