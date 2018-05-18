@@ -340,6 +340,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         //CONTROLLO DELLA REPLICAZIONE
 
+        System.out.println("[ CHECK REPLICA ]");
 
         for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
 
@@ -353,8 +354,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             if (tmpLocations.size() == 2) {
                 if (tmpLocations.get(0).equals(this.ownLocation)) {
-
-                    boolean verified = this.checkSecReplica(tmpLocations.get(2), entry.getKey());
+                    
+                    boolean verified = this.checkSecReplica(tmpLocations.get(1), entry.getKey());
                     if (!verified) {
                         CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
                         callSaveFile(tmpLocations.get(1), cacheFileWrapper);
@@ -362,7 +363,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 } else if (tmpLocations.get(1).equals(this.ownLocation)) {
 
-                    boolean verified = this.checkSecReplica(tmpLocations.get(1), entry.getKey());
+                    boolean verified = this.checkSecReplica(tmpLocations.get(0), entry.getKey());
                     if (!verified) {
                         CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
                         callSaveFile(tmpLocations.get(0), cacheFileWrapper);
@@ -372,7 +373,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             } else {
 
                 if (tmpLocations.get(0).equals(this.ownLocation)) {
-                    System.out.println("CREO UNA SECONDA REPLICA");
+
+                    System.out.println("CREATE THE MISSED REPLICA");
+
                     //TODO
                     CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
                     ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID(), null);
@@ -572,8 +575,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         String checksum = Util.getChecksum(bytesArray);
-        System.out.println("Checksum in saveFileReplica: " + checksum);
-        System.out.println("Checksum contenuto nel replicationWrapper: " + rw.getChecksum());
+//        System.out.println("Checksum in saveFileReplica: " + checksum);
+//        System.out.println("Checksum contenuto nel replicationWrapper: " + rw.getChecksum());
         if (checksum.compareTo(rw.getChecksum()) != 0) {
             return false;
         }

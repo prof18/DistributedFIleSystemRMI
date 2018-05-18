@@ -310,9 +310,9 @@ public class Util {
     public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
         NetNodeLocation selectedNode = null;
         int occupiedSpace = Integer.MAX_VALUE;
-        System.out.println("Lista nodi maggior spazio libero");
+        //System.out.println("Lista nodi maggior spazio libero");
         for (NetNodeLocation node : list) {
-            System.out.println(node.toUrl());
+            //System.out.println(node.toUrl());
             if (node.getTotalByte() < occupiedSpace) {
                 occupiedSpace = node.getTotalByte();
                 selectedNode = node;
