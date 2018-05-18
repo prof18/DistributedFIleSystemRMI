@@ -6,6 +6,10 @@ import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -192,6 +196,44 @@ public class Util {
 
     }
 
+    public static byte[] fileToBytes(String pathFile) {
+
+        byte[] bytesArray = null;
+        Path path = Paths.get(pathFile);
+
+        try {
+            bytesArray = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*FileInputStream fis = null;
+
+        try {
+            bytesArray = new byte[(int) f.length()];
+
+            //read file into bytes[]
+            fis = new FileInputStream(f);
+            fis.read(bytesArray);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }*/
+
+        return bytesArray;
+
+    }
+
     /**
      * This method is used with the goal of the checksum computation
      *
@@ -238,4 +280,47 @@ public class Util {
         System.arraycopy(attributeFile, 0, ret, file.length, attributeFile.length);
         return ret;
     }
+
+    public static ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
+        long maxConnectedTime = maxTimeConnection(list);
+        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
+        for (NetNodeLocation node : list) {
+            if (node.getTimeStamp() == maxConnectedTime) {
+                nodeList.add(node);
+            }
+        }
+
+        return nodeList;
+    }
+
+    public static long maxTimeConnection(ArrayList<NetNodeLocation> list) {
+        long connectedTime = 0;
+        long selectedTimeStamp = 0;
+        long currentTime = new Date().getTime();
+        for (NetNodeLocation dn : list) {
+            if (currentTime - dn.getTimeStamp() > connectedTime) {
+                selectedTimeStamp = dn.getTimeStamp();
+                connectedTime = currentTime - dn.getTimeStamp();
+            }
+        }
+
+        return selectedTimeStamp;
+    }
+
+    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
+        NetNodeLocation selectedNode = null;
+        int occupiedSpace = Integer.MAX_VALUE;
+        System.out.println("Lista nodi maggior spazio libero");
+        for (NetNodeLocation node : list) {
+            System.out.println(node.toUrl());
+            if (node.getTotalByte() < occupiedSpace) {
+                occupiedSpace = node.getTotalByte();
+                selectedNode = node;
+            }
+        }
+
+        return selectedNode;
+    }
+
+
 }

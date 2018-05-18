@@ -27,6 +27,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
+
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     private MediatorFsNet mediatorFsNet;
@@ -79,7 +80,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return fileNodeList;
     }
 
-    public void setFileNodeList( HashMap<String, ListFileWrapper> fileNodeList  ) {
+    public void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) {
         this.fileNodeList = fileNodeList;
     }
 
@@ -120,7 +121,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         System.out.println("aggiornamento nodi UI " + getHostName());
         mainUI.updateConnectedNode(connectedNodes);
 
-        return new JoinWrap(newName, connectedNodes,fileNodeList);
+        return new JoinWrap(newName, connectedNodes, fileNodeList);
     }
 
     @Override
@@ -340,48 +341,94 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         //CONTROLLO DELLA REPLICAZIONE
 
 
-//        for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
-//
-//            ListFileWrapper tmp = entry.getValue();
-//            ArrayList<NetNodeLocation> tmpLocations = tmp.getLocations();
-//
-//            if (tmpLocations.size() > 2) {
-//                System.out.println("ERRORE DUPLICAZIONE SBAGLIATA");
-//            }
-//
-//
-//            if (tmpLocations.size() == 2) {
-//                if (tmpLocations.get(0).equals(this.ownLocation)) {
-//
-//                    boolean verified = this.checkSecReplica(tmpLocations.get(2), entry.getKey());
-//                    if (!verified) {
-//                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
-//                        callSaveFile(tmpLocations.get(1), cacheFileWrapper);
-//                    }
-//
-//                } else if (tmpLocations.get(1).equals(this.ownLocation)) {
-//
-//                    boolean verified = this.checkSecReplica(tmpLocations.get(1), entry.getKey());
-//                    if (!verified) {
-//                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
-//                        callSaveFile(tmpLocations.get(0), cacheFileWrapper);
-//                    }
-//
-//                }
-//            } else {
-//
-//                if (tmpLocations.get(0).equals(this.ownLocation)) {
-//                    System.out.println("CREO UNA SECONDA REPLICA");
-//                    //TODO
-////                    CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
-////                    ReplicationWrapper rw = new ReplicationWrapper( cacheFileWrapper.getUFID(), null);
-////                    rw
-//
-//                }
-//
-//
-//            }
-//        }
+        for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
+
+            ListFileWrapper tmp = entry.getValue();
+            ArrayList<NetNodeLocation> tmpLocations = tmp.getLocations();
+
+            if (tmpLocations.size() > 2) {
+                System.out.println("ERRORE DUPLICAZIONE SBAGLIATA");
+            }
+
+
+            if (tmpLocations.size() == 2) {
+                if (tmpLocations.get(0).equals(this.ownLocation)) {
+
+                    boolean verified = this.checkSecReplica(tmpLocations.get(2), entry.getKey());
+                    if (!verified) {
+                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
+                        callSaveFile(tmpLocations.get(1), cacheFileWrapper);
+                    }
+
+                } else if (tmpLocations.get(1).equals(this.ownLocation)) {
+
+                    boolean verified = this.checkSecReplica(tmpLocations.get(1), entry.getKey());
+                    if (!verified) {
+                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
+                        callSaveFile(tmpLocations.get(0), cacheFileWrapper);
+                    }
+
+                }
+            } else {
+
+                if (tmpLocations.get(0).equals(this.ownLocation)) {
+                    System.out.println("CREO UNA SECONDA REPLICA");
+                    //TODO
+                    CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
+                    ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID(), null);
+                    rw.setAttribute(cacheFileWrapper.getAttribute());
+
+                    byte[] ftb = Util.fileToBytes(path + "/" + entry.getKey());
+                    byte[] fatb = Util.fileToBytes(path + "/" + entry.getKey() + ".attr");
+                    byte[] tftb = Util.append(ftb, fatb);
+
+                    rw.setChecksum(Util.getChecksum(tftb));
+                    rw.setContent(cacheFileWrapper.getContent());
+
+                    ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
+                    Collection<NetNodeLocation> tmpColl = connectedNodes.values();
+                    if (tmpColl != null) {
+                        for (NetNodeLocation nnl : tmpColl) {
+                            if (!nnl.equals(ownLocation)) {
+                                nodeList.add(nnl);
+                            }
+                        }
+                    }
+
+                    ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
+                    NetNodeLocation selectedNode = Util.selectedNode(nodeBiggerTime);
+
+                    Registry registry = null;
+
+                    String tmpIp = "-NOT UPDATE-";
+                    int tmpPort = -1;
+                    boolean ver = false;
+
+                    try {
+
+                        tmpIp = selectedNode.getIp();
+                        tmpPort = selectedNode.getPort();
+                        registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
+                        String tmpPath = selectedNode.toUrl();
+
+                        NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+                        nodeTemp.saveFileReplica(rw);
+
+                    } catch (RemoteException er) {
+                        System.out.println("checkSecReplica");
+
+                    } catch (NotBoundException er) {
+                        System.out.println("checkSecReplica2");
+                    }
+
+
+
+                }
+
+
+            }
+        }
 
 
     }
@@ -483,21 +530,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return new File(path + "/" + fileName).isFile();
     }
 
-
     public boolean saveFileReplica(ReplicationWrapper rw) {
 
         String filePath = path;
 
         System.out.println("saveFileReplica");
         System.out.println(rw.getUFID());
-        /*if (filePath.length() > 1) { //non è la radice
-            String directoryPath = filePath.substring(0, filePath.length() - 1);
-            File directory = new File(directoryPath);
-
-            if (!directory.exists()) { //verifica esistenza della directory, se non esiste la crea.
-                directory.mkdirs();
-            }
-        }*/
 
         File f = new File(filePath + rw.getUFID());
         File fileAtt = new File(filePath + rw.getUFID() + ".attr");
@@ -540,8 +578,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             return false;
         }
 
-        PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, rw.getjSon());
-//        FSStructure.getInstance().generateTreeStructure();
+
+        if (rw.getjSon() != null) {
+            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, rw.getjSon());
+        }
+        //  FSStructure.getInstance().generateTreeStructure();
 
         return true;
     }

@@ -16,9 +16,6 @@ import utils.PropertiesHelper;
 import utils.Util;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.time.Instant;
 import java.util.*;
@@ -28,8 +25,8 @@ import java.util.*;
  */
 public class FileServiceImpl implements FileService {
 
-    private MediatorFsNet mediator;
     private final String path;
+    private MediatorFsNet mediator;
     private ReadingNodeCache readingCache;
     private boolean inWriting;
 
@@ -39,6 +36,27 @@ public class FileServiceImpl implements FileService {
         this.path = path;
         System.out.println("sono tornato al costruttore");
         readingCache = new ReadingNodeCache();
+    }
+
+    private static byte[] toByteArray(Object obj) throws IOException {
+        byte[] bytes = null;
+        ByteArrayOutputStream bos = null;
+        ObjectOutputStream oos = null;
+        try {
+            bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            oos.flush();
+            bytes = bos.toByteArray();
+        } finally {
+            if (oos != null) {
+                oos.close();
+            }
+            if (bos != null) {
+                bos.close();
+            }
+        }
+        return bytes;
     }
 
     /**
@@ -79,7 +97,7 @@ public class FileServiceImpl implements FileService {
             }
             //TODO
 
-            if (mediator.getNode().getFileNodeList().get(fileID) != null){
+            if (mediator.getNode().getFileNodeList().get(fileID) != null) {
                 System.out.println("read file flag : " + mediator.getNode().getFileNodeList().get(fileID).isWritable());
                 flag = mediator.getNode().getFileNodeList().get(fileID).isWritable();
                 inWriting = flag;
@@ -168,19 +186,19 @@ public class FileServiceImpl implements FileService {
         try {
             if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
                 //debug
-                System.out.println("Localhost : "+localHost.toUrl());
+                System.out.println("Localhost : " + localHost.toUrl());
                 System.out.println("lista node list : ");
                 for (int i = 0; i < nodeList.getLocations().size(); i++) {
                     System.out.println(nodeList.getLocations().get(i).toUrl());
                 }
 
                 //fine debug
-                    for (int i = 0; i < nodeList.getLocations().size(); i++) {
-                        if (nodeList.getLocations().get(i).equals(localHost)) { //trovo il nodo locale
-                            tempNodeFileList.remove(i);
-                            nodeList.getLocations().get(i).unlockWriting();
-                            break;
-                        }
+                for (int i = 0; i < nodeList.getLocations().size(); i++) {
+                    if (nodeList.getLocations().get(i).equals(localHost)) { //trovo il nodo locale
+                        tempNodeFileList.remove(i);
+                        nodeList.getLocations().get(i).unlockWriting();
+                        break;
+                    }
 
 
                     for (NetNodeLocation nnl : tempNodeFileList) {
@@ -376,7 +394,6 @@ public class FileServiceImpl implements FileService {
 
     }
 
-
     public String create(String host, FileAttribute attribute, FSTreeNode curDir, String fileName) throws IOException {
         String UFID = host + "_" + Date.from(Instant.now()).hashCode();
         attribute.setOwner(PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
@@ -392,8 +409,8 @@ public class FileServiceImpl implements FileService {
         ObjectOutputStream oout = new ObjectOutputStream(out);
         oout.writeObject(attribute);
         oout.flush();
-        byte[] ftb = fileToBytes(filePath);
-        byte[] fatb = fileToBytes(filePath + ".attr");
+        byte[] ftb = Util.fileToBytes(filePath);
+        byte[] fatb = Util.fileToBytes(filePath + ".attr");
         byte[] tftb = Util.append(ftb, fatb);
         ArrayList<NetNodeLocation> nl = new ArrayList<>();
         nl.add(mediator.getNode().getOwnLocation());
@@ -442,7 +459,6 @@ public class FileServiceImpl implements FileService {
 
     }
 
-
     public void delete(String fileID, FSTreeNode curDir, DeleteFileCallback callback) {
 
         String directoryPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
@@ -465,7 +481,7 @@ public class FileServiceImpl implements FileService {
 
             if (listOfNode.size() > 1) {
                 for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID).getLocations()) {
-                    if(nnl.toString().compareTo(mediator.getNode().getOwnLocation().toString()) !=0 ){
+                    if (nnl.toString().compareTo(mediator.getNode().getOwnLocation().toString()) != 0) {
                         ReplicationMethods.getInstance().deleteFile(fileID, nnl, curDir);
                     }
                 }
@@ -498,7 +514,6 @@ public class FileServiceImpl implements FileService {
         callback.onItemChanged(curDir);
     }
 
-
     public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
         System.out.println("entrato in getAttributes");
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
@@ -517,7 +532,6 @@ public class FileServiceImpl implements FileService {
         }
         //gestire aggiornamento delle informazioni
     }
-
 
     private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws IndexOutOfBoundsException {
         if (first == null) {
@@ -554,7 +568,6 @@ public class FileServiceImpl implements FileService {
         }
         return Arrays.copyOfRange(tmp, 0, count + 1);
     }
-
 
     private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
         System.out.println("entrato in getFile");
@@ -668,13 +681,13 @@ public class FileServiceImpl implements FileService {
             }
 
             nodeList = removeLocalNode(nodeList, node);
-            ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
-            selectedNode = selectedNode(nodeBiggerTime);
+            ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
+            selectedNode = Util.selectedNode(nodeBiggerTime);
         } else {
             ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID()).getLocations();
             nodeList = removeLocalNode(nodeList, node);
-            ArrayList<NetNodeLocation> nodeBiggerTime = listOfMaxConnectedNode(nodeList);
-            selectedNode = selectedNode(nodeBiggerTime);
+            ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
+            selectedNode = Util.selectedNode(nodeBiggerTime);
         }
 
 
@@ -693,85 +706,6 @@ public class FileServiceImpl implements FileService {
         ReplicationMethods.getInstance().fileReplication(selectedNode, repWr, node);
     }
 
-    private ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
-        long maxConnectedTime = maxTimeConnection(list);
-        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
-        for (NetNodeLocation node : list) {
-            if (node.getTimeStamp() == maxConnectedTime) {
-                nodeList.add(node);
-            }
-        }
-
-        return nodeList;
-    }
-
-    private long maxTimeConnection(ArrayList<NetNodeLocation> list) {
-        long connectedTime = 0;
-        long selectedTimeStamp = 0;
-        long currentTime = new Date().getTime();
-        for (NetNodeLocation dn : list) {
-            if (currentTime - dn.getTimeStamp() > connectedTime) {
-                selectedTimeStamp = dn.getTimeStamp();
-                connectedTime = currentTime - dn.getTimeStamp();
-            }
-        }
-
-        return selectedTimeStamp;
-    }
-
-    private NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
-        NetNodeLocation selectedNode = null;
-        int occupiedSpace = Integer.MAX_VALUE;
-        System.out.println("Lista nodi maggior spazio libero");
-        for (NetNodeLocation node : list) {
-            System.out.println(node.toUrl());
-            if (node.getTotalByte() < occupiedSpace) {
-                occupiedSpace = node.getTotalByte();
-                selectedNode = node;
-            }
-        }
-
-        return selectedNode;
-    }
-
-    private static byte[] fileToBytes(String pathFile) {
-
-        byte[] bytesArray = null;
-        Path path = Paths.get(pathFile);
-
-        try {
-            bytesArray = Files.readAllBytes(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        /*FileInputStream fis = null;
-
-        try {
-            bytesArray = new byte[(int) f.length()];
-
-            //read file into bytes[]
-            fis = new FileInputStream(f);
-            fis.read(bytesArray);
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }*/
-
-        return bytesArray;
-
-    }
-
     private ArrayList<NetNodeLocation> removeLocalNode(ArrayList<NetNodeLocation> nodeList, NetNode node) {
 
         for (int i = 0; i < nodeList.size(); i++) {
@@ -785,27 +719,6 @@ public class FileServiceImpl implements FileService {
         }
 
         return nodeList;
-    }
-
-    private static byte[] toByteArray(Object obj) throws IOException {
-        byte[] bytes = null;
-        ByteArrayOutputStream bos = null;
-        ObjectOutputStream oos = null;
-        try {
-            bos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(bos);
-            oos.writeObject(obj);
-            oos.flush();
-            bytes = bos.toByteArray();
-        } finally {
-            if (oos != null) {
-                oos.close();
-            }
-            if (bos != null) {
-                bos.close();
-            }
-        }
-        return bytes;
     }
 
 }
