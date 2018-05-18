@@ -79,6 +79,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return fileNodeList;
     }
 
+    public void setFileNodeList( HashMap<String, ListFileWrapper> fileNodeList  ) {
+        this.fileNodeList = fileNodeList;
+    }
+
     public void updateWritePermissionMap(String UFID, ListFileWrapper listFileWrapper) {
         System.out.println("UPDATE FILE NODE LIST");
         if (fileNodeList.containsKey(UFID)) {
@@ -92,7 +96,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
     }
-
 
     public NetNodeLocation getOwnLocation() {
         return ownLocation;
@@ -117,7 +120,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         System.out.println("aggiornamento nodi UI " + getHostName());
         mainUI.updateConnectedNode(connectedNodes);
 
-        return new JoinWrap(newName, connectedNodes);
+        return new JoinWrap(newName, connectedNodes,fileNodeList);
     }
 
     @Override

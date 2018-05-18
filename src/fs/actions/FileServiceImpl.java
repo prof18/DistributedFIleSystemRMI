@@ -77,9 +77,13 @@ public class FileServiceImpl implements FileService {
             for (Map.Entry<String, ListFileWrapper> list : mediator.getNode().getFileNodeList().entrySet()) {
                 System.out.println(list.getKey() + "   " + list.getValue().isWritable());
             }
-            System.out.println("read file flag : " + mediator.getNode().getFileNodeList().get(fileID).isWritable());
-            flag = mediator.getNode().getFileNodeList().get(fileID).isWritable();
-            inWriting = flag;
+            //TODO
+
+            if (mediator.getNode().getFileNodeList().get(fileID) != null){
+                System.out.println("read file flag : " + mediator.getNode().getFileNodeList().get(fileID).isWritable());
+                flag = mediator.getNode().getFileNodeList().get(fileID).isWritable();
+                inWriting = flag;
+            }
             if (flag) {
                 ListFileWrapper listFileWrapper = mediator.getNode().getFileNodeList().get(fileID);
                 listFileWrapper.setWritable(false);

@@ -37,6 +37,8 @@ public interface NetNode extends Remote, Serializable {
 
     HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
 
+    void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
+
     void updateWritePermissionMap(String UFID, ListFileWrapper list) throws RemoteException;
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
@@ -135,11 +137,11 @@ public interface NetNode extends Remote, Serializable {
 
     boolean checkSecReplica(NetNodeLocation e, String fileName) throws RemoteException;
 
-    boolean verifyFile(String fileName)throws RemoteException;
+    boolean verifyFile(String fileName) throws RemoteException;
 
     boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) throws RemoteException;
 
-    boolean saveFile( CacheFileWrapper e ) throws RemoteException;
+    boolean saveFile(CacheFileWrapper e) throws RemoteException;
 
     /**
      * When a node connects to a distributed FS , update the list of connected nodes with the more

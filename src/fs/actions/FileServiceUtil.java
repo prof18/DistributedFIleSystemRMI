@@ -87,7 +87,7 @@ public class FileServiceUtil {
                 JoinWrap jWrap = node1.join(ownIP, port, hostName);
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
-
+                node.setFileNodeList(jWrap.getFileNodeList());
 
                 System.out.println();
                 System.out.println("[MAPPA RITORNATA]");
@@ -96,6 +96,10 @@ public class FileServiceUtil {
                 node.setConnectedNodes(retMap);
                 mainUI.updateConnectedNode(retMap);
                 ret = retMap;
+
+                //TODO
+
+
 
                 //Se i nodi sono solo 2 le Map saranno già aggiornate
                 if ((retMap.size() != 2)) {
