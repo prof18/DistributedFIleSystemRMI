@@ -354,7 +354,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             if (tmpLocations.size() == 2) {
                 if (tmpLocations.get(0).equals(this.ownLocation)) {
-                    
+
                     boolean verified = this.checkSecReplica(tmpLocations.get(1), entry.getKey());
                     if (!verified) {
                         CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
@@ -375,64 +375,64 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 if (tmpLocations.get(0).equals(this.ownLocation)) {
 
                     System.out.println("CREATE THE MISSED REPLICA");
-
-                    //TODO
                     CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
-                    ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID(), null);
-                    rw.setAttribute(cacheFileWrapper.getAttribute());
-
-                    byte[] ftb = Util.fileToBytes(path + "/" + entry.getKey());
-                    byte[] fatb = Util.fileToBytes(path + "/" + entry.getKey() + ".attr");
-                    byte[] tftb = Util.append(ftb, fatb);
-
-                    rw.setChecksum(Util.getChecksum(tftb));
-                    rw.setContent(cacheFileWrapper.getContent());
-
-                    ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
-                    Collection<NetNodeLocation> tmpColl = connectedNodes.values();
-                    if (tmpColl != null) {
-                        for (NetNodeLocation nnl : tmpColl) {
-                            if (!nnl.equals(ownLocation)) {
-                                nodeList.add(nnl);
-                            }
-                        }
-                    }
-
-                    ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
-                    NetNodeLocation selectedNode = Util.selectedNode(nodeBiggerTime);
-
-                    Registry registry = null;
-
-                    String tmpIp = "-NOT UPDATE-";
-                    int tmpPort = -1;
-                    boolean ver = false;
-
-                    try {
-
-                        tmpIp = selectedNode.getIp();
-                        tmpPort = selectedNode.getPort();
-                        registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
-
-                        String tmpPath = selectedNode.toUrl();
-
-                        NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
-                        nodeTemp.saveFileReplica(rw);
-
-                    } catch (RemoteException er) {
-                        System.out.println("checkSecReplica");
-
-                    } catch (NotBoundException er) {
-                        System.out.println("checkSecReplica2");
-                    }
-
-
+                    callSaveFileReplica(cacheFileWrapper, entry.getKey());
 
                 }
-
 
             }
         }
 
+    }
+
+    public void callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) {
+
+        ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID(), null);
+        rw.setAttribute(cacheFileWrapper.getAttribute());
+
+        byte[] ftb = Util.fileToBytes(path + "/" + UFID);
+        byte[] fatb = Util.fileToBytes(path + "/" + UFID + ".attr");
+        byte[] tftb = Util.append(ftb, fatb);
+
+        rw.setChecksum(Util.getChecksum(tftb));
+        rw.setContent(cacheFileWrapper.getContent());
+
+        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
+        Collection<NetNodeLocation> tmpColl = connectedNodes.values();
+        if (tmpColl != null) {
+            for (NetNodeLocation nnl : tmpColl) {
+                if (!nnl.equals(ownLocation)) {
+                    nodeList.add(nnl);
+                }
+            }
+        }
+
+        ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
+        NetNodeLocation selectedNode = Util.selectedNode(nodeBiggerTime);
+
+        Registry registry = null;
+
+        String tmpIp = "-NOT UPDATE-";
+        int tmpPort = -1;
+        boolean ver = false;
+
+        try {
+
+            tmpIp = selectedNode.getIp();
+            tmpPort = selectedNode.getPort();
+            registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
+            String tmpPath = selectedNode.toUrl();
+
+            NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+            nodeTemp.saveFileReplica(rw);
+
+        } catch (RemoteException er) {
+            System.out.println("checkSecReplica");
+
+        } catch (NotBoundException er) {
+            System.out.println("checkSecReplica2");
+        }
 
     }
 

@@ -189,6 +189,8 @@ public interface NetNode extends Remote, Serializable {
 
     String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
 
+    void callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) throws RemoteException;
+
     /**
      * This method is used to implement the replication
      *
