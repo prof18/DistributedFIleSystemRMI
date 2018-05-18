@@ -164,20 +164,19 @@ public class FileServiceImpl implements FileService {
         try {
             if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
                 //debug
-                System.out.println(localHost);
+                System.out.println("Localhost : "+localHost.toUrl());
+                System.out.println("lista node list : ");
                 for (int i = 0; i < nodeList.getLocations().size(); i++) {
                     System.out.println(nodeList.getLocations().get(i).toUrl());
                 }
 
                 //fine debug
-                if (nodeList.getLocations().get(nodeList.getLocations().indexOf(localHost)).canWrite()) {
                     for (int i = 0; i < nodeList.getLocations().size(); i++) {
                         if (nodeList.getLocations().get(i).equals(localHost)) { //trovo il nodo locale
                             tempNodeFileList.remove(i);
                             nodeList.getLocations().get(i).unlockWriting();
                             break;
                         }
-                    }
 
 
                     for (NetNodeLocation nnl : tempNodeFileList) {
@@ -486,11 +485,11 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
-        /*System.out.println("Replicazione del json per l'albero dopo eliminazione file");
+        System.out.println("Replicazione del json per l'albero dopo eliminazione file");
 
         FSTreeNode root = mediator.getFsStructure().getTree();
 
-        mediator.getFsStructure().generateJson(root);*/
+        mediator.getFsStructure().generateJson(root);
 
         callback.onItemChanged(curDir);
     }
@@ -596,10 +595,10 @@ public class FileServiceImpl implements FileService {
     }
 
     private CacheFileWrapper getCacheFile(String UFID) {
-        System.out.println("entrato in getCacheFile");
+        System.out.println("[CACHE] entrato in getCacheFile");
         CacheFileWrapper retFile = readingCache.get(UFID);
         if (retFile != null) {
-            System.out.println("file trovato nella cache");
+            System.out.println("[CACHE] file trovato nella cache");
             //devo controllare se è ancora valido il file salvato nella cache
             long elapsedTime = Date.from(Instant.now()).getTime() - retFile.getLastValidatedTime();
             if (elapsedTime < readingCache.getTimeInterval()) {
@@ -608,11 +607,7 @@ public class FileServiceImpl implements FileService {
                 System.out.println("[CACHE] : il file è obsoleto");
                 CacheFileWrapper fileWrapperMaster = mediator.getFile(UFID);
                 if (fileWrapperMaster.getLastValidatedTime() == retFile.getLastValidatedTime()) {
-                    System.out.println("il file non è stato modificato");
-                    retFile.setLastValidatedTime(Date.from(Instant.now()));
-                    return retFile;
-                } else {
-                    System.out.println("il file è stato modificato");
+                    System.out.println("[CACHE] il file è stato modificato");
                     retFile = fileWrapperMaster;
                     return retFile;
                 }

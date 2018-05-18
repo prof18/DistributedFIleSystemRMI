@@ -107,7 +107,12 @@ public class FSTreeNode implements Serializable {
     }
 
     private int findFilePos(String UFID) {
-        int pos = 0;
+        System.out.println("DEBUG");
+        for (int i = 0; i < files.size(); i++) {
+            System.out.println(files.get(i).getUFID());
+        }
+
+        int pos = -1;
         for (int i = 0; i < files.size(); i++) {
             if (files.get(i).getUFID().compareTo(UFID) == 0) {
                 pos = i;
@@ -143,6 +148,7 @@ public class FSTreeNode implements Serializable {
     public void removeOneFile(String UFID) {
 
         int pos = findFilePos(UFID);
+        System.out.println("removeOneFile : "+pos);
         files.remove(pos);
     }
 
