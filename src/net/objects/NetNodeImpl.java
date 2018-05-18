@@ -369,6 +369,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 //
 //                if (tmpLocations.get(0).equals(this.ownLocation)) {
 //                    System.out.println("CREO UNA SECONDA REPLICA");
+//                    //TODO
+////                    CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
+////                    ReplicationWrapper rw = new ReplicationWrapper( cacheFileWrapper.getUFID(), null);
+////                    rw
 //
 //                }
 //
@@ -419,8 +423,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         String tmpIp = "-NOT UPDATE-";
         int tmpPort = -1;
-        boolean ver = false;
-
         try {
 
             tmpIp = e.getIp();
@@ -645,39 +647,52 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                     String currentName = ownFilesRoot.get(i).getFileName();
                     String currentUFID = ownFilesRoot.get(i).getUFID();
-                    boolean sameUFID = false;
 
-                    for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
+                    File file = new File(path + "/" + currentUFID);
+                    if (file.exists()) {
 
-                        if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(currentUFID)) {
-                            sameUFID = true;
-                            break;
-                        }
+                        System.out.println("IL FILE ESISTE QUINDI AGGIORNO IL JSON");
+                        boolean sameUFID = false;
 
-                    }
-
-                    boolean sameName = false;
-                    if (!sameUFID) {
                         for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
 
-                            if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
-                                sameName = true;
+                            if (receivedFolder.get("root").getFiles().get(j).getUFID().equals(currentUFID)) {
+                                sameUFID = true;
                                 break;
                             }
 
                         }
-                    }
 
-                    if (sameName) {
-                        String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
-                        ownFilesRoot.get(i).setFileName(newName);
-                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
-                    } else if (sameUFID) {
-                        System.out.println("Non fa nulla");
-                    } else {
-                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
-                    }
+                        boolean sameName = false;
+                        if (!sameUFID) {
+                            for (int j = 0; j < receivedFolder.get("root").getFiles().size(); j++) {
 
+                                if (receivedFolder.get("root").getFiles().get(j).getFileName().equals(currentName)) {
+                                    sameName = true;
+                                    break;
+                                }
+
+                            }
+                        }
+
+                        if (sameName) {
+
+                            String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
+                            ownFilesRoot.get(i).setFileName(newName);
+                            receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+
+
+                        } else if (sameUFID) {
+
+                            file.delete();
+                            File attr = new File(path + "/" + currentUFID + ".attr");
+                            attr.delete();
+                            System.out.println("cancello il file in locale");
+
+                        } else {
+                            receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+                        }
+                    }
                 }
             }
 
@@ -687,24 +702,48 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 if (!receivedFolder.containsKey(entry.getKey())) {
 
-                    String currentName = entry.getValue().getFolderName();
+                    ArrayList<JsonFile> files = entry.getValue().getFiles();
+                    ArrayList<JsonFile> filesExist = new ArrayList<>();
 
-                    for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
-
-                        if (entry2.getValue().getFolderName().equals(currentName)) {
-
-                            String newName = currentName + " ( offline different folder " + time + " )";
-                            entry.getValue().setFolderName(newName);
-                            break;
+                    for (int i = 0; i < files.size(); i++) {
+                        File file = new File(path + "/" + files.get(i).getUFID());
+                        if (file.exists()) {
+                            filesExist.add(files.get(i));
                         }
                     }
 
-                    receivedFolder.put(entry.getKey(), entry.getValue());
-                    if (entry.getValue().getParentUFID().equals("root")) {
-                        receivedFolder.get("root").getChildren().add(entry.getKey());
+                    entry.getValue().setFiles(filesExist);
+
+                    if (filesExist.size() > 0) {
+                        String currentName = entry.getValue().getFolderName();
+
+                        for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
+
+                            if (entry2.getValue().getFolderName().equals(currentName)) {
+
+                                String newName = currentName + " ( offline different folder " + time + " )";
+                                entry.getValue().setFolderName(newName);
+                                break;
+                            }
+                        }
+
+                        receivedFolder.put(entry.getKey(), entry.getValue());
+                        if (entry.getValue().getParentUFID().equals("root")) {
+                            receivedFolder.get("root").getChildren().add(entry.getKey());
+                        }
                     }
 
                 }
+//                else{
+//
+//                    ArrayList<JsonFile> files =  entry.getValue().getFiles();
+//
+//                    for (int i = 0; i< files.size(); i++ ) {
+//
+//                    }
+//
+//
+//                }
             }
 
             String newJson = helpJson.foldersToJson(receivedFolder);
