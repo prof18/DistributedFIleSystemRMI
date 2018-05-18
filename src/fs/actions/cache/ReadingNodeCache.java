@@ -21,7 +21,7 @@ public class ReadingNodeCache {
     }
 
     public long getTimeInterval() {
-        long timeInterval = 3000;
+        long timeInterval = 100000;
         return timeInterval;
     }
 }
