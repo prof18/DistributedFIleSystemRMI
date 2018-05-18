@@ -626,7 +626,16 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             a.add(netNode);
             fileNodeList.put(UFID, new ListFileWrapper(a));
         } else {
-            fileNodeList.get(UFID).getLocations().add(netNode);
+            boolean t = false;
+            for (int i = 0; i < fileNodeList.get(UFID).getLocations().size(); i++) {
+
+                if ( fileNodeList.get(UFID).getLocations().get(i).equals(netNode) ) {
+                    t = true;
+                }
+
+
+            }
+            if(!t){ fileNodeList.get(UFID).getLocations().add(netNode); }
         }
 
         for (NetNodeLocation nnl : connectedNodes.values()) {
