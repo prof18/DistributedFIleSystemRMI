@@ -248,7 +248,7 @@ public class Util {
             md.update(ab);
             byte[] hash = md.digest();
             result = bytesToHex(hash);
-            System.out.println("Checksum:" + result);
+            //System.out.println("Checksum:" + result);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return "Checksum not calculated";

@@ -41,6 +41,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private HashMap<String, ListFileWrapper> fileNodeList = new HashMap(); //hashmap file-nodi che possiedono una copia di tale file.
     private MainUI mainUI;
 
+    {
+        //TODO
+    }
+
+
     public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
         super();
 
@@ -75,12 +80,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
-
     public HashMap<String, ListFileWrapper> getFileNodeList() {
         return fileNodeList;
     }
 
-    public void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) {
+    public synchronized void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) {
         this.fileNodeList = fileNodeList;
     }
 
@@ -107,7 +111,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return ownLocation.getIp();
     }
 
-
     @Override
     public synchronized JoinWrap join(String ipNode, int port, String name) {
         System.out.println("si è connesso un nuovo nodo: " + ipNode + " " + port + " " + name);
@@ -128,6 +131,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     public void setNameLocation(String name) {
         this.ownLocation.setName(name);
     }
+
+    /*public NetNodeWrap add(String ip, int port) {
+        return null;
+    }*/
 
     @Override
     public String checkHostName(String oldName) {
@@ -152,10 +159,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return newName;
     }
 
-    /*public NetNodeWrap add(String ip, int port) {
-        return null;
-    }*/
-
     @Override
     public String getHostName() {
         return ownLocation.getName();
@@ -164,7 +167,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     public int getOwnPort() {
         return ownLocation.getPort();
     }
-
 
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
@@ -274,7 +276,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }
 
-
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
         this.connectedNodes = connectedNodes;
         Util.plot(this.connectedNodes);
@@ -289,13 +290,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public synchronized void checkNodesAndReplica() {
 
+        System.out.println("[ CHECKNODES ]");
+
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
 
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
 
             if (!((ownIP + port).hashCode() == entry.getKey())) {
 
-                System.out.println("[ CHECKNODES ]");
 
                 Registry registry = null;
 
@@ -337,10 +339,43 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }
 
-
         //CONTROLLO DELLA REPLICAZIONE
 
+        boolean updateFileNodeList = false;
+
         System.out.println("[ CHECK REPLICA ]");
+
+        if (downNodes.size() != 0) {
+
+            System.out.println("[ELIMINO DALLA NODEFILELIST I NODI SCONNESSI]");
+
+            Util.plot(downNodes);
+
+            Collection<NetNodeLocation> tmpColl = downNodes.values();
+
+            for (NetNodeLocation nnl : tmpColl) {
+                System.out.println(nnl.toString());
+
+                for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
+
+                    if (nnl.equals(entry.getValue().getLocations().get(0))) {
+                        System.out.println("[ELIMINATO UN NODO");
+                        System.out.println(entry.getValue().getLocations().get(0).toString());
+                        entry.getValue().getLocations().remove(0);
+
+                    } else if (nnl.equals(entry.getValue().getLocations().get(1))) {
+                        System.out.println("[ELIMINATO UN NODO");
+                        System.out.println(entry.getValue().getLocations().get(1).toString());
+                        entry.getValue().getLocations().remove(1);
+
+                    }
+
+                }
+
+            }
+
+        }
+
 
         for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
 
@@ -351,13 +386,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 System.out.println("ERRORE DUPLICAZIONE SBAGLIATA");
             }
 
+            CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
 
             if (tmpLocations.size() == 2) {
+
                 if (tmpLocations.get(0).equals(this.ownLocation)) {
 
                     boolean verified = this.checkSecReplica(tmpLocations.get(1), entry.getKey());
                     if (!verified) {
-                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
                         callSaveFile(tmpLocations.get(1), cacheFileWrapper);
                     }
 
@@ -365,27 +401,76 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                     boolean verified = this.checkSecReplica(tmpLocations.get(0), entry.getKey());
                     if (!verified) {
-                        CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
                         callSaveFile(tmpLocations.get(0), cacheFileWrapper);
                     }
-
                 }
-            } else {
+
+            } else if (tmpLocations.size() == 1) {
 
                 if (tmpLocations.get(0).equals(this.ownLocation)) {
 
                     System.out.println("CREATE THE MISSED REPLICA");
-                    CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
-                    callSaveFileReplica(cacheFileWrapper, entry.getKey());
+                    NetNodeLocation newLoc = callSaveFileReplica(cacheFileWrapper, entry.getKey());
+                    fileNodeList.get(entry.getKey()).getLocations().add(1, newLoc);
+                    updateFileNodeList = true;
 
                 }
 
+            } else {
+                System.out.println("NON DOVRESTI ESSERE QUI");
+            }
+        }
+
+        if (updateFileNodeList) {
+            updateAllFileNodeList(fileNodeList);
+        }
+
+    }
+
+    public void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) {
+
+        System.out.println("UPDATEALLFILENODELIST");
+
+        for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
+
+            if ((ownIP + port).hashCode() != entry.getKey()) {
+
+                System.out.println("[updateAllFileNodeList]");
+
+                Registry registry = null;
+
+                String tmpIp = "-NOT UPDATE-";
+                int tmpPort = -1;
+                String tmpName = "-NOT UPDATE-";
+
+                try {
+
+                    tmpIp = entry.getValue().getIp();
+                    tmpPort = entry.getValue().getPort();
+                    tmpName = entry.getValue().getName();
+
+                    registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
+
+                    String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
+
+                    NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
+
+                    nodeTemp.setFileNodeList(fileNodeList);
+
+                } catch (RemoteException e) {
+                    System.out.println("[updateAllFileNodeList] problemi connessione" + tmpPort + "; Ip: " + tmpIp);
+
+                } catch (NotBoundException e) {
+                    System.out.println("[NotBoundException-updateAllFileNodeList] problemi connessione\" + tmpPort + \"; Ip: \" + tmpIp");
+                    e.printStackTrace();
+
+                }
             }
         }
 
     }
 
-    public void callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) {
+    public NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) {
 
         ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID(), null);
         rw.setAttribute(cacheFileWrapper.getAttribute());
@@ -411,10 +496,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         NetNodeLocation selectedNode = Util.selectedNode(nodeBiggerTime);
 
         Registry registry = null;
-
         String tmpIp = "-NOT UPDATE-";
         int tmpPort = -1;
-        boolean ver = false;
 
         try {
 
@@ -433,6 +516,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         } catch (NotBoundException er) {
             System.out.println("checkSecReplica2");
         }
+
+        return selectedNode;
 
     }
 
@@ -530,7 +615,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public boolean verifyFile(String fileName) {
-        return new File(path + "/" + fileName).isFile();
+
+        boolean t = ( new File(path + "/" + fileName).isFile()&&new File(path + "/" + fileName+".attr").isFile());
+
+        return t;
+        //return new File(path + "/" + fileName).isFile();
     }
 
     public boolean saveFileReplica(ReplicationWrapper rw) {
@@ -629,13 +718,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             boolean t = false;
             for (int i = 0; i < fileNodeList.get(UFID).getLocations().size(); i++) {
 
-                if ( fileNodeList.get(UFID).getLocations().get(i).equals(netNode) ) {
+                if (fileNodeList.get(UFID).getLocations().get(i).equals(netNode)) {
                     t = true;
                 }
 
 
             }
-            if(!t){ fileNodeList.get(UFID).getLocations().add(netNode); }
+            if (!t) {
+                fileNodeList.get(UFID).getLocations().add(netNode);
+            }
         }
 
         for (NetNodeLocation nnl : connectedNodes.values()) {
@@ -814,7 +905,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
     }
-
 
     public void callUpdateAllJson(String json) {
 

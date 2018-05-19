@@ -24,6 +24,9 @@ public class NetNodeLocation implements Serializable {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getIp() {
         return ip;
@@ -36,7 +39,6 @@ public class NetNodeLocation implements Serializable {
     public long getTimeStamp() {
         return timeStamp;
     }
-
 
     @Override
     public String toString() {
@@ -63,13 +65,8 @@ public class NetNodeLocation implements Serializable {
         return Objects.hash(getIp(), getPort(), getName());
     }
 
-
     public int getTotalByte() {
         return totalByte;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setTotalByte(int tb) {

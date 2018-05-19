@@ -39,6 +39,8 @@ public interface NetNode extends Remote, Serializable {
 
     void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
 
+    void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
+
     void updateWritePermissionMap(String UFID, ListFileWrapper list) throws RemoteException;
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
@@ -189,7 +191,7 @@ public interface NetNode extends Remote, Serializable {
 
     String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
 
-    void callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) throws RemoteException;
+    NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) throws RemoteException;
 
     /**
      * This method is used to implement the replication
