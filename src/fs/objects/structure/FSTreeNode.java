@@ -149,7 +149,9 @@ public class FSTreeNode implements Serializable {
 
         int pos = findFilePos(UFID);
         System.out.println("removeOneFile : "+pos);
-        files.remove(pos);
+        if(pos!=-1) {
+            files.remove(pos);
+        }
     }
 
     public void removeParent() {

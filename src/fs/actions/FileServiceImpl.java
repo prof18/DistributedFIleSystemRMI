@@ -499,6 +499,7 @@ public class FileServiceImpl implements FileService {
                     mediator.getNode().getFileNodeList().remove(fileID);
                     curDir.removeOneFile(fileID);
                 }
+
             }
 
         } catch (RemoteException e) {
@@ -507,11 +508,40 @@ public class FileServiceImpl implements FileService {
 
         System.out.println("Replicazione del json per l'albero dopo eliminazione file");
 
+        System.out.println("prima della modifica");
+        System.out.println(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
         FSTreeNode root = mediator.getFsStructure().getTree();
+        int removeIndex=-1;
+        System.out.println("file ID : "+fileID);
+        System.out.println("root files");
+        for (FileWrapper fw:root.getFiles()) {
+            System.out.println(fw.getUFID());
+        }
+
+        System.out.println("size curDir : "+curDir.getFiles().size());
+        for (int i=0;i<root.getFiles().size();i++)
+        {
+            System.out.println("loop search");
+            String tempUFID=root.getFiles().get(i).getUFID();
+            System.out.println("tempUFID : "+tempUFID);
+            if(tempUFID.equals(fileID)){
+                System.out.println("trovato il file");
+                removeIndex=i;
+                break;
+            }
+        }
+        if(removeIndex!=-1){
+            System.out.println("rimozione del file");
+            root.getFiles().remove(removeIndex);
+        }
 
         mediator.getFsStructure().generateJson(root);
+        System.out.println("dopo della modifica");
+        System.out.println(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+
 
         //settare il JSON sui nodi che non hanno il nodo salvato
+
 
         try {
             mediator.getNode().callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
@@ -519,6 +549,7 @@ public class FileServiceImpl implements FileService {
         catch (RemoteException e){
             e.printStackTrace();
         }
+
         callback.onItemChanged(curDir);
     }
 
