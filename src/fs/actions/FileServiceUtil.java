@@ -87,6 +87,7 @@ public class FileServiceUtil {
                 JoinWrap jWrap = node1.join(ownIP, port, hostName);
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
+                node.setFileNodeList(jWrap.getFileNodeList());
 
 
                 System.out.println();

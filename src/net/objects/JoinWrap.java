@@ -1,5 +1,7 @@
 package net.objects;
 
+import fs.actions.object.ListFileWrapper;
+
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -11,6 +13,7 @@ public class JoinWrap implements Serializable {
 
     private String name;
     private HashMap<Integer, NetNodeLocation> coNodes;
+    HashMap<String, ListFileWrapper> fileNodeList;
 
     /**
      * It is the constructor of the class
@@ -18,9 +21,10 @@ public class JoinWrap implements Serializable {
      * @param name    is the name of the service
      * @param coNodes is the list of connected nodes
      */
-    public JoinWrap(String name, HashMap<Integer, NetNodeLocation> coNodes) {
+    public JoinWrap(String name, HashMap<Integer, NetNodeLocation> coNodes , HashMap<String, ListFileWrapper> fileNodeList ) {
         this.name = name;
         this.coNodes = coNodes;
+        this.fileNodeList = fileNodeList;
     }
 
     /**
@@ -40,4 +44,6 @@ public class JoinWrap implements Serializable {
     public HashMap<Integer, NetNodeLocation> getCoNodesJoin() {
         return coNodes;
     }
+
+    public HashMap<String, ListFileWrapper> getFileNodeList(){return fileNodeList; }
 }
