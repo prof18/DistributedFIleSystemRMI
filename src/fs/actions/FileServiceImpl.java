@@ -491,6 +491,14 @@ public class FileServiceImpl implements FileService {
 
         mediator.getFsStructure().generateJson(root);
 
+        //settare il JSON sui nodi che non hanno il nodo salvato
+
+        try {
+            mediator.getNode().callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+        }
+        catch (RemoteException e){
+            e.printStackTrace();
+        }
         callback.onItemChanged(curDir);
     }
 
