@@ -719,13 +719,15 @@ public class FileServiceImpl implements FileService {
             }
 
             nodeList = removeLocalNode(nodeList, node);
-            ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
-            selectedNode = Util.selectedNode(nodeBiggerTime);
+            //ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
+            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+            selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
         } else {
             ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID()).getLocations();
             nodeList = removeLocalNode(nodeList, node);
-            ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
-            selectedNode = Util.selectedNode(nodeBiggerTime);
+            //ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
+            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+            selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
         }
 
 

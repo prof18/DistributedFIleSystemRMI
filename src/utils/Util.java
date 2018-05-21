@@ -281,7 +281,7 @@ public class Util {
         return ret;
     }
 
-    public static ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
+ /*   public static ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
         long maxConnectedTime = maxTimeConnection(list);
         ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
         for (NetNodeLocation node : list) {
@@ -291,6 +291,41 @@ public class Util {
         }
 
         return nodeList;
+    }*/
+
+    public static ArrayList<NetNodeLocation> listOConnectedNodeWithMinOccupiedSpace(ArrayList<NetNodeLocation> list) {
+        int occupiedSpace = Integer.MAX_VALUE;
+        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
+        for (NetNodeLocation node : list) {
+            if (node.getTotalByte() <= occupiedSpace) {
+                nodeList.add(node);
+                occupiedSpace = node.getTotalByte();
+            }
+        }
+
+        return nodeList;
+    }
+
+    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
+        NetNodeLocation selectedNode = null;
+
+        /*//System.out.println("Lista nodi maggior spazio libero");
+        for (NetNodeLocation node : list) {
+            //System.out.println(node.toUrl());
+            if (node.getTotalByte() < occupiedSpace) {
+                occupiedSpace = node.getTotalByte();
+                selectedNode = node;
+            }
+        }*/
+        long maxConnectedTime = maxTimeConnection(list);
+
+        for (NetNodeLocation node : list) {
+            if (node.getTimeStamp() == maxConnectedTime) {
+                selectedNode = node;
+            }
+        }
+
+        return selectedNode;
     }
 
     public static long maxTimeConnection(ArrayList<NetNodeLocation> list) {
@@ -307,20 +342,6 @@ public class Util {
         return selectedTimeStamp;
     }
 
-    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
-        NetNodeLocation selectedNode = null;
-        int occupiedSpace = Integer.MAX_VALUE;
-        //System.out.println("Lista nodi maggior spazio libero");
-        for (NetNodeLocation node : list) {
-            //System.out.println(node.toUrl());
-            if (node.getTotalByte() < occupiedSpace) {
-                occupiedSpace = node.getTotalByte();
-                selectedNode = node;
-            }
-        }
-
-        return selectedNode;
-    }
 
 
 }

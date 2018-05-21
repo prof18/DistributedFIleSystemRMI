@@ -492,8 +492,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }
 
-        ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
-        NetNodeLocation selectedNode = Util.selectedNode(nodeBiggerTime);
+        ArrayList<NetNodeLocation> nodeWithSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+        NetNodeLocation selectedNode = Util.selectedNode(nodeWithSmallerOccupiedSpace);
 
         Registry registry = null;
         String tmpIp = "-NOT UPDATE-";

@@ -9,6 +9,7 @@ import fs.actions.object.ReadWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
+import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import ui.utility.*;
@@ -678,11 +679,11 @@ public class MainUI extends JFrame {
                 if (newName != null && !newName.equals("")) {
                     renameFolder(item.getTreeNode(), newName);
                     fsStructure.generateJson(directoryTree);
-                    try {
+                    /*try {
                         ownNode.callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
                     } catch (RemoteException e) {
                         e.printStackTrace();
-                    }
+                    }*/
 
                 }
             } else {
@@ -691,13 +692,18 @@ public class MainUI extends JFrame {
                     item.getFileWrapper().setFileName(newName);
                     updateModels(currentNode, true);
                     fsStructure.generateJson(directoryTree);
-                    try {
+                   /* try {
                         ownNode.callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
                     } catch (RemoteException e) {
                         e.printStackTrace();
-                    }
+                    }*/
                 }
             }
+
+            FSTreeNode root = currentNode.findRoot();
+            root.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            MediatorFsNet.getInstance().jsonReplicaton(root);
+
         });
         menu.add(rename);
         //Delete
