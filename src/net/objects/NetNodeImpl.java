@@ -377,6 +377,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
 
+        HashMap<String, NetNodeLocation> updateToDo = new HashMap<>();
+
         for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
 
             ListFileWrapper tmp = entry.getValue();
@@ -411,13 +413,20 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                     System.out.println("CREATE THE MISSED REPLICA");
                     NetNodeLocation newLoc = callSaveFileReplica(cacheFileWrapper, entry.getKey());
-                    fileNodeList.get(entry.getKey()).getLocations().add(1, newLoc);
+                    updateToDo.put(entry.getKey(), newLoc);
+//                    fileNodeList.get(entry.getKey()).getLocations().add(1, newLoc);
                     updateFileNodeList = true;
 
                 }
 
             } else {
                 System.out.println("NON DOVRESTI ESSERE QUI");
+            }
+        }
+
+        if (updateToDo.size() != 0) {
+            for (Map.Entry<String, NetNodeLocation> entry : updateToDo.entrySet()) {
+                fileNodeList.get(entry.getKey()).getLocations().add(entry.getValue());
             }
         }
 
@@ -616,7 +625,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public boolean verifyFile(String fileName) {
 
-        boolean t = ( new File(path + "/" + fileName).isFile()&&new File(path + "/" + fileName+".attr").isFile());
+        boolean t = (new File(path + "/" + fileName).isFile() && new File(path + "/" + fileName + ".attr").isFile());
 
         return t;
         //return new File(path + "/" + fileName).isFile();
