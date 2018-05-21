@@ -368,7 +368,6 @@ public class FileServiceImpl implements FileService {
 
             for (int i = 0; i < tempNodeFileList.size(); i++) {
                 tempNodeFileList.get(i).reduceOccupiedSpace(oldLength);
-                System.out.println("chiamato il replication task da riga 284");
                 ReplicationMethods.getInstance().fileReplication(tempNodeFileList.get(i), rw, mediator.getNode());
             }
 

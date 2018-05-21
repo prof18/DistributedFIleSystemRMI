@@ -1,21 +1,18 @@
 package ui.frame;
 
-import fs.actions.FSStructure;
 import fs.actions.DirectoryServiceImpl;
+import fs.actions.FSStructure;
 import fs.actions.FileServiceUtil;
 import fs.actions.interfaces.DirectoryService;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.ReadWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
-import fs.objects.structure.FileAttribute;
 import fs.objects.structure.FileWrapper;
-import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import ui.utility.*;
 import utils.Constants;
-import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -25,11 +22,13 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.rmi.NotBoundException;
-import java.rmi.UnknownHostException;
+import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -54,6 +53,7 @@ public class MainUI extends JFrame {
     private FileService fileService;
     private static FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
+    private NetNode ownNode;
     private JTextArea connectedNodeTextArea;
 
     private JPanel rightWrapper, rightDownWrapper, filesUI, filesDetail, connectedStatus;
@@ -89,7 +89,6 @@ public class MainUI extends JFrame {
         rightWrapper = new JPanel(new GridBagLayout());
         //A Wrapper that contains Connected Status and File Details boxes
         rightDownWrapper = new JPanel(new GridBagLayout());
-
         filesUI = new JPanel(new GridLayout());
         filesDetail = createDetailsUI();
         connectedStatus = createConnectedStatus();
@@ -209,6 +208,7 @@ public class MainUI extends JFrame {
         WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
         fileService = wrapperFS.getService();
         netNodeLocation = wrapperFS.getOwnLocation();
+        ownNode = wrapperFS.getNetNode();
     }
 
     // Draws the File Tree View
@@ -320,11 +320,11 @@ public class MainUI extends JFrame {
             if (path.length > 2) {
                 String directoryName = path[path.length - 2];
                 fw = root.findNodeByName(root, directoryName).getFile(fileID);
-            }else{
+            } else {
                 fw = root.getFile(fileID);
             }
 
-            if(fw == null){
+            if (fw == null) {
                 fw = fileWrapper;
             }
 
@@ -678,6 +678,12 @@ public class MainUI extends JFrame {
                 if (newName != null && !newName.equals("")) {
                     renameFolder(item.getTreeNode(), newName);
                     fsStructure.generateJson(directoryTree);
+                    try {
+                        ownNode.callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             } else {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
@@ -685,6 +691,11 @@ public class MainUI extends JFrame {
                     item.getFileWrapper().setFileName(newName);
                     updateModels(currentNode, true);
                     fsStructure.generateJson(directoryTree);
+                    try {
+                        ownNode.callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
