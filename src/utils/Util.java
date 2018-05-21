@@ -281,7 +281,7 @@ public class Util {
         return ret;
     }
 
- /*   public static ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
+    /*public static ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
         long maxConnectedTime = maxTimeConnection(list);
         ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
         for (NetNodeLocation node : list) {
@@ -303,7 +303,24 @@ public class Util {
             }
         }
 
-        return nodeList;
+        ArrayList<NetNodeLocation> sortedList = ascSort(nodeList);
+
+        return sortedList;
+    }
+
+    private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
+        ArrayList<NetNodeLocation> sortedList = new ArrayList<>(nodeList.size());
+        NetNodeLocation temp;
+        for (int i = 1; i < nodeList.size(); i++) {
+            for (int j = i; j > 0; j--) {
+                if (nodeList.get(j).getTotalByte() < nodeList.get(j-1).getTotalByte()){
+                    temp = nodeList.get(j);
+                    nodeList.set(j, nodeList.get(j-1));
+                    nodeList.set((j-1),temp);
+                }
+            }
+        }
+        return sortedList;
     }
 
     public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
@@ -317,10 +334,10 @@ public class Util {
                 selectedNode = node;
             }
         }*/
-        long maxConnectedTime = maxTimeConnection(list);
+        long connectedTimeThreshold = maxTimeConnection(list)/2;
 
         for (NetNodeLocation node : list) {
-            if (node.getTimeStamp() == maxConnectedTime) {
+            if (node.getTimeStamp() >= connectedTimeThreshold) {
                 selectedNode = node;
             }
         }
@@ -341,6 +358,7 @@ public class Util {
 
         return selectedTimeStamp;
     }
+
 
 
 
