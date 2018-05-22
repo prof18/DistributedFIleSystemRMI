@@ -294,6 +294,11 @@ public class Util {
     }*/
 
     public static ArrayList<NetNodeLocation> listOConnectedNodeWithMinOccupiedSpace(ArrayList<NetNodeLocation> list) {
+
+        if (list.size() == 1){
+            return list;
+        }
+
         int occupiedSpace = Integer.MAX_VALUE;
         ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
         for (NetNodeLocation node : list) {
@@ -334,6 +339,11 @@ public class Util {
                 selectedNode = node;
             }
         }*/
+
+        if (list.size() == 1){
+            return list.get(0);
+        }
+
         long connectedTimeThreshold = maxTimeConnection(list)/2;
 
         for (NetNodeLocation node : list) {

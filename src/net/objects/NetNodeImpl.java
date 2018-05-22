@@ -680,9 +680,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
 
-        if (rw.getjSon() != null) {
+        /*if (rw.getjSon() != null) {
             PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, rw.getjSon());
-        }
+        }*/
         //  FSStructure.getInstance().generateTreeStructure();
 
         return true;

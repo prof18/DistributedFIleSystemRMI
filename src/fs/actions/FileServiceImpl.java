@@ -438,7 +438,7 @@ public class FileServiceImpl implements FileService {
             rw.setAttribute(attribute);
             rw.setContent(ftb);
             rw.setChecksum(fw.getChecksum());
-            rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            //rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             System.out.println("Creazione contenitore riuscita");
 
             System.out.println("Esecuzione metodo replication");

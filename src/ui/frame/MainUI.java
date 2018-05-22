@@ -688,7 +688,18 @@ public class MainUI extends JFrame {
                 }
             } else {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
+
                 if (newName != null && !newName.equals("")) {
+                    String path = item.getFileWrapper().getPath();
+                    System.out.println("Old file Path: " + path);
+                    String[] arrayPath = path.split("/");
+                    path = "";
+                    for (int i = arrayPath.length - 2; i >= 0; i--) {
+                        path = arrayPath[i] + "/" + path;
+                    }
+                    path = path + newName;
+                    System.out.println("New file Path: " + path);
+                    item.getFileWrapper().setPath(path);
                     item.getFileWrapper().setFileName(newName);
                     updateModels(currentNode, true);
                     fsStructure.generateJson(directoryTree);
