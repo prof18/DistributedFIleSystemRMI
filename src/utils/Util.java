@@ -295,9 +295,9 @@ public class Util {
 
     public static ArrayList<NetNodeLocation> listOConnectedNodeWithMinOccupiedSpace(ArrayList<NetNodeLocation> list) {
 
-        if (list.size() == 1){
+        /*if (list.size() == 1){
             return list;
-        }
+        }*/
 
         int occupiedSpace = Integer.MAX_VALUE;
         ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
@@ -314,7 +314,6 @@ public class Util {
     }
 
     private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
-        ArrayList<NetNodeLocation> sortedList = new ArrayList<>(nodeList.size());
         NetNodeLocation temp;
         for (int i = 1; i < nodeList.size(); i++) {
             for (int j = i; j > 0; j--) {
@@ -325,7 +324,7 @@ public class Util {
                 }
             }
         }
-        return sortedList;
+        return nodeList;
     }
 
     public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
@@ -340,9 +339,9 @@ public class Util {
             }
         }*/
 
-        if (list.size() == 1){
+        /*if (list.size() == 1){
             return list.get(0);
-        }
+        }*/
 
         long connectedTimeThreshold = maxTimeConnection(list)/2;
 

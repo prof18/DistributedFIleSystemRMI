@@ -690,7 +690,7 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
-    private void replication(ReplicationWrapper repWr, NetNode node) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+    private void replication(ReplicationWrapper repWr, NetNode node) throws RemoteException { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
 
         HashMap<String, ListFileWrapper> hm = null;
         try {
@@ -709,16 +709,17 @@ public class FileServiceImpl implements FileService {
             Collection<NetNodeLocation> tmpColl = null;
             try {
                 tmpColl = node.getHashMap().values();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+
             if (tmpColl != null) {
                 for (NetNodeLocation nnl : tmpColl) {
+                    if (nnl.toUrl().compareTo(mediator.getNode().getOwnLocation().toUrl()) != 0)
                     nodeList.add(nnl);
                 }
             }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
 
-            nodeList = removeLocalNode(nodeList, node);
             //ArrayList<NetNodeLocation> nodeBiggerTime = Util.listOfMaxConnectedNode(nodeList);
             ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
             selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
