@@ -805,7 +805,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     String currentUFID = ownFilesRoot.get(i).getUFID();
 
                     File file = new File(path + "/" + currentUFID);
-                    if (file.exists()) {
+                    File attr = new File(path + "/" + currentUFID + ".attr");
+                    if (file.exists() && attr.exists()) {
 
                         System.out.println("IL FILE ESISTE QUINDI AGGIORNO IL JSON");
                         boolean sameUFID = false;
@@ -841,7 +842,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         } else if (sameUFID) {
 
                             file.delete();
-                            File attr = new File(path + "/" + currentUFID + ".attr");
                             attr.delete();
                             System.out.println("cancello il file in locale");
 
@@ -856,50 +856,98 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             for (Map.Entry<String, JsonFolder> entry : ownFolder.entrySet()) {
 
-                if (!receivedFolder.containsKey(entry.getKey())) {
+                //Se non è contenuto lo aggiungo al received Folder
+                if (receivedFolder.containsKey(entry.getKey())) {
 
+                    //Prendo i file della cartella
                     ArrayList<JsonFile> files = entry.getValue().getFiles();
+                    //Salvo i file che possiedo in locale
                     ArrayList<JsonFile> filesExist = new ArrayList<>();
 
                     for (int i = 0; i < files.size(); i++) {
                         File file = new File(path + "/" + files.get(i).getUFID());
-                        if (file.exists()) {
+                        File attr = new File(path + "/" + files.get(i).getUFID() + ".attr");
+
+                        if (file.exists() && attr.exists()) {
                             filesExist.add(files.get(i));
                         }
                     }
 
-                    entry.getValue().setFiles(filesExist);
+                    if (filesExist.size() > 0) {
+
+                        ArrayList<JsonFile> receivedFiles = receivedFolder.get(entry.getKey()).getFiles();
+
+                        if (receivedFiles.size() > 0) {
+
+                            for (int j = 0; j < receivedFiles.size(); j++) {
+
+                                for (int i = 0; i < filesExist.size(); i++) {
+
+                                    if ( receivedFiles.get(j).equals(filesExist.get(i)) ) {
+                                        filesExist.remove(i);
+                                        break;
+                                    }
+
+                                }
+
+                            }
+
+                            if(filesExist.size()>0){
+
+                                receivedFiles.addAll(filesExist);
+
+                            }
+
+                        } else {
+                            receivedFolder.get(entry.getKey()).setFiles(filesExist);
+                        }
+
+                    }
+
+
+                } else {
+                    // il receivedFolder non contiene una cartella con lo stesso ufid
+
+                    //Prendo i file della cartella
+                    ArrayList<JsonFile> files = entry.getValue().getFiles();
+                    //Salvo i file che possiedo in locale
+                    ArrayList<JsonFile> filesExist = new ArrayList<>();
+
+                    for (int i = 0; i < files.size(); i++) {
+                        File file = new File(path + "/" + files.get(i).getUFID());
+                        File attr = new File(path + "/" + files.get(i).getUFID() + ".attr");
+                        if (file.exists() && attr.exists()) {
+                            filesExist.add(files.get(i));
+                        }
+                    }
+
+                    //entry.getValue().setFiles(filesExist);
 
                     if (filesExist.size() > 0) {
                         String currentName = entry.getValue().getFolderName();
-
+                        String newName = entry.getValue().getFolderName();
+                        ;
                         for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
 
                             if (entry2.getValue().getFolderName().equals(currentName)) {
 
-                                String newName = currentName + " ( offline different folder " + time + " )";
-                                entry.getValue().setFolderName(newName);
+                                newName = currentName + " ( offline different folder " + time + " )";
+                                //entry.getValue().setFolderName(newName);
                                 break;
                             }
                         }
 
                         receivedFolder.put(entry.getKey(), entry.getValue());
+
+                        receivedFolder.get(entry.getKey()).setFiles(filesExist);
+                        receivedFolder.get(entry.getKey()).setFolderName(newName);
+
                         if (entry.getValue().getParentUFID().equals("root")) {
                             receivedFolder.get("root").getChildren().add(entry.getKey());
                         }
                     }
 
                 }
-//                else{
-//
-//                    ArrayList<JsonFile> files =  entry.getValue().getFiles();
-//
-//                    for (int i = 0; i< files.size(); i++ ) {
-//
-//                    }
-//
-//
-//                }
             }
 
             String newJson = helpJson.foldersToJson(receivedFolder);

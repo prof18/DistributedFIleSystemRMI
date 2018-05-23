@@ -2,6 +2,8 @@ package fs.objects.json;
 
 import fs.objects.structure.FileAttribute;
 
+import java.util.Objects;
+
 public class JsonFile {
 
     private String fileName;
@@ -57,5 +59,21 @@ public class JsonFile {
                 ", UFID='" + UFID + '\'' +
                 ", attribute=" + attribute +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JsonFile)) return false;
+        JsonFile jsonFile = (JsonFile) o;
+        return Objects.equals(fileName, jsonFile.fileName) &&
+                Objects.equals(UFID, jsonFile.UFID);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(fileName, UFID);
     }
 }
