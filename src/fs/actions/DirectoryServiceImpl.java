@@ -11,7 +11,10 @@ import utils.PropertiesHelper;
 
 import javax.swing.*;
 import java.io.FileNotFoundException;
+import java.rmi.RemoteException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -43,13 +46,20 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public void createDirectory(FSTreeNode currentNode, String dirName, NewItemCallback callback) {
 
+        String host = "";
+        try {
+            host = MediatorFsNet.getInstance().getNode().getHostName();
+        } catch (RemoteException e) {
+            System.out.println("Hostname null during folder creation");
+        }
+
+
         FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
         FSTreeNode directoryParent = treeRoot.findNodeByUFID(treeRoot, currentNode.getUFID());
         FSTreeNode node = new FSTreeNode();
         node.setParent(directoryParent);
         node.setNameNode(dirName);
-        //TODO; change UUID
-        node.setUFID(UUID.randomUUID().toString());
+        node.setUFID(host + "_" + Date.from(Instant.now()).hashCode());
         node.setChildrens(new ArrayList<>());
         node.setFiles(new ArrayList<>());
         directoryParent.addChild(node);
