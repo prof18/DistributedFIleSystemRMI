@@ -57,11 +57,4 @@ public interface DirectoryService {
         void onItemChanged(FSTreeNode fsTreeNode);
 
     }
-
-
-    void unName(String dir, String name);
-
-    String getNames(String dir, String pattern);
-
-    String lookup(String dir, String name);
 }
