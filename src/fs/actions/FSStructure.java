@@ -4,13 +4,10 @@ import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
-import mediator_fs_net.MediatorFsNet;
 import utils.Constants;
 import utils.GSONHelper;
 import utils.PropertiesHelper;
 
-import java.rmi.RemoteException;
-import java.time.Instant;
 import java.util.*;
 
 /**
@@ -157,18 +154,10 @@ public class FSStructure {
 
         } else {
 
-            String host = "";
-            try {
-                host = MediatorFsNet.getInstance().getNode().getHostName();
-            } catch (RemoteException e) {
-                System.out.println("Hostname null during folder creation");
-            }
-
             //generate the tree with only the root
             tree = new FSTreeNode();
             tree.setParent(null);
-            //TODO: change UUID set to root for everyone
-            tree.setUFID(host + "_" + Date.from(Instant.now()).hashCode());
+            tree.setUFID("root");
             tree.setNameNode("root");
             tree.setChildrens(new ArrayList<>());
             tree.setFiles(new ArrayList<>());

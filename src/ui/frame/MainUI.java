@@ -81,6 +81,9 @@ public class MainUI extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                //To avoid data loss we save (again) the structure of the file system in the properties
+                FSTreeNode node = FSStructure.getInstance().getTree();
+                FSStructure.getInstance().generateJson(node);
                 System.exit(0);
             }
         });
