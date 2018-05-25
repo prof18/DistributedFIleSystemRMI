@@ -124,32 +124,57 @@ public class FSTreeNode implements Serializable {
     }
 
     public FSTreeNode findNodeByUFID(FSTreeNode node, String UFID) {
-        if (node.getUFID().compareTo(UFID) == 0)
+     /*   if (node.getUFID().compareTo(UFID) == 0)
             return node;
         ArrayList<FSTreeNode> children = node.getChildren();
         FSTreeNode res = null;
         for (int i = 0; res == null && i < children.size(); i++) {
             res = findNodeByUFID(children.get(i), UFID);
         }
-        return res;
+        return res;*/
+
+        Queue<FSTreeNode> queue = new LinkedList<>();
+        queue.add(node);
+        while (!queue.isEmpty()) {
+            FSTreeNode nodeExtracted = queue.poll();
+            if (nodeExtracted != null) {
+                if (nodeExtracted.getUFID().compareTo(UFID) == 0)
+                    return nodeExtracted;
+                else
+                    queue.addAll(nodeExtracted.getChildren());
+            }
+        }
+        return null;
     }
 
     public FSTreeNode findNodeByName(FSTreeNode node, String name) {
-        if (node.getNameNode().compareTo(name) == 0)
+        /*if (node.getNameNode().compareTo(name) == 0)
             return node;
         ArrayList<FSTreeNode> children = node.getChildren();
         FSTreeNode res = null;
         for (int i = 0; res == null && i < children.size(); i++) {
             res = findNodeByName(children.get(i), name);
         }
-        return res;
+        return res;*/
+        Queue<FSTreeNode> queue = new LinkedList<>();
+        queue.add(node);
+        while (!queue.isEmpty()) {
+            FSTreeNode nodeExtracted = queue.poll();
+            if (nodeExtracted != null) {
+                if (nodeExtracted.getNameNode().compareTo(name) == 0)
+                    return nodeExtracted;
+                else
+                    queue.addAll(nodeExtracted.getChildren());
+            }
+        }
+        return null;
     }
 
     public void removeOneFile(String UFID) {
 
         int pos = findFilePos(UFID);
-        System.out.println("removeOneFile : "+pos);
-        if(pos!=-1) {
+        System.out.println("removeOneFile : " + pos);
+        if (pos != -1) {
             files.remove(pos);
         }
     }
@@ -287,7 +312,7 @@ public class FSTreeNode implements Serializable {
 
         queue.add(this);
 
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             FSTreeNode node = queue.poll();
 
             if (node != null) {
