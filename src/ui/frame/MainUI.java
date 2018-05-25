@@ -26,7 +26,6 @@ import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -200,11 +199,9 @@ public class MainUI extends JFrame {
         }
         NetNodeLocation location;
         if (portRet == -1) {
-            System.out.println("The first node doesn't connect to anyone");
             location = null;
         } else {
             location = new NetNodeLocation(ipRet, portRet, nameServiceHost);
-            System.out.println("[MAIN] Connection to location = " + location);
         }
         WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
         fileService = wrapperFS.getService();
@@ -235,7 +232,6 @@ public class MainUI extends JFrame {
                         TableItem item = new TableItem();
                         item.setTreeNode(node);
                         item.setFile(false);
-                        System.out.println("MainUI.drawTreeView ITEM : " + item);
                         changeTableView(false, item);
                         setFolderInfo(node);
                     }
@@ -245,15 +241,9 @@ public class MainUI extends JFrame {
             }
         });
 
-        tree.setCellRenderer(new
-
-                TreeCellRenderer());
-
+        tree.setCellRenderer(new TreeCellRenderer());
         tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        treeScroll = new
-
-                JScrollPane(tree);
-
+        treeScroll = new JScrollPane(tree);
     }
 
     // Draws the File Table View
@@ -401,7 +391,6 @@ public class MainUI extends JFrame {
     private void changeTableView(boolean goingUp, TableItem item) {
         clearInfo();
         FileViewTableModel model = (FileViewTableModel) table.getModel();
-        System.out.println("MainUI.changeTableView");
         if (!goingUp) {
             int row = table.getSelectedRow();
             //selected table item
@@ -412,10 +401,7 @@ public class MainUI extends JFrame {
                 openFile(item.getFileWrapper());
             } else {
                 //update the table with the new directory
-                System.out.println("MainUI.changeTableView  ELSE");
                 FSTreeNode node = item.getTreeNode();
-                System.out.println("MainUI.changeTableView  currentNode : " + currentNode);
-                System.out.println("MainUI.changeTableView  Node : " + node);
                 currentNode = node;
                 if (!node.isRoot())
                     navigateUpBtn.setEnabled(true);
@@ -509,45 +495,24 @@ public class MainUI extends JFrame {
      * @param treeNode The update FSTreeNode Object
      */
     public static void updateModels(FSTreeNode treeNode, boolean local) {
-        System.out.println("MainUI updateModels");
-
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         model.setNode(treeNode);
 
         TreePath path = tree.getSelectionPath();
         FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
-        System.out.println("DEBUG");
-        FSTreeNode root = (FSTreeNode) treeModel.getRoot();
-        System.out.println("la radice : " + root.toString());
-        for (FSTreeNode figli : root.getChildren()) {
-            System.out.println("figlio : " + figli.toString());
-        }
-        System.out.println("END DEBUG");
-        //problema in questo punto
         tree.setModel(null);
-        System.out.println("setted model to null");
         treeModel.setNode(treeNode.findRoot());
-        System.out.println("setted root ");
         tree.setModel(treeModel);
-        System.out.println("setted model");
         tree.setSelectionPath(path);
-        System.out.println("setted selection path");
         tree.expandPath(path);
-        System.out.println("setted expand path");
 
-        System.out.println("GENERATION JSON");
         if (local) {
-            System.out.println("local generation");
             fsStructure.generateJson(directoryTree);
         } else {
-            System.out.println("remote generation");
-            String gson = treeNode.getGson();
-            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, gson);
+            String json = treeNode.getJson();
+            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
             FSStructure.getInstance().generateTreeStructure();
-            System.out.println("ended remote generation");
         }
-        System.out.println("ENDED UPDATE MODELS");
-
     }
 
     private boolean openFile(FileWrapper fileWrapper) {
@@ -558,7 +523,6 @@ public class MainUI extends JFrame {
             ReadWrapper readWrapper = fileService.read(id, 0);
             byte[] content = readWrapper.getContent();
             String contentS = new String(content);
-            //TODO: pass the boolean
             new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath(), readWrapper.isWritable());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -658,12 +622,6 @@ public class MainUI extends JFrame {
         });
         menu.add(menuItem);
         menu.addSeparator();
-        //About
-        menuItem = new JMenuItem("About");
-        menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked About");
-        });
-        menu.add(menuItem);
         menuBar.add(menu);
 
         //Edit Menu
@@ -679,41 +637,28 @@ public class MainUI extends JFrame {
                 if (newName != null && !newName.equals("")) {
                     renameFolder(item.getTreeNode(), newName);
                     fsStructure.generateJson(directoryTree);
-                    /*try {
-                        ownNode.callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }*/
-
                 }
             } else {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
 
                 if (newName != null && !newName.equals("")) {
                     String path = item.getFileWrapper().getPath();
-                    System.out.println("Old file Path: " + path);
                     String[] arrayPath = path.split("/");
                     path = "";
                     for (int i = arrayPath.length - 2; i >= 0; i--) {
                         path = arrayPath[i] + "/" + path;
                     }
                     path = path + newName;
-                    System.out.println("New file Path: " + path);
                     item.getFileWrapper().setPath(path);
                     item.getFileWrapper().setFileName(newName);
                     updateModels(currentNode, true);
                     fsStructure.generateJson(directoryTree);
-                   /* try {
-                        ownNode.callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }*/
                 }
             }
 
             FSTreeNode root = currentNode.findRoot();
-            root.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-            MediatorFsNet.getInstance().jsonReplicaton(root);
+            root.setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            MediatorFsNet.getInstance().jsonReplication(root);
 
         });
         menu.add(rename);

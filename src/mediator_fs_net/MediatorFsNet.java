@@ -66,7 +66,6 @@ public class MediatorFsNet {
      * @return return a wrapper that contains the file and its attribute
      */
     public CacheFileWrapper getFile(String UFID) { //ricerca nella "rete" del file
-        System.out.println("entrato nel mediator alla ricerca del file : " + UFID);
         try {
             return node.getFileOtherHost(UFID);
         } catch (RemoteException e) {
@@ -82,26 +81,9 @@ public class MediatorFsNet {
      * @return return a wrapper that contains the file and its attribute
      */
     public CacheFileWrapper getFilefromFS(String UFID) {
-        System.out.println("entrato in mediator -> getFileFromFS");
         return service.getFileAndAttribute(UFID);
     }
 
-    /**
-     * This method is used to call the method replaceFileFromFS in order to replace an edit file
-     * from an instance of the interface NetNode
-     *
-     * @param list is a list of file to replace
-     */
-    //TODO: non viene utilizzato e quindi può essere eliminato stessa cosa per replaceFileFromFS
-    public void replaceFile(ArrayList<WritingCacheFileWrapper> list) {
-        System.out.println("[MEDIATOR] entrato in replaceFile");
-        System.out.println("file da modificare " + list.size());
-        try {
-            node.replaceFileFromFS(list);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
 
     public FSStructure getFsStructure() {
 
@@ -116,28 +98,20 @@ public class MediatorFsNet {
         return node;
     }
 
-    public void jsonReplicaton(FSTreeNode treeRoot) {
-
+    public void jsonReplication(FSTreeNode treeRoot) {
         try {
             HashMap<Integer, NetNodeLocation> tmpHashMap = new HashMap<>(node.getHashMap());
 
             tmpHashMap.remove((node.getOwnIp() + node.getOwnPort()).hashCode());
-
-            System.out.println("Json replication");
-
             for (NetNodeLocation nnl : tmpHashMap.values()) {
-                System.out.println("Nodo: " + nnl.toUrl());
                 ReplicationMethods.getInstance().jsonReplication(nnl, treeRoot);
             }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public void updateJson(FSTreeNode treeRoot) {
-        System.out.println("Mediator updateJson");
         MainUI.updateModels(treeRoot, false);
     }
 
@@ -147,21 +121,4 @@ public class MediatorFsNet {
         FSStructure.getInstance().generateJson(root);
         updateJson(root);
     }
-
-
-
-    /*public boolean fileReplication(ReplicationWrapper file){ //Probabile che sia da sistemare
-        System.out.println("[MEDIATOR] entrato in fileReplication");
-        boolean check = false;
-
-        do {
-            try {
-                check = node.saveFileReplica(file);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }while(!check);
-
-        return check;
-    }*/
 }

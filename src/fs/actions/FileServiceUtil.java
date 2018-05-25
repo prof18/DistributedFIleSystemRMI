@@ -9,6 +9,7 @@ import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
 import net.objects.interfaces.NetNode;
 import ui.frame.MainUI;
+import utils.Constants;
 import utils.Util;
 
 import java.rmi.AlreadyBoundException;
@@ -22,25 +23,24 @@ import java.util.Map;
 
 /**
  * This class is used by the mainUI:
- *  to create a new node;
- *  to connect it to the Distributed FileSystem;
- *  to notify to all the connected nodes that a new node has entered in the network.
+ * to create a new node;
+ * to connect it to the Distributed FileSystem;
+ * to notify to all the connected nodes that a new node has entered in the network.
  */
 
 public class FileServiceUtil {
     private static String hostName;
 
     /**
-     *
-     * @param path path to connect
-     * @param ownIP ip of the new node
+     * @param path        path to connect
+     * @param ownIP       ip of the new node
      * @param locationRet gives the parameters to connect to an another node
-     * @param mainUI instance of the MainUI
+     * @param mainUI      instance of the MainUI
      * @return a WrapperFileServiceUtil that contains:
-     *  the location of this node
-     *  the hash map of all the nodes in the system and their location
-     *  the created node
-     *  the hashMap that has for keys the UFID of the files and values the location of nodes that contain a file
+     * the location of this node
+     * the hash map of all the nodes in the system and their location
+     * the created node
+     * the hashMap that has for keys the UFID of the files and values the location of nodes that contain a file
      * @throws NotBoundException
      * @throws UnknownHostException
      */
@@ -55,7 +55,6 @@ public class FileServiceUtil {
         int port = rw.getPort();
         NetNode node = null;
         try {
-            //node = new NetNodeImpl(path, ownIP,port, nameService,mediatorFsNet);
             node = new NetNodeImpl(path, ownIP, port, mediatorFsNet, mainUI);
             hostName = node.getHostName();
         } catch (RemoteException e) {
@@ -66,8 +65,6 @@ public class FileServiceUtil {
         mediatorFsNet.addService(service);
         try {
             String connectPath = "rmi://" + ownIP + ":" + port + "/" + hostName;
-            System.out.println("connectPath = " + connectPath);
-
             registry.bind(connectPath, node);
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -81,7 +78,7 @@ public class FileServiceUtil {
                 System.out.println("recPat = " + recPat);
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
-                System.out.println("[AGGIORNAMENTO NODI]");
+                System.out.println("[Updating Nodes]");
 
                 //Modifiche per il nome Host random
                 JoinWrap jWrap = node1.join(ownIP, port, hostName);
@@ -89,9 +86,6 @@ public class FileServiceUtil {
                 node.setNameLocation(jWrap.getNameJoin());
                 node.setFileNodeList(jWrap.getFileNodeList());
 
-
-                System.out.println();
-                System.out.println("[MAPPA RITORNATA]");
                 System.out.println();
                 Util.plot(retMap);
                 node.setConnectedNodes(retMap);
@@ -100,9 +94,6 @@ public class FileServiceUtil {
 
                 //Se i nodi sono solo 2 le Map saranno già aggiornate
                 if ((retMap.size() != 2)) {
-                    System.out.println();
-                    System.out.println("[AGGIORNAMENTO NODI CONNESSI SU TERZI]");
-                    System.out.println();
                     for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
                         if (!((ownIP + port).hashCode() == entry.getKey() || (locationRet.getIp() + locationRet.getPort()).hashCode() == entry.getKey())) {
@@ -119,13 +110,11 @@ public class FileServiceUtil {
                     }
                 }
 
-                System.out.println("aggiornamento json in create del fileServiceUtil");
-                System.out.println("called getJson");
                 String node1Gson = node1.getJson();
-                System.out.println("called updateJson");
-                System.out.println("node1Gson = " + node1Gson);
+                System.out.println("Updating JSON");
+                if (Constants.PRINT_JSON)
+                    System.out.println("JSON = " + node1Gson);
                 node.updateJson(node1Gson);
-                System.out.println("called get updateConnectNode");
                 mainUI.updateConnectedNode(node.getHashMap());
 
 

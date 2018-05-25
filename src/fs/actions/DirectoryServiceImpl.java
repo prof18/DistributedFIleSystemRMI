@@ -15,7 +15,6 @@ import java.rmi.RemoteException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * We have to do two things: update the json and create new file in the PC FS
@@ -27,6 +26,8 @@ public class DirectoryServiceImpl implements DirectoryService {
     private FileService fileService;
 
     private static DirectoryServiceImpl INSTANCE = null;
+
+    private boolean showLog = Constants.PRINT_JSON;
 
     public static DirectoryServiceImpl getInstance() {
         if (INSTANCE == null)
@@ -53,7 +54,6 @@ public class DirectoryServiceImpl implements DirectoryService {
             System.out.println("Hostname null during folder creation");
         }
 
-
         FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
         FSTreeNode directoryParent = treeRoot.findNodeByUFID(treeRoot, currentNode.getUFID());
         FSTreeNode node = new FSTreeNode();
@@ -63,14 +63,15 @@ public class DirectoryServiceImpl implements DirectoryService {
         node.setChildrens(new ArrayList<>());
         node.setFiles(new ArrayList<>());
         directoryParent.addChild(node);
-        //long editTime = System.currentTimeMillis();
         node.setLastEditTime(System.currentTimeMillis());
         node.updateAncestorTime();
 
-        System.out.println("Replicazione del json per l'albero dopo creazione file");
         FSStructure.getInstance().generateJson(treeRoot);
-        treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-        MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
+        String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
+        treeRoot.setJson(json);
+        if (showLog)
+            System.out.println("Json after directory creation: " + json);
+        MediatorFsNet.getInstance().jsonReplication(treeRoot);
 
         callback.onItemChanged(directoryParent);
     }
@@ -93,7 +94,6 @@ public class DirectoryServiceImpl implements DirectoryService {
                     "The folder is not empty. Would you like to delete all?", "Warning", JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
                 // Saving code here
-                System.out.println("Delete");
                 FSTreeNode parent = nodeToDelete.getParent();
                 nodeToDelete.setLastEditTime(System.currentTimeMillis());
                 nodeToDelete.updateAncestorTime();
@@ -108,14 +108,15 @@ public class DirectoryServiceImpl implements DirectoryService {
             nodeToReturn = parent;
         }
 
-        System.out.println("Replicazione del json per l'albero dopo eliminazione del file");
         FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
         FSStructure.getInstance().generateJson(treeRoot);
-        treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-        MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
+        String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
+        treeRoot.setJson(json);
+        if (showLog)
+            System.out.println("Json after directory deleted");
+        MediatorFsNet.getInstance().jsonReplication(treeRoot);
 
         callback.onItemChanged(nodeToReturn);
-
     }
 
     @Override
@@ -133,15 +134,15 @@ public class DirectoryServiceImpl implements DirectoryService {
             else
                 wrapper.setPath(currentNode.getPath() + name);
 
-            System.out.println("Replicazione del json per l'albero dopo creazione file");
             FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
             FSTreeNode curNode = treeRoot.findNodeByUFID(treeRoot, currentNode.getUFID());
             curNode.addFiles(wrapper);
 
             FSStructure.getInstance().generateJson(treeRoot);
-            treeRoot.setGson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-            System.out.println("Gson: " + PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-            MediatorFsNet.getInstance().jsonReplicaton(treeRoot);
+            treeRoot.setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            if (showLog)
+                System.out.println("Json after file created: " + PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            MediatorFsNet.getInstance().jsonReplication(treeRoot);
 
             callback.onItemChanged(curNode);
 

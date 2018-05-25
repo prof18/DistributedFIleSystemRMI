@@ -184,12 +184,11 @@ public interface NetNode extends Remote, Serializable {
      * @param newFile      is an instance of an object that contain the edit file and its attribute
      * @param lastModified is the time of the lastModified
      * @param UFID         is the unique name of the file
-     * @return a string that represent the successful or not of the replace file
      * @throws RemoteException if there are problems in the RMI communication
      */
 
 
-    String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
+    void replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
 
     NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) throws RemoteException;
 

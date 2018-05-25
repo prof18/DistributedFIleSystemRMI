@@ -206,32 +206,7 @@ public class Util {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        /*FileInputStream fis = null;
-
-        try {
-            bytesArray = new byte[(int) f.length()];
-
-            //read file into bytes[]
-            fis = new FileInputStream(f);
-            fis.read(bytesArray);
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }*/
-
         return bytesArray;
-
     }
 
     /**
@@ -242,7 +217,6 @@ public class Util {
      */
     public static String getChecksum(byte[] ab) {
         String result;
-        System.out.println(ab);
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(ab);
@@ -281,23 +255,7 @@ public class Util {
         return ret;
     }
 
-    /*public static ArrayList<NetNodeLocation> listOfMaxConnectedNode(ArrayList<NetNodeLocation> list) {
-        long maxConnectedTime = maxTimeConnection(list);
-        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
-        for (NetNodeLocation node : list) {
-            if (node.getTimeStamp() == maxConnectedTime) {
-                nodeList.add(node);
-            }
-        }
-
-        return nodeList;
-    }*/
-
     public static ArrayList<NetNodeLocation> listOConnectedNodeWithMinOccupiedSpace(ArrayList<NetNodeLocation> list) {
-
-        /*if (list.size() == 1){
-            return list;
-        }*/
 
         int occupiedSpace = Integer.MAX_VALUE;
         ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
@@ -308,19 +266,17 @@ public class Util {
             }
         }
 
-        ArrayList<NetNodeLocation> sortedList = ascSort(nodeList);
-
-        return sortedList;
+        return ascSort(nodeList);
     }
 
     private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
         NetNodeLocation temp;
         for (int i = 1; i < nodeList.size(); i++) {
             for (int j = i; j > 0; j--) {
-                if (nodeList.get(j).getTotalByte() < nodeList.get(j-1).getTotalByte()){
+                if (nodeList.get(j).getTotalByte() < nodeList.get(j - 1).getTotalByte()) {
                     temp = nodeList.get(j);
-                    nodeList.set(j, nodeList.get(j-1));
-                    nodeList.set((j-1),temp);
+                    nodeList.set(j, nodeList.get(j - 1));
+                    nodeList.set((j - 1), temp);
                 }
             }
         }
@@ -329,21 +285,7 @@ public class Util {
 
     public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
         NetNodeLocation selectedNode = null;
-
-        /*//System.out.println("Lista nodi maggior spazio libero");
-        for (NetNodeLocation node : list) {
-            //System.out.println(node.toUrl());
-            if (node.getTotalByte() < occupiedSpace) {
-                occupiedSpace = node.getTotalByte();
-                selectedNode = node;
-            }
-        }*/
-
-        /*if (list.size() == 1){
-            return list.get(0);
-        }*/
-
-        long connectedTimeThreshold = maxTimeConnection(list)/2;
+        long connectedTimeThreshold = maxTimeConnection(list) / 2;
 
         for (NetNodeLocation node : list) {
             if (node.getTimeStamp() >= connectedTimeThreshold) {
@@ -367,8 +309,6 @@ public class Util {
 
         return selectedTimeStamp;
     }
-
-
 
 
 }

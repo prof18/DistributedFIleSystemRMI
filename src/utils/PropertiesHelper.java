@@ -75,7 +75,7 @@ public class PropertiesHelper {
         } catch (IOException e) {
             System.out.println("Configuration not Saved");
         } catch ( NullPointerException f){
-            System.out.println("BAMBA");
+            System.out.println("NPE during writing config");
         }
     }
 

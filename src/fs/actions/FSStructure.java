@@ -4,10 +4,13 @@ import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
+import mediator_fs_net.MediatorFsNet;
 import utils.Constants;
 import utils.GSONHelper;
 import utils.PropertiesHelper;
 
+import java.rmi.RemoteException;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -27,10 +30,6 @@ public class FSStructure {
     private FSStructure() {
 
     }
-
-    //qui si genera la struttura ad albero del file system.
-    //e rimane sempre istanziata cosi' quando serve e' pronta
-
 
     public FSTreeNode getTree() {
         return tree;
@@ -81,11 +80,8 @@ public class FSStructure {
         }
 
         String json = GSONHelper.getInstance().foldersToJson(folderMap);
-        //System.out.println("json generated = " + json);
 
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
-        //TODO: Send the json to the other nodes
-        System.out.println("Wrote new json structure");
 
 
     }
@@ -160,11 +156,19 @@ public class FSStructure {
             }
 
         } else {
+
+            String host = "";
+            try {
+                host = MediatorFsNet.getInstance().getNode().getHostName();
+            } catch (RemoteException e) {
+                System.out.println("Hostname null during folder creation");
+            }
+
             //generate the tree with only the root
             tree = new FSTreeNode();
             tree.setParent(null);
             //TODO: change UUID set to root for everyone
-            tree.setUFID("root");
+            tree.setUFID(host + "_" + Date.from(Instant.now()).hashCode());
             tree.setNameNode("root");
             tree.setChildrens(new ArrayList<>());
             tree.setFiles(new ArrayList<>());
@@ -172,9 +176,5 @@ public class FSStructure {
 
             generateJson(tree);
         }
-
-
     }
-
-
 }

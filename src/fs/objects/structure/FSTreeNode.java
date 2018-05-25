@@ -14,7 +14,7 @@ public class FSTreeNode implements Serializable {
     private FSTreeNode parent;
     private ArrayList<FileWrapper> files = new ArrayList<>();
     private long lastEditTime;
-    private String gsonTree;
+    private String jsonTree;
 
 
     public FSTreeNode(String UFID, String nameNode, ArrayList<FSTreeNode> childrens, FSTreeNode parent) {
@@ -67,12 +67,12 @@ public class FSTreeNode implements Serializable {
         return files;
     }
 
-    public String getGson() {
-        return gsonTree;
+    public String getJson() {
+        return jsonTree;
     }
 
-    public void setGson(String gsonTree) {
-        this.gsonTree = gsonTree;
+    public void setJson(String gsonTree) {
+        this.jsonTree = gsonTree;
     }
 
     public void setUFID(String UFID) {

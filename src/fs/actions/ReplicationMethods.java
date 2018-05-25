@@ -17,7 +17,7 @@ public class ReplicationMethods {
 
     private static ReplicationMethods INSTANCE = null;
 
-    private ReplicationMethods(){
+    private ReplicationMethods() {
     }
 
     public static ReplicationMethods getInstance() {
@@ -26,8 +26,7 @@ public class ReplicationMethods {
         return INSTANCE;
     }
 
-    public void fileReplication(NetNodeLocation netNodeLoc, ReplicationWrapper repWr, NetNode nNode){
-        System.out.println("FileReplication method");
+    public void fileReplication(NetNodeLocation netNodeLoc, ReplicationWrapper repWr, NetNode nNode) {
         Registry registry;
         try {
             int it = 0;
@@ -42,12 +41,12 @@ public class ReplicationMethods {
                 if (rep) {
                     nNode.nodeFileAssociation(repWr.getUFID(), netNodeLoc);
                     netNodeLoc.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
-                    System.out.println("Replicazione file " + repWr.getUFID() + " riuscita.");
+                    System.out.println("Replication of: " + repWr.getUFID() + " done.");
                 } else {
-                    System.out.println("Replicazione file " + repWr.getUFID() + " fallita.");
+                    System.out.println("Replication of " + repWr.getUFID() + " failed.");
                     it++;
                 }
-            } while (!rep && it <=10);
+            } while (!rep && it <= 10);
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
@@ -55,11 +54,9 @@ public class ReplicationMethods {
     }
 
     public void jsonReplication(NetNodeLocation netNode, FSTreeNode directory) {
-        System.out.println("JsonReplication method nel nodo " + netNode.toUrl());
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
-            System.out.println("Node URL: " + netNode.toUrl());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
             node.updateUI(directory);
 
@@ -68,23 +65,17 @@ public class ReplicationMethods {
         }
     }
 
-    public void deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory){
-        System.out.println("DeleteFile method");
+    public void deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory) {
         Registry registry;
         String filePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
 
-            System.out.println("Cancellazione file: " + fileID);
-            System.out.println("Percorso file: " + filePath);
-            System.out.println("Nel nodo: " + netNode.toUrl());
-
-
             if (node.deleteFile(fileID, treeFileDirectory.getUFID())) {
-                System.out.println("File e attributi eliminati con successo");
+                System.out.println("Replication Deleting successful");
             } else {
-                System.out.println("File e attributi non sono stati eliminati");
+                System.out.println("Replication Deleting failed");
             }
 
         } catch (RemoteException | NotBoundException e) {
@@ -92,8 +83,7 @@ public class ReplicationMethods {
         }
     }
 
-    public void updateWritePermissionMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper){
-        System.out.println("UpdatePermittionMap method");
+    public void updateWritePermissionMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper) {
         Registry registry;
         try {
             for (NetNodeLocation netNode : nodeSet) {
