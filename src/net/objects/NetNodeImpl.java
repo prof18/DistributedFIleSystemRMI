@@ -83,6 +83,60 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         this.fileNodeList = fileNodeList;
     }
 
+    public void beginFileNodeList() {
+
+        String thisJson = this.getJson();
+
+        GSONHelper helpJson = GSONHelper.getInstance();
+        HashMap<String, JsonFolder> folder = helpJson.jsonToFolders(thisJson);
+
+        ArrayList<String> folderToRemove = new ArrayList<>();
+        HashMap<String, ListFileWrapper> fNodeList = new HashMap();
+
+        for (Map.Entry<String, JsonFolder> entry : folder.entrySet()) {
+
+            ArrayList<JsonFile> files = entry.getValue().getFiles();
+
+            if (files.size() > 0) {
+                for (int i = 0; i < files.size(); i++) {
+
+                    File file = new File(path + "/" + files.get(i).getUFID());
+                    File attr = new File(path + "/" + files.get(i).getUFID() + ".attr");
+
+                    if ((file.exists() && attr.exists())) {
+
+                        ArrayList<NetNodeLocation> locations = new ArrayList<>();
+                        locations.add(this.ownLocation);
+                        ListFileWrapper tmp = new ListFileWrapper(locations);
+
+                        fNodeList.put(files.get(i).getUFID(),tmp);
+
+                    }else{
+                        files.remove(i);
+                    }
+                }
+
+                if(files.size()==0){
+                    folderToRemove.add(entry.getKey());
+                }
+
+            }else{
+                folderToRemove.add(entry.getKey());
+            }
+        }
+
+        if (folderToRemove.size()>0){
+
+            for (int i = 0; i < folderToRemove.size(); i++){
+                folder.remove(folderToRemove.get(i));
+            }
+
+        }
+
+        this.setFileNodeList(fNodeList);
+
+    }
+
     public void updateWritePermissionMap(String UFID, ListFileWrapper listFileWrapper) {
         System.out.println("Permission Map Updating");
         if (fileNodeList.containsKey(UFID)) {
