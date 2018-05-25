@@ -613,7 +613,6 @@ public class MainUI extends JFrame {
                 newFolder(folderName);
         });
         menu.add(menuItem);
-        menu.addSeparator();
         menuBar.add(menu);
 
         //Edit Menu
