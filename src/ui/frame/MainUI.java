@@ -332,6 +332,7 @@ public class MainUI extends JFrame {
             pathVLabel.setText(node.getPath());
             fileSizeVLabel.setText(node.getFolderSize());
             lastEditVLabel.setText(sdf.format(node.getLastEditTime()));
+            ownerVLabel.setText(node.getOwner());
         }
     }
 

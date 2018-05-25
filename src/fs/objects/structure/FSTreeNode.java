@@ -15,6 +15,7 @@ public class FSTreeNode implements Serializable {
     private ArrayList<FileWrapper> files = new ArrayList<>();
     private long lastEditTime;
     private String jsonTree;
+    private String owner;
 
 
     public FSTreeNode(String UFID, String nameNode, ArrayList<FSTreeNode> childrens, FSTreeNode parent) {
@@ -26,6 +27,14 @@ public class FSTreeNode implements Serializable {
 
     public FSTreeNode() {
 
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public long getLastEditTime() {

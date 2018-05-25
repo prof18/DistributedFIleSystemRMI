@@ -63,6 +63,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         currentNode.addChild(node);
         node.setLastEditTime(System.currentTimeMillis());
         node.updateAncestorTime();
+        node.setOwner(PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
 
         FSStructure.getInstance().generateJson(currentNode.findRoot());
         String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);

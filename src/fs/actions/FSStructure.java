@@ -51,6 +51,7 @@ public class FSStructure {
             jsonFolder.setUFID(node.getUFID());
             jsonFolder.setFolderName(node.getNameNode());
             jsonFolder.setLastEditTime(node.getLastEditTime());
+            jsonFolder.setOwner(node.getOwner());
             if (!node.isRoot())
                 jsonFolder.setParentUFID(node.getParent().getUFID());
 
