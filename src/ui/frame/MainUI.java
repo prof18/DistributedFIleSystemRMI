@@ -185,14 +185,6 @@ public class MainUI extends JFrame {
         String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String portRetConfig = PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
 
-        System.out.println("checkValue connect()");
-        System.out.println("ipHost = " + ipHost);
-        System.out.println("nameServiceHost = " + nameServiceHost);
-        System.out.println("ipRet = " + ipRet);
-        System.out.println("path = " + path);
-        System.out.println("portRetConfig = " + portRetConfig);
-        System.out.println();
-        System.out.println();
         int portRet = -1;
         if (portRetConfig != null && !portRetConfig.equals("")) {
             portRet = Integer.parseInt(portRetConfig);
@@ -249,8 +241,7 @@ public class MainUI extends JFrame {
     // Draws the File Table View
     private void drawTableView() {
         model = new FileViewTableModel();
-        final JTable table = new JTable();
-        this.table = table;
+        table = new JTable();
         table.setFillsViewportHeight(true);
         table.setTableHeader(null);
         table.setModel(model);
@@ -497,6 +488,7 @@ public class MainUI extends JFrame {
     public static void updateModels(FSTreeNode treeNode, boolean local) {
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         model.setNode(treeNode);
+        //get the current node before updating and next select the node to show
 
         TreePath path = tree.getSelectionPath();
         FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
@@ -621,7 +613,6 @@ public class MainUI extends JFrame {
                 newFolder(folderName);
         });
         menu.add(menuItem);
-        menu.addSeparator();
         menuBar.add(menu);
 
         //Edit Menu

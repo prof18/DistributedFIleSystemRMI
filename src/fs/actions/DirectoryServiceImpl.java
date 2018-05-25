@@ -54,26 +54,24 @@ public class DirectoryServiceImpl implements DirectoryService {
             System.out.println("Hostname null during folder creation");
         }
 
-        FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
-        FSTreeNode directoryParent = treeRoot.findNodeByUFID(treeRoot, currentNode.getUFID());
         FSTreeNode node = new FSTreeNode();
-        node.setParent(directoryParent);
+        node.setParent(currentNode);
         node.setNameNode(dirName);
         node.setUFID(host + "_" + Date.from(Instant.now()).hashCode());
         node.setChildrens(new ArrayList<>());
         node.setFiles(new ArrayList<>());
-        directoryParent.addChild(node);
+        currentNode.addChild(node);
         node.setLastEditTime(System.currentTimeMillis());
         node.updateAncestorTime();
 
-        FSStructure.getInstance().generateJson(treeRoot);
+        FSStructure.getInstance().generateJson(currentNode.findRoot());
         String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
-        treeRoot.setJson(json);
+        currentNode.findRoot().setJson(json);
         if (showLog)
             System.out.println("Json after directory creation: " + json);
-        MediatorFsNet.getInstance().jsonReplication(treeRoot);
+        MediatorFsNet.getInstance().jsonReplication(currentNode.findRoot());
 
-        callback.onItemChanged(directoryParent);
+        callback.onItemChanged(currentNode);
     }
 
     @Override
@@ -134,17 +132,15 @@ public class DirectoryServiceImpl implements DirectoryService {
             else
                 wrapper.setPath(currentNode.getPath() + name);
 
-            FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
-            FSTreeNode curNode = treeRoot.findNodeByUFID(treeRoot, currentNode.getUFID());
-            curNode.addFiles(wrapper);
+            currentNode.addFiles(wrapper);
 
-            FSStructure.getInstance().generateJson(treeRoot);
-            treeRoot.setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            FSStructure.getInstance().generateJson(currentNode.findRoot());
+            currentNode.findRoot().setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             if (showLog)
                 System.out.println("Json after file created: " + PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-            MediatorFsNet.getInstance().jsonReplication(treeRoot);
+            MediatorFsNet.getInstance().jsonReplication(currentNode.findRoot());
 
-            callback.onItemChanged(curNode);
+            callback.onItemChanged(currentNode);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

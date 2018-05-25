@@ -399,13 +399,13 @@ public class FileServiceImpl implements FileService {
 
         //eliminazione negli altri nodi
 
-        try {
+      /*  try {
             if (mediator.getNode().getFileNodeList() != null) {
                 System.out.println("Node with the file: " + mediator.getNode().getFileNodeList().get(fileID).getLocations().size());
             }
         } catch (RemoteException e) {
             e.printStackTrace();
-        }
+        }*/
 
         try {
 

@@ -47,7 +47,6 @@ public class FileServiceUtil {
 
     public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) throws NotBoundException, NullPointerException {
         System.setProperty("java.rmi.server.hostname", ownIP);
-        System.out.println("locationRet = " + locationRet);
         HashMap<Integer, NetNodeLocation> ret = new HashMap<>();
         MediatorFsNet mediatorFsNet = MediatorFsNet.getInstance();
         RegistryWrapper rw = Util.getNextFreePort();
