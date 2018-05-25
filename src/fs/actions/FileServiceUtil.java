@@ -121,6 +121,18 @@ public class FileServiceUtil {
                 e.printStackTrace();
             }
         }
+
+        try {
+            if(locationRet == null && node.getJson()!=null){
+
+                node.beginFileNodeList();
+
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+
         WrapperFileServiceUtil wfsu = null;
         try {
             wfsu = new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), node.getHashMap(), service, node);
