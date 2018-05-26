@@ -109,25 +109,25 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         locations.add(this.ownLocation);
                         ListFileWrapper tmp = new ListFileWrapper(locations);
 
-                        fNodeList.put(files.get(i).getUFID(),tmp);
+                        fNodeList.put(files.get(i).getUFID(), tmp);
 
-                    }else{
+                    } else {
                         files.remove(i);
                     }
                 }
 
-                if(files.size()==0){
+                if (files.size() == 0) {
                     folderToRemove.add(entry.getKey());
                 }
 
-            }else{
+            } else {
                 folderToRemove.add(entry.getKey());
             }
         }
 
-        if (folderToRemove.size()>0){
+        if (folderToRemove.size() > 0) {
 
-            for (int i = 0; i < folderToRemove.size(); i++){
+            for (int i = 0; i < folderToRemove.size(); i++) {
                 folder.remove(folderToRemove.get(i));
             }
 
@@ -270,26 +270,22 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         if (file == null) {
             System.out.println("File not in the node" + ownLocation.toUrl());
         } else {
-            // se il file in questo host non è stato modicato nel mentre si procede alla modifica
-            //TODO è stato tolto il check per fare delle prove lastModified == file.getAttribute().getLastModifiedTime().getTime()
-            //TODO è un errore da capire
-            if (true) {
-                File file1 = new File(path + UFID);
-                System.out.println("File deleted: " + file1.delete());
-                file1 = new File(path + UFID + ".attr");
-                System.out.println("Attribute deleted: " + file1.delete());
-                File newFileh = new File(path + UFID);
-                try {
-                    FileOutputStream writer = new FileOutputStream(newFileh);
-                    writer.write(newFile.getContent());
-                    ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path + UFID + ".attr"));
-                    ois.writeObject(newFile.getAttribute());
-                    ois.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            File file1 = new File(path + UFID);
+            System.out.println("File deleted: " + file1.delete());
+            file1 = new File(path + UFID + ".attr");
+            System.out.println("Attribute deleted: " + file1.delete());
+            File newFileh = new File(path + UFID);
+            try {
+                FileOutputStream writer = new FileOutputStream(newFileh);
+                writer.write(newFile.getContent());
+                ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path + UFID + ".attr"));
+                ois.writeObject(newFile.getAttribute());
+                ois.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
+        
     }
 
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {

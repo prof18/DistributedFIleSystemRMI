@@ -4,7 +4,7 @@ import fs.actions.object.CacheFileWrapper;
 
 import java.util.HashMap;
 
-//TODO cambiare perchè la cache viene invalidata ogni volta che un file viene modificato
+
 public class ReadingNodeCache {
     private HashMap<String, CacheFileWrapper> cache;
 

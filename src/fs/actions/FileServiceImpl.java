@@ -76,7 +76,6 @@ public class FileServiceImpl implements FileService {
      * This method differs from the previous one
      * because the lenght of the file is automatically assigned to the count.
      */
-    //TODO: controllare il flag per accesso
     public ReadWrapper read(String fileID, int offset) throws FileNotFoundException {
 
         CacheFileWrapper wrapper = getFile(fileID);
