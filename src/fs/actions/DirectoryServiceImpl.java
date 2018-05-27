@@ -93,11 +93,14 @@ public class DirectoryServiceImpl implements DirectoryService {
                     "The folder is not empty. Would you like to delete all?", "Warning", JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
                 // Saving code here
+                ArrayList<FileWrapper> allFilesUFID = nodeToDelete.getAllFilesWhenDeleteDirectory();
+                MediatorFsNet.getInstance().deleteDirectoryFiles(allFilesUFID);
                 FSTreeNode parent = nodeToDelete.getParent();
                 nodeToDelete.setLastEditTime(System.currentTimeMillis());
                 nodeToDelete.updateAncestorTime();
                 parent.getChildren().remove(nodeToDelete);
                 nodeToReturn = parent;
+
             }
         } else {
             FSTreeNode parent = nodeToDelete.getParent();

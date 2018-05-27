@@ -65,14 +65,18 @@ public class ReplicationMethods {
         }
     }
 
-    public void deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory) {
+    public void deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory, long fileSize) {
         Registry registry;
-        String filePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
 
-            if (node.deleteFile(fileID, treeFileDirectory.getUFID())) {
+            String directoryUFID = null;
+            if (treeFileDirectory != null){
+                directoryUFID = treeFileDirectory.getUFID();
+            }
+
+            if (node.deleteFile(fileID, directoryUFID, fileSize)) {
                 System.out.println("Replication Deleting successful");
             } else {
                 System.out.println("Replication Deleting failed");

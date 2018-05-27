@@ -415,7 +415,8 @@ public class FileServiceImpl implements FileService {
             if (listOfNode.size() > 1) {
                 for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID).getLocations()) {
                     if (nnl.toString().compareTo(mediator.getNode().getOwnLocation().toString()) != 0) {
-                        ReplicationMethods.getInstance().deleteFile(fileID, nnl, curDir);
+                        long fileSize = curDir.getFile(fileID).getAttribute().getFileLength();
+                        ReplicationMethods.getInstance().deleteFile(fileID, nnl, curDir, fileSize);
                     }
                 }
             }
@@ -624,12 +625,12 @@ public class FileServiceImpl implements FileService {
                 e.printStackTrace();
             }
 
-            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOfConnectedNodeForLongTime(nodeList);
             selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
         } else {
             ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID()).getLocations();
             nodeList = removeLocalNode(nodeList, node);
-            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOfConnectedNodeForLongTime(nodeList);
             selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
         }
 

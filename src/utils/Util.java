@@ -255,18 +255,18 @@ public class Util {
         return ret;
     }
 
-    public static ArrayList<NetNodeLocation> listOConnectedNodeWithMinOccupiedSpace(ArrayList<NetNodeLocation> list) {
+    public static ArrayList<NetNodeLocation> listOfConnectedNodeForLongTime(ArrayList<NetNodeLocation> list) {
+        long connectedTimeThreshold = maxTimeConnection(list) / 3;
+        long currentTime = new Date().getTime();
+        ArrayList<NetNodeLocation> selectedNodesList = new ArrayList<>();
 
-        int occupiedSpace = Integer.MAX_VALUE;
-        ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
-        for (NetNodeLocation node : list) {
-            if (node.getTotalByte() <= occupiedSpace) {
-                nodeList.add(node);
-                occupiedSpace = node.getTotalByte();
+        for (int i = 0; i < list.size(); i++) {
+            if (currentTime - list.get(i).getTimeStamp() >= connectedTimeThreshold) {
+                selectedNodesList.add(list.get(i));
             }
         }
 
-        return ascSort(nodeList);
+        return selectedNodesList;
     }
 
     private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
@@ -283,31 +283,36 @@ public class Util {
         return nodeList;
     }
 
-    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
+/*    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
         NetNodeLocation selectedNode = null;
         long connectedTimeThreshold = maxTimeConnection(list) / 2;
 
-        for (NetNodeLocation node : list) {
-            if (node.getTimeStamp() >= connectedTimeThreshold) {
-                selectedNode = node;
+        for (int i = 0; i < list.size() && selectedNode == null ; i++) {
+            if (list.get(i).getTimeStamp() >= connectedTimeThreshold) {
+                selectedNode = list.get(i);
             }
         }
 
         return selectedNode;
+    }*/
+
+    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
+        ascSort(list);
+        return list.get(0);
     }
 
     public static long maxTimeConnection(ArrayList<NetNodeLocation> list) {
         long connectedTime = 0;
-        long selectedTimeStamp = 0;
+        long selectedTimeStamp;
         long currentTime = new Date().getTime();
         for (NetNodeLocation dn : list) {
             if (currentTime - dn.getTimeStamp() > connectedTime) {
                 selectedTimeStamp = dn.getTimeStamp();
-                connectedTime = currentTime - dn.getTimeStamp();
+                connectedTime = currentTime - selectedTimeStamp;
             }
         }
 
-        return selectedTimeStamp;
+        return connectedTime;
     }
 
 

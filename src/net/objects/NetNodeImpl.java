@@ -502,7 +502,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }
 
-        ArrayList<NetNodeLocation> nodeWithSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+        ArrayList<NetNodeLocation> nodeWithSmallerOccupiedSpace = Util.listOfConnectedNodeForLongTime(nodeList);
         NetNodeLocation selectedNode = Util.selectedNode(nodeWithSmallerOccupiedSpace);
 
         Registry registry;
@@ -652,7 +652,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return checksum.compareTo(rw.getChecksum()) == 0;
     }
 
-    public boolean deleteFile(String UFID, String treeFileDirectoryUFID) {
+    public boolean deleteFile(String UFID, String treeFileDirectoryUFID, long fileSize) {
         String filePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String totalFilePath = filePath + UFID;
         boolean filesDeleted = false;
@@ -664,7 +664,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         System.out.println("Deleting file: " + UFID);
         if (fileDelete && attrDelete) {
             filesDeleted = true;
-            mediatorFsNet.removeFileFromTree(UFID, treeFileDirectoryUFID);
+            ownLocation.reduceOccupiedSpace((int) fileSize);
+            if (treeFileDirectoryUFID != null){
+                mediatorFsNet.removeFileFromTree(UFID, treeFileDirectoryUFID);
+            }
+
         }
 
         if (filesDeleted && fileNodeList.containsKey(UFID)) {
