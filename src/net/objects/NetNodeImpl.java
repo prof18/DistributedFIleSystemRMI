@@ -79,8 +79,43 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return fileNodeList;
     }
 
-    public synchronized void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) {
-        this.fileNodeList = fileNodeList;
+    public synchronized void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) {
+        //this.fileNodeList = fileNodeList;
+
+        if (typeSet) {
+
+            for (Map.Entry<String, ListFileWrapper> entry : this.fileNodeList.entrySet()) {
+
+                if (receivedFNL.containsKey(entry.getKey())) {
+                    File file = new File(path + "/" + entry.getKey());
+                    File attr = new File(path + "/" + entry.getKey() + ".attr");
+
+                    file.delete();
+                    attr.delete();
+
+                } else {
+                    receivedFNL.put(entry.getKey(), entry.getValue());
+                }
+
+            }
+
+            this.fileNodeList = receivedFNL;
+
+        } else {
+            this.fileNodeList = receivedFNL;
+        }
+
+
+    }
+
+    public void modifyFileNodeList(HashMap<String, ListFileWrapper> toModify) {
+
+        for (Map.Entry<String, ListFileWrapper> entry : toModify.entrySet()) {
+            if (this.fileNodeList.containsKey(entry.getKey())) {
+                this.fileNodeList.replace(entry.getKey(), entry.getValue());
+            }
+        }
+
     }
 
     public void beginFileNodeList() {
@@ -133,7 +168,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         }
 
-        this.setFileNodeList(fNodeList);
+        this.setFileNodeList(fNodeList,false);
 
     }
 
@@ -285,7 +320,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 e.printStackTrace();
             }
         }
-        
+
     }
 
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
@@ -427,14 +462,21 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }
 
+        HashMap<String, ListFileWrapper> UpFNL = new HashMap<>();
+
         if (updateToDo.size() != 0) {
             for (Map.Entry<String, NetNodeLocation> entry : updateToDo.entrySet()) {
                 fileNodeList.get(entry.getKey()).getLocations().add(entry.getValue());
+
+                ListFileWrapper tmp = new ListFileWrapper(fileNodeList.get(entry.getKey()).getLocations());
+                UpFNL.put(entry.getKey(),tmp);
+
+
             }
         }
 
         if (updateFileNodeList) {
-            updateAllFileNodeList(fileNodeList);
+            updateAllFileNodeList(UpFNL);
         }
 
     }
@@ -462,7 +504,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                     NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
 
-                    nodeTemp.setFileNodeList(fileNodeList);
+//                    nodeTemp.setFileNodeList(fileNodeList);
+                    nodeTemp.modifyFileNodeList(fileNodeList);
 
                 } catch (RemoteException e) {
                     System.out.println("[updateAllFileNodeList] problemi connessione" + tmpPort + "; Ip: " + tmpIp);
@@ -661,7 +704,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         if (fileDelete && attrDelete) {
             filesDeleted = true;
             ownLocation.reduceOccupiedSpace((int) fileSize);
-            if (treeFileDirectoryUFID != null){
+            if (treeFileDirectoryUFID != null) {
                 mediatorFsNet.removeFileFromTree(UFID, treeFileDirectoryUFID);
             }
 

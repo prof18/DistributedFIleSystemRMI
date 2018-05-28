@@ -37,7 +37,9 @@ public interface NetNode extends Remote, Serializable {
 
     HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
 
-    void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
+    void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) throws RemoteException;
+
+    void modifyFileNodeList(HashMap<String, ListFileWrapper> toModify) throws RemoteException;
 
     void beginFileNodeList()throws RemoteException;
 
