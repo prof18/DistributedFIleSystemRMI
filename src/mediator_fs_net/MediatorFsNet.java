@@ -137,13 +137,19 @@ public class MediatorFsNet {
 
                     for (int j = 0; j < fileLocations.size() ; j++) {
                         if(fileLocations.get(j).toUrl().compareTo(node.getOwnLocation().toUrl()) != 0) {
-                            ReplicationMethods.getInstance().deleteFile(files.get(i).getUFID(), fileLocations.get(j), null, files.get(i).getAttribute().getFileLength());
+                            boolean fileDelete = ReplicationMethods.getInstance().deleteFile(files.get(i).getUFID(), fileLocations.get(j), null, files.get(i).getAttribute().getFileLength());
+                            if (fileDelete){
+                                fileLocations.get(j).reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
+                            }
                         }else{
                             String localFilePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
                             File localFile = new File(localFilePath + files.get(i).getUFID());
                             File localAttribute = new File(localFilePath + files.get(i).getUFID() + ".attr");
-                            localFile.delete();
-                            localAttribute.delete();
+                            boolean deleteLocalFile = localFile.delete();
+                            boolean deleteAttrFile = localAttribute.delete();
+                            if (deleteLocalFile && deleteAttrFile){
+                                MediatorFsNet.getInstance().getNode().getOwnLocation().reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
+                            }
                         }
                     }
                     fileNodeList.remove(files.get(i).getUFID());

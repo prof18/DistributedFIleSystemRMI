@@ -39,8 +39,8 @@ public class ReplicationMethods {
                 rep = node.saveFileReplica(repWr);
 
                 if (rep) {
-                    nNode.nodeFileAssociation(repWr.getUFID(), netNodeLoc);
                     netNodeLoc.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
+                    nNode.nodeFileAssociation(repWr.getUFID(), netNodeLoc);
                     System.out.println("Replication of: " + repWr.getUFID() + " done.");
                 } else {
                     System.out.println("Replication of " + repWr.getUFID() + " failed.");
@@ -65,7 +65,8 @@ public class ReplicationMethods {
         }
     }
 
-    public void deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory, long fileSize) {
+    public boolean deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory, long fileSize) {
+        boolean deleteState = false;
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
@@ -77,6 +78,7 @@ public class ReplicationMethods {
             }
 
             if (node.deleteFile(fileID, directoryUFID, fileSize)) {
+                deleteState = true;
                 System.out.println("Replication Deleting successful");
             } else {
                 System.out.println("Replication Deleting failed");
@@ -85,6 +87,8 @@ public class ReplicationMethods {
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
+
+        return deleteState;
     }
 
     public void updateWritePermissionMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper) {
