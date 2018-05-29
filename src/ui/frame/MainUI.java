@@ -11,7 +11,6 @@ import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
-import net.objects.interfaces.NetNode;
 import ui.utility.*;
 import utils.Constants;
 import utils.PropertiesHelper;
@@ -28,9 +27,7 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -287,34 +284,37 @@ public class MainUI extends JFrame {
         });
     }
 
-    // Shows the info of a file in the File Details Box
-    private void setFileInfo(FileWrapper fileWrapper) {
-        if (fileWrapper != null) { //secondo me funziona solo se presente il file attribute in locale
-            String fileID = fileWrapper.getUFID();
-            String filePath = fileWrapper.getPath();
-            FSTreeNode root = FSStructure.getInstance().getTree();
-            String[] path = filePath.split("/");
-            FileWrapper fw;
-            if (path.length > 2) {
-                String directoryName = path[path.length - 2];
-                fw = root.findNodeByName(root, directoryName).getFile(fileID);
-            } else {
-                fw = root.getFile(fileID);
-            }
+    /**
+     * This method updates the UI when the File System changes
+     *
+     * @param treeNode The update FSTreeNode Object
+     */
+    public static void updateModels(FSTreeNode treeNode, boolean local) {
 
-            if (fw == null) {
-                fw = fileWrapper;
-            }
+        // update the ui maintaining the current view
+        String ufidSeen = currentNode.getUFID();
+        currentNode = treeNode.findRoot();
+        if (!ufidSeen.equals(currentNode.getUFID()))
+            currentNode = currentNode.findNodeByUFID(currentNode, ufidSeen);
 
-            fileNameVLabel.setText(fw.getFileName());
-            typeVLabel.setText(fw.getAttribute().getType());
-            pathVLabel.setText(fw.getPath());
-            fileSizeVLabel.setText(String.valueOf(fw.getAttribute().getFileLength()));
-            ownerVLabel.setText(fw.getAttribute().getOwner());
-            if (fw.getAttribute().getLastModifiedTime() != null)
-                lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
+        FileViewTableModel model = (FileViewTableModel) table.getModel();
+        model.setNode(currentNode);
+
+        TreePath path = tree.getSelectionPath();
+        FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
+        tree.setModel(null);
+        treeModel.setNode(currentNode.findRoot());
+        tree.setModel(treeModel);
+        tree.setSelectionPath(path);
+        tree.expandPath(path);
+
+        if (local) {
+            fsStructure.generateJson(treeNode.findRoot());
+        } else {
+            String json = treeNode.getJson();
+            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+            FSStructure.getInstance().generateTreeStructure();
         }
-
     }
 
     // Shows the info of a folder in the File Details Box
@@ -422,7 +422,6 @@ public class MainUI extends JFrame {
         cs.gridy = 0;
         filesDetail.add(fileNameLabel, cs);
         fileNameVLabel = new JLabel("-");
-        //cs.fill = GridBagConstraints.BOTH;
         cs.gridx = 1;
         cs.gridy = 0;
         filesDetail.add(fileNameVLabel, cs);
@@ -480,36 +479,34 @@ public class MainUI extends JFrame {
         return filesDetail;
     }
 
-    /**
-     * This method updates the UI when the File System changes
-     *
-     * @param treeNode The update FSTreeNode Object
-     */
-    public static void updateModels(FSTreeNode treeNode, boolean local) {
+    // Shows the info of a file in the File Details Box
+    private void setFileInfo(FileWrapper fileWrapper) {
+        if (fileWrapper != null) {
+            String fileID = fileWrapper.getUFID();
+            String filePath = fileWrapper.getPath();
+            FSTreeNode root = FSStructure.getInstance().getTree();
+            String[] path = filePath.split("/");
+            FileWrapper fw;
+            if (path.length > 2) {
+                String directoryName = path[path.length - 2];
+                fw = root.findNodeByName(root, directoryName).getFile(fileID);
+            } else {
+                fw = root.getFile(fileID);
+            }
 
-        String ufidSeen = currentNode.getUFID();
-        currentNode = treeNode.findRoot();
-        if (!ufidSeen.equals(currentNode.getUFID()))
-            currentNode = currentNode.findNodeByUFID(currentNode, ufidSeen);
+            if (fw == null) {
+                fw = fileWrapper;
+            }
 
-        FileViewTableModel model = (FileViewTableModel) table.getModel();
-        model.setNode(currentNode);
-
-        TreePath path = tree.getSelectionPath();
-        FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
-        tree.setModel(null);
-        treeModel.setNode(currentNode.findRoot());
-        tree.setModel(treeModel);
-        tree.setSelectionPath(path);
-        tree.expandPath(path);
-
-        if (local) {
-            fsStructure.generateJson(treeNode.findRoot());
-        } else {
-            String json = treeNode.getJson();
-            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
-            FSStructure.getInstance().generateTreeStructure();
+            fileNameVLabel.setText(fw.getFileName());
+            typeVLabel.setText(fw.getAttribute().getType());
+            pathVLabel.setText(fw.getPath());
+            fileSizeVLabel.setText(String.valueOf(fw.getAttribute().getFileLength()));
+            ownerVLabel.setText(fw.getAttribute().getOwner());
+            if (fw.getAttribute().getLastModifiedTime() != null)
+                lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
         }
+
     }
 
     private boolean openFile(FileWrapper fileWrapper) {

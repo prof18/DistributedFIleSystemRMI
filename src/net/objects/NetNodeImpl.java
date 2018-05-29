@@ -695,6 +695,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         String filePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String totalFilePath = filePath + UFID;
         boolean filesDeleted = false;
+
         File file = new File(totalFilePath);
         File fileAttr = new File(totalFilePath + ".attr");
         boolean fileDelete = file.delete();
@@ -703,10 +704,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         System.out.println("Deleting file: " + UFID);
         if (fileDelete && attrDelete) {
             filesDeleted = true;
-            ownLocation.reduceOccupiedSpace((int) fileSize);
+            for (NetNodeLocation nnl:fileNodeList.get(UFID).getLocations()) {
+                nnl.reduceOccupiedSpace((int) fileSize);
+            }
+            //ownLocation.reduceOccupiedSpace((int) fileSize);
             if (treeFileDirectoryUFID != null) {
                 mediatorFsNet.removeFileFromTree(UFID, treeFileDirectoryUFID);
             }
+
 
         }
 
@@ -759,7 +764,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public void updateUI(FSTreeNode treeRoot) {
-        mediatorFsNet.updateJson(treeRoot);
+        System.out.println("Json updateUI netNode : " + treeRoot.getJson());
+        MediatorFsNet.getInstance().updateJson(treeRoot);
     }
 
     public String getJson() {

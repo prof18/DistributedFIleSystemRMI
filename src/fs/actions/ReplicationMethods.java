@@ -13,6 +13,11 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
 
+
+/**
+ * This class contains all method used for the replication of created or deleted files and file system changes.
+ */
+
 public class ReplicationMethods {
 
     private static ReplicationMethods INSTANCE = null;
@@ -26,6 +31,13 @@ public class ReplicationMethods {
         return INSTANCE;
     }
 
+    /**
+     * This method is used to replicate file in a selected node.
+     *
+     * @param netNodeLoc node where file is replicated
+     * @param repWr wrapper with file data to be replicated
+     * @param nNode netNode for update the replication file-node list
+     */
     public void fileReplication(NetNodeLocation netNodeLoc, ReplicationWrapper repWr, NetNode nNode) {
         Registry registry;
         try {
@@ -39,8 +51,8 @@ public class ReplicationMethods {
                 rep = node.saveFileReplica(repWr);
 
                 if (rep) {
-                    nNode.nodeFileAssociation(repWr.getUFID(), netNodeLoc);
                     netNodeLoc.addOccupiedSpace((int) repWr.getAttribute().getFileLength());
+                    nNode.nodeFileAssociation(repWr.getUFID(), netNodeLoc);
                     System.out.println("Replication of: " + repWr.getUFID() + " done.");
                 } else {
                     System.out.println("Replication of " + repWr.getUFID() + " failed.");
@@ -53,19 +65,34 @@ public class ReplicationMethods {
         }
     }
 
-    public void jsonReplication(NetNodeLocation netNode, FSTreeNode directory) {
+
+    /**
+     * This method is used to replicate file system structure in all connected nodes
+     *
+     * @param netNode node where file system JSON is replicated
+     * @param root Root of the file system
+     */
+    public void jsonReplication(NetNodeLocation netNode, FSTreeNode root) {
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
-            node.updateUI(directory);
+            node.updateUI(root);
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
     }
 
-    public void deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory, long fileSize) {
+    /**
+     * This method is used to delete local replicated files in the connected nodes
+     *
+     * @param  fileID file UFID
+     * @param netNode node where file is local saved
+     * @param treeFileDirectory Directory to delete
+     */
+    public boolean deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory, long fileSize) {
+        boolean deleteState = false;
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
@@ -77,6 +104,7 @@ public class ReplicationMethods {
             }
 
             if (node.deleteFile(fileID, directoryUFID, fileSize)) {
+                deleteState = true;
                 System.out.println("Replication Deleting successful");
             } else {
                 System.out.println("Replication Deleting failed");
@@ -85,6 +113,8 @@ public class ReplicationMethods {
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
+
+        return deleteState;
     }
 
     public void updateWritePermissionMap(String fileID, Collection<NetNodeLocation> nodeSet, ListFileWrapper listFileWrapper) {

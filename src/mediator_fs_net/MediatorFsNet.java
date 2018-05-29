@@ -102,6 +102,11 @@ public class MediatorFsNet {
         return node;
     }
 
+    /**
+     * This method is used to call the method jsonReplication of the class ReplicationMethods for update the file system structure in all connected nodes
+     *
+     * @param treeRoot is the file system root
+     */
     public void jsonReplication(FSTreeNode treeRoot) {
         try {
             HashMap<Integer, NetNodeLocation> tmpHashMap = new HashMap<>(node.getHashMap());
@@ -115,10 +120,21 @@ public class MediatorFsNet {
         }
     }
 
+    /**
+     * This method is used to call the method updateModels of the class MainUI for update the UI and the tree structure of the file system
+     *
+     * @param treeRoot is the file system root
+     */
     public void updateJson(FSTreeNode treeRoot) {
         MainUI.updateModels(treeRoot, false);
     }
 
+    /**
+     * This method is used to delete a local file
+     *
+     * @param UFID file UFID
+     * @param treeFileDirectoryUFID is the directory where the file is saved
+     */
     public void removeFileFromTree(String UFID, String treeFileDirectoryUFID) {
         FSTreeNode root = FSStructure.getInstance().getTree();
         root.findNodeByUFID(root, treeFileDirectoryUFID).removeOneFile(UFID);
@@ -126,6 +142,11 @@ public class MediatorFsNet {
         updateJson(root);
     }
 
+    /**
+     * This method is used to delete all file contained in a directory in all connected nodes
+     *
+     * @param files list of files to delete
+     */
     public void deleteDirectoryFiles(ArrayList<FileWrapper> files){
         HashMap<String, ListFileWrapper> fileNodeList;
         try {
@@ -137,13 +158,19 @@ public class MediatorFsNet {
 
                     for (int j = 0; j < fileLocations.size() ; j++) {
                         if(fileLocations.get(j).toUrl().compareTo(node.getOwnLocation().toUrl()) != 0) {
-                            ReplicationMethods.getInstance().deleteFile(files.get(i).getUFID(), fileLocations.get(j), null, files.get(i).getAttribute().getFileLength());
+                            boolean fileDelete = ReplicationMethods.getInstance().deleteFile(files.get(i).getUFID(), fileLocations.get(j), null, files.get(i).getAttribute().getFileLength());
+                            if (fileDelete){
+                                fileLocations.get(j).reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
+                            }
                         }else{
                             String localFilePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
                             File localFile = new File(localFilePath + files.get(i).getUFID());
                             File localAttribute = new File(localFilePath + files.get(i).getUFID() + ".attr");
-                            localFile.delete();
-                            localAttribute.delete();
+                            boolean deleteLocalFile = localFile.delete();
+                            boolean deleteAttrFile = localAttribute.delete();
+                            if (deleteLocalFile && deleteAttrFile){
+                                MediatorFsNet.getInstance().getNode().getOwnLocation().reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
+                            }
                         }
                     }
                     fileNodeList.remove(files.get(i).getUFID());

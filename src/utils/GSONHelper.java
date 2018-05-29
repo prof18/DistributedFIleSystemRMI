@@ -28,8 +28,8 @@ public class GSONHelper {
     /**
      * Generates a JSON string
      *
-     * @param folders   The object to convert to JSON
-     * @return          A JSON String
+     * @param folders The object to convert to JSON
+     * @return A JSON String
      */
     public String foldersToJson(HashMap<String, JsonFolder> folders) {
         return gson.toJson(folders);
@@ -38,8 +38,8 @@ public class GSONHelper {
     /**
      * Convert an OBJECT to a JSON String
      *
-     * @param json  The JSON string to convert
-     * @return      The Object converted to JSON
+     * @param json The JSON string to convert
+     * @return The Object converted to JSON
      */
     public HashMap<String, JsonFolder> jsonToFolders(String json) {
         Type folderMapType = new TypeToken<HashMap<String, JsonFolder>>() {
