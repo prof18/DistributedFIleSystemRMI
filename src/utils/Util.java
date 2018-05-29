@@ -316,4 +316,16 @@ public class Util {
     }
 
 
+    public static void printStackTrace() {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        System.out.println("Called by:");
+        System.out.println(stackTraceElements[0]);
+        System.out.println(stackTraceElements[1]);
+        System.out.println(stackTraceElements[2]);
+        System.out.println(stackTraceElements[3]);
+        System.out.println(stackTraceElements[4]);
+        System.out.println(stackTraceElements[5]);
+        System.out.println(stackTraceElements[6]);
+    }
+
 }
