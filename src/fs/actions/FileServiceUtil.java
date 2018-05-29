@@ -124,7 +124,7 @@ public class FileServiceUtil {
                 System.out.println("Updating JSON");
                 if (Constants.PRINT_JSON)
                     System.out.println("JSON = " + node1Gson);
-                node.updateJson(node1Gson);
+                node.connectionMergeJson(node1Gson);
                 mainUI.updateConnectedNode(node.getHashMap());
 
 
