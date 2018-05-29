@@ -97,7 +97,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback) {
 
-        FSTreeNode nodeToReturn = null;
+        FSTreeNode nodeToReturn;
 
         if (!nodeToDelete.getFiles().isEmpty() || !nodeToDelete.getChildren().isEmpty()) {
             int dialogResult = JOptionPane.showConfirmDialog(null,
@@ -105,7 +105,9 @@ public class DirectoryServiceImpl implements DirectoryService {
             if (dialogResult == JOptionPane.YES_OPTION) {
                 // Saving code here
                 ArrayList<FileWrapper> allFilesUFID = nodeToDelete.getAllFilesWhenDeleteDirectory();
-                MediatorFsNet.getInstance().deleteDirectoryFiles(allFilesUFID);
+                if (allFilesUFID != null){
+                    MediatorFsNet.getInstance().deleteDirectoryFiles(allFilesUFID);
+                }
                 FSTreeNode parent = nodeToDelete.getParent();
                 nodeToDelete.setLastEditTime(System.currentTimeMillis());
                 nodeToDelete.updateAncestorTime();
@@ -122,7 +124,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             nodeToReturn = parent;
         }
 
-        FSTreeNode treeRoot = FSStructure.getInstance().getTree().findRoot();
+        FSTreeNode treeRoot = nodeToReturn.findRoot();
         FSStructure.getInstance().generateJson(treeRoot);
         String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
         treeRoot.setJson(json);
