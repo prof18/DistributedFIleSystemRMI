@@ -764,7 +764,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public void updateUI(FSTreeNode treeRoot) {
-        mediatorFsNet.updateJson(treeRoot);
+        System.out.println("Json updateUI netNode : " + treeRoot.getJson());
+        MediatorFsNet.getInstance().updateJson(treeRoot);
     }
 
     public String getJson() {

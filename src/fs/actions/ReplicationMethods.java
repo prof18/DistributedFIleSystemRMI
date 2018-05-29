@@ -13,6 +13,11 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
 
+
+/**
+ * This class contains all method used for the replication of created or deleted files and file system changes.
+ */
+
 public class ReplicationMethods {
 
     private static ReplicationMethods INSTANCE = null;
@@ -26,6 +31,13 @@ public class ReplicationMethods {
         return INSTANCE;
     }
 
+    /**
+     * This method is used to replicate file in a selected node.
+     *
+     * @param netNodeLoc node where file is replicated
+     * @param repWr wrapper with file data to be replicated
+     * @param nNode netNode for update the replication file-node list
+     */
     public void fileReplication(NetNodeLocation netNodeLoc, ReplicationWrapper repWr, NetNode nNode) {
         Registry registry;
         try {
@@ -53,18 +65,32 @@ public class ReplicationMethods {
         }
     }
 
-    public void jsonReplication(NetNodeLocation netNode, FSTreeNode directory) {
+
+    /**
+     * This method is used to replicate file system structure in all connected nodes
+     *
+     * @param netNode node where file system JSON is replicated
+     * @param root Root of the file system
+     */
+    public void jsonReplication(NetNodeLocation netNode, FSTreeNode root) {
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(netNode.getIp(), netNode.getPort());
             NetNode node = (NetNode) registry.lookup(netNode.toUrl());
-            node.updateUI(directory);
+            node.updateUI(root);
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * This method is used to delete local replicated files in the connected nodes
+     *
+     * @param  fileID file UFID
+     * @param netNode node where file is local saved
+     * @param treeFileDirectory Directory to delete
+     */
     public boolean deleteFile(String fileID, NetNodeLocation netNode, FSTreeNode treeFileDirectory, long fileSize) {
         boolean deleteState = false;
         Registry registry;
