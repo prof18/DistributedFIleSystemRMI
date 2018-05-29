@@ -68,7 +68,6 @@ public class PropertiesHelper {
             OutputStream outputStream = new FileOutputStream(propFile);
             props.store(outputStream, "DFS settings");
             outputStream.close();
-            System.out.println("Configuration saved");
         } catch (IOException e) {
             System.out.println("Configuration not Saved");
         } catch (NullPointerException f) {
