@@ -27,8 +27,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     private static DirectoryServiceImpl INSTANCE = null;
 
-    private boolean showLog = Constants.PRINT_JSON;
-
     public static DirectoryServiceImpl getInstance() {
         if (INSTANCE == null)
             INSTANCE = new DirectoryServiceImpl();
@@ -65,22 +63,9 @@ public class DirectoryServiceImpl implements DirectoryService {
         node.updateAncestorTime();
         node.setOwner(PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
 
-        System.out.println("Called createDirectory");
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        System.out.println("Called by:");
-        System.out.println(stackTraceElements[0]);
-        System.out.println(stackTraceElements[1]);
-        System.out.println(stackTraceElements[2]);
-        System.out.println(stackTraceElements[3]);
-        System.out.println(stackTraceElements[4]);
-        System.out.println(stackTraceElements[5]);
-        System.out.println(stackTraceElements[6]);
-
         FSStructure.getInstance().generateJson(currentNode.findRoot());
         String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
         currentNode.findRoot().setJson(json);
-        if (showLog)
-            System.out.println("Json after directory creation: " + json);
         MediatorFsNet.getInstance().jsonReplication(currentNode.findRoot());
 
         callback.onItemChanged(currentNode);
@@ -105,7 +90,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             if (dialogResult == JOptionPane.YES_OPTION) {
                 // Saving code here
                 ArrayList<FileWrapper> allFilesUFID = nodeToDelete.getAllFilesWhenDeleteDirectory();
-                if (allFilesUFID != null){
+                if (allFilesUFID != null) {
                     MediatorFsNet.getInstance().deleteDirectoryFiles(allFilesUFID);
                 }
                 FSTreeNode parent = nodeToDelete.getParent();
@@ -128,8 +113,6 @@ public class DirectoryServiceImpl implements DirectoryService {
         FSStructure.getInstance().generateJson(treeRoot);
         String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
         treeRoot.setJson(json);
-        if (showLog)
-            System.out.println("Json after directory deleted");
         MediatorFsNet.getInstance().jsonReplication(treeRoot);
 
         callback.onItemChanged(nodeToReturn);
@@ -154,8 +137,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 
             FSStructure.getInstance().generateJson(currentNode.findRoot());
             currentNode.findRoot().setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-            if (showLog)
-                System.out.println("Json after file created: " + PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
             MediatorFsNet.getInstance().jsonReplication(currentNode.findRoot());
 
             callback.onItemChanged(currentNode);

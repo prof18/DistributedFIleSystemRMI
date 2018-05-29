@@ -110,7 +110,6 @@ public class EditFileUI extends JFrame {
         byte[] content = textArea.getText().getBytes();
         try {
             String fileDirectoryName = filePath[filePath.length - 2];
-            System.out.println("File directory name: " + fileDirectoryName);
             FSTreeNode root = FSStructure.getInstance().getTree();
             String fileDirectoryUFID = root.getUFID();
             if (fileDirectoryName.compareTo("") != 0) {

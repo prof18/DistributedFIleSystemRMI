@@ -9,7 +9,6 @@ import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
 import net.objects.interfaces.NetNode;
 import ui.frame.MainUI;
-import utils.Constants;
 import utils.Util;
 
 import java.rmi.AlreadyBoundException;
@@ -73,7 +72,7 @@ public class FileServiceUtil {
 
         boolean merge = false;
         try {
-            if(node.getJson()!=null){
+            if (node.getJson() != null) {
                 node.beginFileNodeList();
                 merge = true;
             }
@@ -85,7 +84,6 @@ public class FileServiceUtil {
             String recPat = locationRet.toUrl();
             try {
                 Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
-                System.out.println("recPat = " + recPat);
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
                 System.out.println("[Updating Nodes]");
@@ -94,7 +92,7 @@ public class FileServiceUtil {
                 JoinWrap jWrap = node1.join(ownIP, port, hostName);
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
-                node.setFileNodeList(jWrap.getFileNodeList(),merge);
+                node.setFileNodeList(jWrap.getFileNodeList(), merge);
 
                 System.out.println();
                 Util.plot(retMap);
@@ -121,9 +119,6 @@ public class FileServiceUtil {
                 }
 
                 String node1Gson = node1.getJson();
-                System.out.println("Updating JSON");
-                if (Constants.PRINT_JSON)
-                    System.out.println("JSON = " + node1Gson);
                 node.connectionMergeJson(node1Gson);
                 mainUI.updateConnectedNode(node.getHashMap());
 

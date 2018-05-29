@@ -86,10 +86,6 @@ public class FileServiceImpl implements FileService {
 
         boolean flag = false;
         try {
-            for (Map.Entry<String, ListFileWrapper> list : mediator.getNode().getFileNodeList().entrySet()) {
-                System.out.println(list.getKey() + "   " + list.getValue().isWritable());
-            }
-
             if (mediator.getNode().getFileNodeList().get(fileID) != null) {
                 flag = mediator.getNode().getFileNodeList().get(fileID).isWritable();
                 inWriting = flag;
@@ -156,10 +152,6 @@ public class FileServiceImpl implements FileService {
 
         try {
             if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
-
-                for (int i = 0; i < nodeList.getLocations().size(); i++) {
-                    System.out.println(nodeList.getLocations().get(i).toUrl());
-                }
 
                 //fine debug
                 for (int i = 0; i < nodeList.getLocations().size(); i++) {
@@ -370,16 +362,12 @@ public class FileServiceImpl implements FileService {
         HashMap<String, ListFileWrapper> t = mediator.getNode().getFileNodeList();
         HashMap<Integer, NetNodeLocation> t1 = mediator.getNode().getHashMap();
 
-//        if (mediator.getNode().getFileNodeList().size() > 1 || mediator.getNode().getHashMap().size() > 1) {
         if (mediator.getNode().getHashMap().size() > 1) {
-            Date creationDate = new Date().from(Instant.now());
-
             ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
             rw.setPath(curDir.getPath());
             rw.setAttribute(attribute);
             rw.setContent(ftb);
             rw.setChecksum(fw.getChecksum());
-            System.out.println("Replication Done");
             replication(rw, mediator.getNode());
         }
 
@@ -400,16 +388,6 @@ public class FileServiceImpl implements FileService {
         String directoryPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         File file = new File(directoryPath + fileID);
         File fileAttr = new File(directoryPath + fileID + ".attr");
-
-        //eliminazione negli altri nodi
-
-      /*  try {
-            if (mediator.getNode().getFileNodeList() != null) {
-                System.out.println("Node with the file: " + mediator.getNode().getFileNodeList().get(fileID).getLocations().size());
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }*/
 
         try {
 
@@ -443,14 +421,9 @@ public class FileServiceImpl implements FileService {
         }
 
         //removing the deleted file from the cache
-        System.out.println("deleted element from cache : "+readingCache.remove(fileID));
-
-
+        readingCache.remove(fileID);
         FSTreeNode root = mediator.getFsStructure().getTree();
         int removeIndex = -1;
-        for (FileWrapper fw : root.getFiles()) {
-            System.out.println(fw.getUFID());
-        }
 
         for (int i = 0; i < root.getFiles().size(); i++) {
             String tempUFID = root.getFiles().get(i).getUFID();
@@ -464,9 +437,6 @@ public class FileServiceImpl implements FileService {
         }
 
         mediator.getFsStructure().generateJson(root);
-        System.out.println("JSON after delete:");
-        System.out.println(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-
 
         try {
             mediator.getNode().callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
@@ -530,16 +500,12 @@ public class FileServiceImpl implements FileService {
     }
 
     private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
-        System.out.println(path + UFID);
         File file = new File(path + UFID);
         if (file.exists()) {
-            System.out.println("The file is in local memory");
             return new CacheFileWrapper(file, getLocalAttributeFile(UFID), UFID, true);
         } else {
-            System.out.println("The file is NOT in local memory");
             CacheFileWrapper cacheFileWrapper = getCacheFile(UFID);
             if (cacheFileWrapper != null) {
-                System.out.println("The file is in the cache");
                 return cacheFileWrapper;
             } else {
                 CacheFileWrapper cacheFile = mediator.getFile(UFID);
@@ -644,8 +610,6 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
-        //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
-        //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
         ReplicationMethods.getInstance().fileReplication(selectedNode, repWr, node);
     }
 

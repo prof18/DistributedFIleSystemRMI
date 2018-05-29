@@ -38,7 +38,7 @@ public class Util {
                 registry = LocateRegistry.createRegistry(port);
                 notFound = false;
             } catch (RemoteException e) {
-                System.out.println("porta occupata");
+                System.out.println("Port not available");
                 port++;
             }
         }
@@ -72,8 +72,6 @@ public class Util {
     public static void saveFSExample() {
         HashMap<String, JsonFolder> folderMap = generateFakeObjects();
         String json = GSONHelper.getInstance().foldersToJson(folderMap);
-        System.out.println("json = " + json);
-
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
     }
 
@@ -222,7 +220,6 @@ public class Util {
             md.update(ab);
             byte[] hash = md.digest();
             result = bytesToHex(hash);
-            //System.out.println("Checksum:" + result);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return "Checksum not calculated";

@@ -54,7 +54,6 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
 
                 //the check methods is called if only there are other nodes in the list
                 if (!(node.getHashMap().size() == 1)) {
-                    //System.out.println("-CHECK NODES-" + i);
                     i++;
                     node.checkNodesAndReplica();
                 }

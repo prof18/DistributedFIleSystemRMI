@@ -168,21 +168,16 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         }
 
-        this.setFileNodeList(fNodeList,false);
+        this.setFileNodeList(fNodeList, false);
 
     }
 
     public void updateWritePermissionMap(String UFID, ListFileWrapper listFileWrapper) {
-        System.out.println("Permission Map Updating");
         if (fileNodeList.containsKey(UFID)) {
             fileNodeList.replace(UFID, fileNodeList.get(UFID), listFileWrapper);
         } else {
             fileNodeList.put(UFID, listFileWrapper);
         }
-        for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
-            System.out.println(entry.getKey() + "   " + entry.getValue().isWritable());
-        }
-
     }
 
     public NetNodeLocation getOwnLocation() {
@@ -294,21 +289,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public void replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) {
         CacheFileWrapper file = getFile(UFID);
-        try {
-            //bisogna aggiungere il path del file;
-            FileInputStream fis = new FileInputStream(path + UFID);
-            //TODO: aggiungere cattura del file
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        System.out.println("UFID = " + UFID);
-        if (file == null) {
-            System.out.println("File not in the node" + ownLocation.toUrl());
-        } else {
+        if (file != null) {
             File file1 = new File(path + UFID);
-            System.out.println("File deleted: " + file1.delete());
+            file1.delete();
             file1 = new File(path + UFID + ".attr");
-            System.out.println("Attribute deleted: " + file1.delete());
+            file1.delete();
             File newFileh = new File(path + UFID);
             try {
                 FileOutputStream writer = new FileOutputStream(newFileh);
@@ -396,7 +381,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             Collection<NetNodeLocation> tmpColl = downNodes.values();
 
             for (NetNodeLocation nnl : tmpColl) {
-                System.out.println(nnl.toString());
 
                 for (Map.Entry<String, ListFileWrapper> entry : fileNodeList.entrySet()) {
 
@@ -425,10 +409,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             ListFileWrapper tmp = entry.getValue();
             ArrayList<NetNodeLocation> tmpLocations = tmp.getLocations();
-
-            if (tmpLocations.size() > 2) {
-                System.out.println("Duplication wrong");
-            }
 
             CacheFileWrapper cacheFileWrapper = mediatorFsNet.getFile(entry.getKey());
 
@@ -469,7 +449,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 fileNodeList.get(entry.getKey()).getLocations().add(entry.getValue());
 
                 ListFileWrapper tmp = new ListFileWrapper(fileNodeList.get(entry.getKey()).getLocations());
-                UpFNL.put(entry.getKey(),tmp);
+                UpFNL.put(entry.getKey(), tmp);
 
 
             }
@@ -701,13 +681,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         boolean fileDelete = file.delete();
         boolean attrDelete = fileAttr.delete();
 
-        System.out.println("Deleting file: " + UFID);
         if (fileDelete && attrDelete) {
             filesDeleted = true;
-            for (NetNodeLocation nnl:fileNodeList.get(UFID).getLocations()) {
+            for (NetNodeLocation nnl : fileNodeList.get(UFID).getLocations()) {
                 nnl.reduceOccupiedSpace((int) fileSize);
             }
-            //ownLocation.reduceOccupiedSpace((int) fileSize);
             if (treeFileDirectoryUFID != null) {
                 mediatorFsNet.removeFileFromTree(UFID, treeFileDirectoryUFID);
             }
@@ -764,7 +742,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public void updateUI(FSTreeNode treeRoot) {
-        System.out.println("Json updateUI netNode : " + treeRoot.getJson());
         MediatorFsNet.getInstance().updateJson(treeRoot);
     }
 
@@ -949,7 +926,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
 
         } else {
-            System.out.println("[Json not available]");
             this.setJson(json, false);
         }
 
