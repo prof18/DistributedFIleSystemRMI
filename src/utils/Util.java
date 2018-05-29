@@ -255,6 +255,12 @@ public class Util {
         return ret;
     }
 
+    /**
+     * This method return a list of connected nodes those are connected for a time greater than a third of the maximum connected time
+     *
+     * @param list list of connected nodes
+     * @return list of candidate nodes
+     */
     public static ArrayList<NetNodeLocation> listOfConnectedNodeForLongTime(ArrayList<NetNodeLocation> list) {
         long connectedTimeThreshold = maxTimeConnection(list) / 3;
         long currentTime = new Date().getTime();
@@ -269,6 +275,12 @@ public class Util {
         return selectedNodesList;
     }
 
+    /**
+     * This method return a list of connected nodes sorting by ascendant occupied space
+     *
+     * @param nodeList list of candidate nodes for the replication
+     * @return sorted list of candidate nodes
+     */
     private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
         NetNodeLocation temp;
         for (int i = 1; i < nodeList.size(); i++) {
@@ -283,11 +295,23 @@ public class Util {
         return nodeList;
     }
 
+    /**
+     * This method return the node for the replication
+     *
+     * @param list sorted list of connected nodes
+     * @return candidate node for replication
+     */
     public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
         ascSort(list);
         return list.get(0);
     }
 
+    /**
+     * This method return the maximum time connection
+     *
+     * @param list list of connected nodes
+     * @return maximum connected time
+     */
     public static long maxTimeConnection(ArrayList<NetNodeLocation> list) {
         long connectedTime = 0;
         long selectedTimeStamp;

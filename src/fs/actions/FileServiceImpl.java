@@ -400,17 +400,6 @@ public class FileServiceImpl implements FileService {
         String directoryPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         File file = new File(directoryPath + fileID);
         File fileAttr = new File(directoryPath + fileID + ".attr");
-
-        //eliminazione negli altri nodi
-
-      /*  try {
-            if (mediator.getNode().getFileNodeList() != null) {
-                System.out.println("Node with the file: " + mediator.getNode().getFileNodeList().get(fileID).getLocations().size());
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }*/
-
         try {
 
             ArrayList<NetNodeLocation> listOfNode = new ArrayList<>(mediator.getNode().getFileNodeList().get(fileID).getLocations());
@@ -428,7 +417,7 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
-        //eliminazione in locale
+        //remove local files
         try {
             if (file.exists() && file.isFile()) {
                 if (file.delete() && fileAttr.delete() && mediator.getNode().getFileNodeList().containsKey(fileID)) {
@@ -602,7 +591,13 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
-    private void replication(ReplicationWrapper repWr, NetNode node) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+    /**
+     * Method for the choice of the node where replicate the created file
+     *
+     * @param repWr wrapper for the data file to replicated
+     * @param node local node
+     */
+    private void replication(ReplicationWrapper repWr, NetNode node) {
 
         HashMap<String, ListFileWrapper> hm = null;
         try {
@@ -644,8 +639,7 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
-        //chiamata da remoto per la scrittura del file con acknowledge, se esito positivo
-        //associo il file al nodo, altrimenti rieseguo la chiamata di scrittura.
+        // call the method for remotely replication
         ReplicationMethods.getInstance().fileReplication(selectedNode, repWr, node);
     }
 
