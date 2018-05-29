@@ -46,22 +46,15 @@ public class MainUI extends JFrame {
     private static JTree tree;
     private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
     private static FSTreeNode currentNode;
-    // private static FSTreeNode directoryTree;
-
     private JMenuItem rename, delete;
     private FileViewTableModel model;
-
     private DirectoryService directoryService;
     private FileService fileService;
     private static FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
-    private NetNode ownNode;
     private JTextArea connectedNodeTextArea;
-
     private JPanel rightWrapper, rightDownWrapper, filesUI, filesDetail, connectedStatus;
-
     private JScrollPane treeScroll;
-
     private boolean isItemCreated = false;
 
     public void showUI(boolean show) {
@@ -113,7 +106,6 @@ public class MainUI extends JFrame {
         directoryService.setFileService(fileService);
         fsStructure.generateTreeStructure();
         //Get the structure of the File System
-        //   directoryTree = fsStructure.getTree();
         currentNode = fsStructure.getTree();
         //if root, disable the navigate up button
         if (currentNode.isRoot())
@@ -203,7 +195,6 @@ public class MainUI extends JFrame {
         WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
         fileService = wrapperFS.getService();
         netNodeLocation = wrapperFS.getOwnLocation();
-        ownNode = wrapperFS.getNetNode();
     }
 
     // Draws the File Tree View
@@ -406,7 +397,10 @@ public class MainUI extends JFrame {
             }
         } else {
             FSTreeNode node = model.getCurrentTreeNode();
-            currentNode = node;
+            if (node.getParent() == null)
+                currentNode = node;
+            else
+                currentNode = node.getParent();
             if (node.getParent().isRoot())
                 navigateUpBtn.setEnabled(false);
             model.setNode(node.getParent());
@@ -493,30 +487,13 @@ public class MainUI extends JFrame {
      */
     public static void updateModels(FSTreeNode treeNode, boolean local) {
 
-        Util.printStackTrace();
-
-
-
         String ufidSeen = currentNode.getUFID();
         currentNode = treeNode.findRoot();
-      /*  Queue<FSTreeNode> queue = new LinkedList<>();
-        queue.add(currentNode);
-        while (!queue.isEmpty()) {
-            FSTreeNode node = queue.poll();
-            if (node != null) {
-                if (!ufidSeen.equals(node.getUFID())) {
-                    queue.addAll(node.getChildren());
-                } else
-                    node = cur
-            }
-        }*/
-
-      if (!ufidSeen.equals(currentNode.getUFID()))
-          currentNode = currentNode.findNodeByUFID(currentNode, ufidSeen);
+        if (!ufidSeen.equals(currentNode.getUFID()))
+            currentNode = currentNode.findNodeByUFID(currentNode, ufidSeen);
 
         FileViewTableModel model = (FileViewTableModel) table.getModel();
         model.setNode(currentNode);
-        //get the current node before updating and next select the node to show
 
         TreePath path = tree.getSelectionPath();
         FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
@@ -525,7 +502,6 @@ public class MainUI extends JFrame {
         tree.setModel(treeModel);
         tree.setSelectionPath(path);
         tree.expandPath(path);
-
 
         if (local) {
             fsStructure.generateJson(treeNode.findRoot());
