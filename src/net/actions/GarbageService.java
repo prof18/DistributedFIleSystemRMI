@@ -56,7 +56,7 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
                 if (!(node.getHashMap().size() == 1)) {
                     //System.out.println("-CHECK NODES-" + i);
                     i++;
-                    node.checkNodes();
+                    node.checkNodesAndReplica();
                 }
 
             } catch (InterruptedException e) {

@@ -4,7 +4,7 @@ import fs.actions.object.CacheFileWrapper;
 
 import java.util.HashMap;
 
-//TODO cambiare perchè la cache viene invalidata ogni volta che un file viene modificato
+
 public class ReadingNodeCache {
     private HashMap<String, CacheFileWrapper> cache;
 
@@ -20,8 +20,16 @@ public class ReadingNodeCache {
         return cache.get(UFID);
     }
 
+    public boolean remove(String UFID){
+        CacheFileWrapper ret=cache.remove(UFID);
+        if(ret==null){
+            return false;
+        }
+        return true;
+    }
+
     public long getTimeInterval() {
-        long timeInterval = 3000;
+        long timeInterval = 100000;
         return timeInterval;
     }
 }

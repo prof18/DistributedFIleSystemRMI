@@ -1,19 +1,18 @@
 package ui.frame;
 
-import fs.actions.FSStructure;
 import fs.actions.DirectoryServiceImpl;
+import fs.actions.FSStructure;
 import fs.actions.FileServiceUtil;
 import fs.actions.interfaces.DirectoryService;
 import fs.actions.interfaces.FileService;
+import fs.actions.object.ReadWrapper;
 import fs.actions.object.WrapperFileServiceUtil;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.NetNodeLocation;
-import net.objects.interfaces.NetNode;
 import ui.utility.*;
 import utils.Constants;
-import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
@@ -26,9 +25,9 @@ import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.NotBoundException;
-import java.rmi.UnknownHostException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -43,22 +42,16 @@ public class MainUI extends JFrame {
     private static JTable table;
     private static JTree tree;
     private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
-    private FSTreeNode currentNode;
-    private static FSTreeNode directoryTree;
-
+    private static FSTreeNode currentNode;
     private JMenuItem rename, delete;
     private FileViewTableModel model;
-
     private DirectoryService directoryService;
     private FileService fileService;
     private static FSStructure fsStructure;
     private NetNodeLocation netNodeLocation;
     private JTextArea connectedNodeTextArea;
-
     private JPanel rightWrapper, rightDownWrapper, filesUI, filesDetail, connectedStatus;
-
     private JScrollPane treeScroll;
-
     private boolean isItemCreated = false;
 
     public void showUI(boolean show) {
@@ -80,6 +73,9 @@ public class MainUI extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                //To avoid data loss we save (again) the structure of the file system in the properties
+                FSTreeNode node = FSStructure.getInstance().getTree();
+                FSStructure.getInstance().generateJson(node);
                 System.exit(0);
             }
         });
@@ -88,7 +84,6 @@ public class MainUI extends JFrame {
         rightWrapper = new JPanel(new GridBagLayout());
         //A Wrapper that contains Connected Status and File Details boxes
         rightDownWrapper = new JPanel(new GridBagLayout());
-
         filesUI = new JPanel(new GridLayout());
         filesDetail = createDetailsUI();
         connectedStatus = createConnectedStatus();
@@ -99,7 +94,7 @@ public class MainUI extends JFrame {
 
         //set Window Title
         this.setTitle(this.getTitle() + " - Address: " + netNodeLocation.getIp() + " | Port: " + netNodeLocation.getPort()
-                + " | Hostname: " + netNodeLocation.getName());
+                + " | Hostname: " + netNodeLocation.getName() + " | Username: " + PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
 
         //Loading file system structure
         System.out.println("Loading structure");
@@ -108,10 +103,9 @@ public class MainUI extends JFrame {
         directoryService.setFileService(fileService);
         fsStructure.generateTreeStructure();
         //Get the structure of the File System
-        directoryTree = fsStructure.getTree();
-        currentNode = directoryTree;
+        currentNode = fsStructure.getTree();
         //if root, disable the navigate up button
-        if (directoryTree.isRoot())
+        if (currentNode.isRoot())
             navigateUpBtn.setEnabled(false);
 
         //Generate Tree View
@@ -185,25 +179,15 @@ public class MainUI extends JFrame {
         String path = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String portRetConfig = PropertiesHelper.getInstance().loadConfig(Constants.PORT_RET_CONFIG);
 
-        System.out.println("checkValue connect()");
-        System.out.println("ipHost = " + ipHost);
-        System.out.println("nameServiceHost = " + nameServiceHost);
-        System.out.println("ipRet = " + ipRet);
-        System.out.println("path = " + path);
-        System.out.println("portRetConfig = " + portRetConfig);
-        System.out.println();
-        System.out.println();
         int portRet = -1;
         if (portRetConfig != null && !portRetConfig.equals("")) {
             portRet = Integer.parseInt(portRetConfig);
         }
         NetNodeLocation location;
         if (portRet == -1) {
-            System.out.println("The first node doesn't connect to anyone");
             location = null;
         } else {
             location = new NetNodeLocation(ipRet, portRet, nameServiceHost);
-            System.out.println("[MAIN] Connection to location = " + location);
         }
         WrapperFileServiceUtil wrapperFS = FileServiceUtil.create(path, ipHost, location, this);
         fileService = wrapperFS.getService();
@@ -212,7 +196,7 @@ public class MainUI extends JFrame {
 
     // Draws the File Tree View
     private void drawTreeView() {
-        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+        FileViewTreeModel treeModel = new FileViewTreeModel(currentNode.findRoot());
         tree = new JTree();
         tree.setModel(treeModel);
         //Avoid multiple selections
@@ -233,7 +217,6 @@ public class MainUI extends JFrame {
                         TableItem item = new TableItem();
                         item.setTreeNode(node);
                         item.setFile(false);
-                        System.out.println("MainUI.drawTreeView ITEM : " + item);
                         changeTableView(false, item);
                         setFolderInfo(node);
                     }
@@ -243,27 +226,20 @@ public class MainUI extends JFrame {
             }
         });
 
-        tree.setCellRenderer(new
-
-                TreeCellRenderer());
-
+        tree.setCellRenderer(new TreeCellRenderer());
         tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        treeScroll = new
-
-                JScrollPane(tree);
-
+        treeScroll = new JScrollPane(tree);
     }
 
     // Draws the File Table View
     private void drawTableView() {
         model = new FileViewTableModel();
-        final JTable table = new JTable();
-        this.table = table;
+        table = new JTable();
         table.setFillsViewportHeight(true);
         table.setTableHeader(null);
         table.setModel(model);
         table.setRowHeight(table.getRowHeight() + 8);
-        model.setNode(directoryTree);
+        model.setNode(currentNode.findRoot());
         table.setShowGrid(false);
         //Set width of the first column
         TableColumn tableColumn = table.getColumnModel().getColumn(0);
@@ -308,16 +284,36 @@ public class MainUI extends JFrame {
         });
     }
 
-    // Shows the info of a file in the File Details Box
-    private void setFileInfo(FileWrapper fileWrapper) {
-        if (fileWrapper != null) {
-            fileNameVLabel.setText(fileWrapper.getFileName());
-            typeVLabel.setText(fileWrapper.getAttribute().getType());
-            pathVLabel.setText(fileWrapper.getPath());
-            fileSizeVLabel.setText(String.valueOf(fileWrapper.getAttribute().getFileLength()));
-            ownerVLabel.setText(fileWrapper.getAttribute().getOwner());
-            if (fileWrapper.getAttribute().getLastModifiedTime() != null)
-                lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
+    /**
+     * This method updates the UI when the File System changes
+     *
+     * @param treeNode The update FSTreeNode Object
+     */
+    public static void updateModels(FSTreeNode treeNode, boolean local) {
+
+        // update the ui maintaining the current view
+        String ufidSeen = currentNode.getUFID();
+        currentNode = treeNode.findRoot();
+        if (!ufidSeen.equals(currentNode.getUFID()))
+            currentNode = currentNode.findNodeByUFID(currentNode, ufidSeen);
+
+        FileViewTableModel model = (FileViewTableModel) table.getModel();
+        model.setNode(currentNode);
+
+        TreePath path = tree.getSelectionPath();
+        FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
+        tree.setModel(null);
+        treeModel.setNode(currentNode.findRoot());
+        tree.setModel(treeModel);
+        tree.setSelectionPath(path);
+        tree.expandPath(path);
+
+        if (local) {
+            fsStructure.generateJson(treeNode.findRoot());
+        } else {
+            String json = treeNode.getJson();
+            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
+            FSStructure.getInstance().generateTreeStructure();
         }
     }
 
@@ -327,8 +323,9 @@ public class MainUI extends JFrame {
             fileNameVLabel.setText(node.getNameNode());
             typeVLabel.setText("folder");
             pathVLabel.setText(node.getPath());
-            fileSizeVLabel.setText("<to compute>");
+            fileSizeVLabel.setText(node.getFolderSize());
             lastEditVLabel.setText(sdf.format(node.getLastEditTime()));
+            ownerVLabel.setText(node.getOwner());
         }
     }
 
@@ -382,7 +379,6 @@ public class MainUI extends JFrame {
     private void changeTableView(boolean goingUp, TableItem item) {
         clearInfo();
         FileViewTableModel model = (FileViewTableModel) table.getModel();
-        System.out.println("MainUI.changeTableView");
         if (!goingUp) {
             int row = table.getSelectedRow();
             //selected table item
@@ -393,10 +389,7 @@ public class MainUI extends JFrame {
                 openFile(item.getFileWrapper());
             } else {
                 //update the table with the new directory
-                System.out.println("MainUI.changeTableView  ELSE");
                 FSTreeNode node = item.getTreeNode();
-                System.out.println("MainUI.changeTableView  currentNode : " + currentNode);
-                System.out.println("MainUI.changeTableView  Node : " + node);
                 currentNode = node;
                 if (!node.isRoot())
                     navigateUpBtn.setEnabled(true);
@@ -404,7 +397,10 @@ public class MainUI extends JFrame {
             }
         } else {
             FSTreeNode node = model.getCurrentTreeNode();
-            currentNode = node;
+            if (node.getParent() == null)
+                currentNode = node;
+            else
+                currentNode = node.getParent();
             if (node.getParent().isRoot())
                 navigateUpBtn.setEnabled(false);
             model.setNode(node.getParent());
@@ -426,7 +422,6 @@ public class MainUI extends JFrame {
         cs.gridy = 0;
         filesDetail.add(fileNameLabel, cs);
         fileNameVLabel = new JLabel("-");
-        //cs.fill = GridBagConstraints.BOTH;
         cs.gridx = 1;
         cs.gridy = 0;
         filesDetail.add(fileNameVLabel, cs);
@@ -484,50 +479,33 @@ public class MainUI extends JFrame {
         return filesDetail;
     }
 
-    /**
-     * This method updates the UI when the File System changes
-     *
-     * @param treeNode The update FSTreeNode Object
-     */
-    public static void updateModels(FSTreeNode treeNode, boolean local) {
-        System.out.println("MainUI updateModels");
+    // Shows the info of a file in the File Details Box
+    private void setFileInfo(FileWrapper fileWrapper) {
+        if (fileWrapper != null) {
+            String fileID = fileWrapper.getUFID();
+            String filePath = fileWrapper.getPath();
+            FSTreeNode root = FSStructure.getInstance().getTree();
+            String[] path = filePath.split("/");
+            FileWrapper fw;
+            if (path.length > 2) {
+                String directoryName = path[path.length - 2];
+                fw = root.findNodeByName(root, directoryName).getFile(fileID);
+            } else {
+                fw = root.getFile(fileID);
+            }
 
-        FileViewTableModel model = (FileViewTableModel) table.getModel();
-        model.setNode(treeNode);
+            if (fw == null) {
+                fw = fileWrapper;
+            }
 
-        TreePath path = tree.getSelectionPath();
-        FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
-        System.out.println("DEBUG");
-        FSTreeNode root = (FSTreeNode) treeModel.getRoot();
-        System.out.println("la radice : " + root.toString());
-        for (FSTreeNode figli : root.getChildren()) {
-            System.out.println("figlio : " + figli.toString());
+            fileNameVLabel.setText(fw.getFileName());
+            typeVLabel.setText(fw.getAttribute().getType());
+            pathVLabel.setText(fw.getPath());
+            fileSizeVLabel.setText(String.valueOf(fw.getAttribute().getFileLength()));
+            ownerVLabel.setText(fw.getAttribute().getOwner());
+            if (fw.getAttribute().getLastModifiedTime() != null)
+                lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
         }
-        System.out.println("END DEBUG");
-        //problema in questo punto
-        tree.setModel(null);
-        System.out.println("setted model to null");
-        treeModel.setNode(treeNode.findRoot());
-        System.out.println("setted root ");
-        tree.setModel(treeModel);
-        System.out.println("setted model");
-        tree.setSelectionPath(path);
-        System.out.println("setted selection path");
-        tree.expandPath(path);
-        System.out.println("setted expand path");
-
-        System.out.println("GENERATION JSON");
-        if (local) {
-            System.out.println("local generation");
-            fsStructure.generateJson(directoryTree);
-        } else {
-            System.out.println("remote generation");
-            String gson = treeNode.getGson();
-            PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, gson);
-            FSStructure.getInstance().generateTreeStructure();
-            System.out.println("ended remote generation");
-        }
-        System.out.println("ENDED UPDATE MODELS");
 
     }
 
@@ -536,9 +514,10 @@ public class MainUI extends JFrame {
 
         try {
             String id = fileWrapper.getUFID();
-            byte[] content = fileService.read(id, 0);
+            ReadWrapper readWrapper = fileService.read(id, 0);
+            byte[] content = readWrapper.getContent();
             String contentS = new String(content);
-            new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath());
+            new EditFileUI(this, contentS, fileService, id, fileWrapper.getPath(), readWrapper.isWritable());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             isOpen = false;
@@ -636,13 +615,6 @@ public class MainUI extends JFrame {
                 newFolder(folderName);
         });
         menu.add(menuItem);
-        menu.addSeparator();
-        //About
-        menuItem = new JMenuItem("About");
-        menuItem.addActionListener((ActionListener) -> {
-            System.out.println("Clicked About");
-        });
-        menu.add(menuItem);
         menuBar.add(menu);
 
         //Edit Menu
@@ -657,15 +629,30 @@ public class MainUI extends JFrame {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
                 if (newName != null && !newName.equals("")) {
                     renameFolder(item.getTreeNode(), newName);
-                    fsStructure.generateJson(directoryTree);
+                    fsStructure.generateJson(currentNode.findRoot());
                 }
             } else {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
+
                 if (newName != null && !newName.equals("")) {
+                    String path = item.getFileWrapper().getPath();
+                    String[] arrayPath = path.split("/");
+                    path = "";
+                    for (int i = arrayPath.length - 2; i >= 0; i--) {
+                        path = arrayPath[i] + "/" + path;
+                    }
+                    path = path + newName;
+                    item.getFileWrapper().setPath(path);
                     item.getFileWrapper().setFileName(newName);
-                    fsStructure.generateJson(directoryTree);
+                    updateModels(currentNode, true);
+                    fsStructure.generateJson(currentNode.findRoot());
                 }
             }
+
+            FSTreeNode root = currentNode.findRoot();
+            root.setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+            MediatorFsNet.getInstance().jsonReplication(root);
+
         });
         menu.add(rename);
         //Delete

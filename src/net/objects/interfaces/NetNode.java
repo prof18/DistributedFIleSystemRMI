@@ -2,18 +2,20 @@ package net.objects.interfaces;
 
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.ListFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
-//import net.objects.NetNodeWrap;
 
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+//import net.objects.NetNodeWrap;
 
 /**
  * This interface is dedicated in order to manage all the operation related to communication
@@ -33,13 +35,21 @@ public interface NetNode extends Remote, Serializable {
 
     JoinWrap join(String ipNode, int port, String name) throws RemoteException;
 
-    HashMap<String, ArrayList<NetNodeLocation>> getFileNodeList() throws RemoteException;
+    HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
 
-    void updateFileNodeList(String UFID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
+    void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) throws RemoteException;
+
+    void modifyFileNodeList(HashMap<String, ListFileWrapper> toModify) throws RemoteException;
+
+    void beginFileNodeList()throws RemoteException;
+
+    void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
+
+    void updateWritePermissionMap(String UFID, ListFileWrapper list) throws RemoteException;
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
-    boolean deleteFile(String UFID, String filePath, FSTreeNode treeFileDirectory) throws RemoteException;
+    boolean deleteFile(String UFID, String treeFileDirectoryUFID, long fileSize) throws RemoteException;
 
     NetNodeLocation getOwnLocation() throws RemoteException;
 
@@ -129,7 +139,15 @@ public interface NetNode extends Remote, Serializable {
      * @throws RemoteException if there are problems in the RMI communication
      */
 
-    void checkNodes() throws RemoteException;
+    void checkNodesAndReplica() throws RemoteException;
+
+    boolean checkSecReplica(NetNodeLocation e, String fileName) throws RemoteException;
+
+    boolean verifyFile(String fileName) throws RemoteException;
+
+    boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) throws RemoteException;
+
+    boolean saveFile(CacheFileWrapper e) throws RemoteException;
 
     /**
      * When a node connects to a distributed FS , update the list of connected nodes with the more
@@ -170,12 +188,13 @@ public interface NetNode extends Remote, Serializable {
      * @param newFile      is an instance of an object that contain the edit file and its attribute
      * @param lastModified is the time of the lastModified
      * @param UFID         is the unique name of the file
-     * @return a string that represent the successful or not of the replace file
      * @throws RemoteException if there are problems in the RMI communication
      */
 
 
-    String replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
+    void replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
+
+    NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) throws RemoteException;
 
     /**
      * This method is used to implement the replication
@@ -189,16 +208,6 @@ public interface NetNode extends Remote, Serializable {
 
 
     /**
-     * This method is used to lock the writing of a specific file
-     *
-     * @param fileID   is the unique identifier of the file
-     * @param nodeList is the list of nodes that stores the specific file
-     * @return
-     * @throws RemoteException
-     */
-    boolean updateFileList(String fileID, ArrayList<NetNodeLocation> nodeList) throws RemoteException;
-
-    /**
      * Is used to verify if a nodes is reachable
      *
      * @return a string with a message
@@ -207,14 +216,11 @@ public interface NetNode extends Remote, Serializable {
 
     String verify() throws RemoteException;
 
-
-    //TODO
-
-    String getJson() throws  RemoteException;
+    String getJson() throws RemoteException;
 
     void setJson(String gson, boolean up) throws RemoteException;
 
-    void updateJson(String gson) throws RemoteException;
+    void connectionMergeJson(String gson) throws RemoteException;
 
     void callUpdateAllJson(String json) throws RemoteException;
 

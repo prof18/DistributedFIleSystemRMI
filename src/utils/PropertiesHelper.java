@@ -25,7 +25,7 @@ public class PropertiesHelper {
     /**
      * Load the Proprieties file from a specific path
      *
-     * @param path  The path of the properties file
+     * @param path The path of the properties file
      */
     public static void setPropFile(String path) {
         PropertiesHelper.propFile = new File(path);
@@ -64,9 +64,8 @@ public class PropertiesHelper {
      */
     public void writeConfig(String key, String value) {
         try {
-            System.out.println("PropertiesHelper.writeConfig props: "+props);
-            System.out.println("PropertiesHelper.writeConfig key: "+key);
-            System.out.println("PropertiesHelper.writeConfig value: "+value);
+            System.out.println("PropertiesHelper.writeConfig key: " + key);
+            System.out.println("PropertiesHelper.writeConfig value: " + value);
             props.setProperty(key, value);
             OutputStream outputStream = new FileOutputStream(propFile);
             props.store(outputStream, "DFS settings");
@@ -74,8 +73,8 @@ public class PropertiesHelper {
             System.out.println("Configuration saved");
         } catch (IOException e) {
             System.out.println("Configuration not Saved");
-        } catch ( NullPointerException f){
-            System.out.println("BAMBA");
+        } catch (NullPointerException f) {
+            System.out.println("NPE during writing config");
         }
     }
 

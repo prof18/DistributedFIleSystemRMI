@@ -6,13 +6,17 @@ import fs.objects.structure.FileAttribute;
 import net.objects.NetNodeLocation;
 import net.objects.RegistryWrapper;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import javax.xml.bind.DatatypeConverter;
+
 
 /**
  * This class contains a list of util methods used in the code
@@ -192,6 +196,19 @@ public class Util {
 
     }
 
+    public static byte[] fileToBytes(String pathFile) {
+
+        byte[] bytesArray = null;
+        Path path = Paths.get(pathFile);
+
+        try {
+            bytesArray = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytesArray;
+    }
+
     /**
      * This method is used with the goal of the checksum computation
      *
@@ -200,13 +217,12 @@ public class Util {
      */
     public static String getChecksum(byte[] ab) {
         String result;
-        System.out.println(ab);
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(ab);
             byte[] hash = md.digest();
             result = bytesToHex(hash);
-            System.out.println("Checksum:" + result);
+            //System.out.println("Checksum:" + result);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return "Checksum not calculated";
@@ -238,4 +254,65 @@ public class Util {
         System.arraycopy(attributeFile, 0, ret, file.length, attributeFile.length);
         return ret;
     }
+
+    public static ArrayList<NetNodeLocation> listOfConnectedNodeForLongTime(ArrayList<NetNodeLocation> list) {
+        long connectedTimeThreshold = maxTimeConnection(list) / 3;
+        long currentTime = new Date().getTime();
+        ArrayList<NetNodeLocation> selectedNodesList = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            if (currentTime - list.get(i).getTimeStamp() >= connectedTimeThreshold) {
+                selectedNodesList.add(list.get(i));
+            }
+        }
+
+        return selectedNodesList;
+    }
+
+    private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
+        NetNodeLocation temp;
+        for (int i = 1; i < nodeList.size(); i++) {
+            for (int j = i; j > 0; j--) {
+                if (nodeList.get(j).getTotalByte() < nodeList.get(j - 1).getTotalByte()) {
+                    temp = nodeList.get(j);
+                    nodeList.set(j, nodeList.get(j - 1));
+                    nodeList.set((j - 1), temp);
+                }
+            }
+        }
+        return nodeList;
+    }
+
+    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
+        ascSort(list);
+        return list.get(0);
+    }
+
+    public static long maxTimeConnection(ArrayList<NetNodeLocation> list) {
+        long connectedTime = 0;
+        long selectedTimeStamp;
+        long currentTime = new Date().getTime();
+        for (NetNodeLocation dn : list) {
+            if (currentTime - dn.getTimeStamp() > connectedTime) {
+                selectedTimeStamp = dn.getTimeStamp();
+                connectedTime = currentTime - selectedTimeStamp;
+            }
+        }
+
+        return connectedTime;
+    }
+
+
+    public static void printStackTrace() {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        System.out.println("Called by:");
+        System.out.println(stackTraceElements[0]);
+        System.out.println(stackTraceElements[1]);
+        System.out.println(stackTraceElements[2]);
+        System.out.println(stackTraceElements[3]);
+        System.out.println(stackTraceElements[4]);
+        System.out.println(stackTraceElements[5]);
+        System.out.println(stackTraceElements[6]);
+    }
+
 }

@@ -28,12 +28,11 @@ public class FSStructure {
 
     }
 
-    //qui si genera la struttura ad albero del file system.
-    //e rimane sempre istanziata cosi' quando serve e' pronta
-
-
     public FSTreeNode getTree() {
-        return tree;
+        if (tree.isRoot())
+            return tree;
+        else
+            return tree.findRoot();
     }
 
 
@@ -55,6 +54,7 @@ public class FSStructure {
             jsonFolder.setUFID(node.getUFID());
             jsonFolder.setFolderName(node.getNameNode());
             jsonFolder.setLastEditTime(node.getLastEditTime());
+            jsonFolder.setOwner(node.getOwner());
             if (!node.isRoot())
                 jsonFolder.setParentUFID(node.getParent().getUFID());
 
@@ -81,11 +81,8 @@ public class FSStructure {
         }
 
         String json = GSONHelper.getInstance().foldersToJson(folderMap);
-        //System.out.println("json generated = " + json);
 
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
-        //TODO: Send the json to the other nodes
-        System.out.println("Wrote new json structure");
 
 
     }
@@ -160,10 +157,10 @@ public class FSStructure {
             }
 
         } else {
+
             //generate the tree with only the root
             tree = new FSTreeNode();
             tree.setParent(null);
-            //TODO: change UUID set to root for everyone
             tree.setUFID("root");
             tree.setNameNode("root");
             tree.setChildrens(new ArrayList<>());
@@ -172,9 +169,5 @@ public class FSStructure {
 
             generateJson(tree);
         }
-
-
     }
-
-
 }

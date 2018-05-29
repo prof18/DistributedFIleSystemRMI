@@ -11,6 +11,7 @@ public class JsonFolder {
     private String parentUFID;
     private ArrayList<String> children;
     private ArrayList<JsonFile> files;
+    private String owner;
 
     public JsonFolder() {
     }
@@ -22,6 +23,14 @@ public class JsonFolder {
         this.parentUFID = parentUFID;
         this.children = children;
         this.files = files;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public String getUFID() {
