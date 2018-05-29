@@ -9,7 +9,6 @@ public class Constants {
     public static final String FOLDERS_CONFIG = "folder_config";
     public static final String PORT_RET_CONFIG = "port_ret";
     public static final String USERNAME_CONFIG = "username";
-    public static final boolean OUT_TO_UI = false;
     public static final long INTERVAL_GARBAGE_COLLECTOR = 20000; //in ms
     public static final boolean PRINT_JSON = true;
 }
