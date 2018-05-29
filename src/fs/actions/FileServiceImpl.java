@@ -289,7 +289,6 @@ public class FileServiceImpl implements FileService {
             ReplicationWrapper rw = new ReplicationWrapper(fileID, fileName);
             rw.setAttribute(cacheFileWrapper.getAttribute());
             rw.setContent(repContent);
-            //TODO: modificato verificare se è giusto
             byte[] fatb = new byte[0];
             try {
                 fatb = toByteArray(cacheFileWrapper.getAttribute());
@@ -461,7 +460,6 @@ public class FileServiceImpl implements FileService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //TODO: gestire aggiornamento delle informazioni
     }
 
     private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws IndexOutOfBoundsException {
