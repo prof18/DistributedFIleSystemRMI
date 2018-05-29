@@ -283,19 +283,6 @@ public class Util {
         return nodeList;
     }
 
-/*    public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
-        NetNodeLocation selectedNode = null;
-        long connectedTimeThreshold = maxTimeConnection(list) / 2;
-
-        for (int i = 0; i < list.size() && selectedNode == null ; i++) {
-            if (list.get(i).getTimeStamp() >= connectedTimeThreshold) {
-                selectedNode = list.get(i);
-            }
-        }
-
-        return selectedNode;
-    }*/
-
     public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
         ascSort(list);
         return list.get(0);

@@ -9,12 +9,10 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.rmi.NotBoundException;
-import java.rmi.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -194,11 +192,6 @@ public class SettingsDialog extends JDialog {
         pack();
         setResizable(false);
         setLocationRelativeTo(null);
-
-        //folderChooserTF.setText("/home/marco/Projects/University/Distribuiti/fs1/");
-
-        //TODO: uncomment this to generate a fake fs
-        //Util.saveFSExample();
     }
 
     /**

@@ -20,6 +20,14 @@ public class ReadingNodeCache {
         return cache.get(UFID);
     }
 
+    public boolean remove(String UFID){
+        CacheFileWrapper ret=cache.remove(UFID);
+        if(ret==null){
+            return false;
+        }
+        return true;
+    }
+
     public long getTimeInterval() {
         long timeInterval = 100000;
         return timeInterval;

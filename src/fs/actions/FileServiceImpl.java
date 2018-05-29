@@ -442,6 +442,9 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
+        //removing the deleted file from the cache
+        System.out.println("deleted element from cache : "+readingCache.remove(fileID));
+
 
         FSTreeNode root = mediator.getFsStructure().getTree();
         int removeIndex = -1;
