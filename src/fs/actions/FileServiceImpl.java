@@ -76,7 +76,6 @@ public class FileServiceImpl implements FileService {
      * This method differs from the previous one
      * because the lenght of the file is automatically assigned to the count.
      */
-    //TODO: controllare il flag per accesso
     public ReadWrapper read(String fileID, int offset) throws FileNotFoundException {
 
         CacheFileWrapper wrapper = getFile(fileID);
@@ -368,7 +367,11 @@ public class FileServiceImpl implements FileService {
         fw.setChecksum(Util.getChecksum(tftb));
 
         //Replication
-        if (mediator.getNode().getFileNodeList().size() > 1 || mediator.getNode().getHashMap().size() > 1) {
+        HashMap<String, ListFileWrapper> t = mediator.getNode().getFileNodeList();
+        HashMap<Integer, NetNodeLocation> t1 = mediator.getNode().getHashMap();
+
+//        if (mediator.getNode().getFileNodeList().size() > 1 || mediator.getNode().getHashMap().size() > 1) {
+        if (mediator.getNode().getHashMap().size() > 1) {
             Date creationDate = new Date().from(Instant.now());
 
             ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
@@ -415,7 +418,8 @@ public class FileServiceImpl implements FileService {
             if (listOfNode.size() > 1) {
                 for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID).getLocations()) {
                     if (nnl.toString().compareTo(mediator.getNode().getOwnLocation().toString()) != 0) {
-                        ReplicationMethods.getInstance().deleteFile(fileID, nnl, curDir);
+                        long fileSize = curDir.getFile(fileID).getAttribute().getFileLength();
+                        ReplicationMethods.getInstance().deleteFile(fileID, nnl, curDir, fileSize);
                     }
                 }
             }
@@ -440,20 +444,19 @@ public class FileServiceImpl implements FileService {
 
 
         FSTreeNode root = mediator.getFsStructure().getTree();
-        int removeIndex=-1;
-        for (FileWrapper fw:root.getFiles()) {
+        int removeIndex = -1;
+        for (FileWrapper fw : root.getFiles()) {
             System.out.println(fw.getUFID());
         }
 
-        for (int i=0;i<root.getFiles().size();i++)
-        {
-            String tempUFID=root.getFiles().get(i).getUFID();
-            if(tempUFID.equals(fileID)){
-                removeIndex=i;
+        for (int i = 0; i < root.getFiles().size(); i++) {
+            String tempUFID = root.getFiles().get(i).getUFID();
+            if (tempUFID.equals(fileID)) {
+                removeIndex = i;
                 break;
             }
         }
-        if(removeIndex!=-1){
+        if (removeIndex != -1) {
             root.getFiles().remove(removeIndex);
         }
 
@@ -464,8 +467,7 @@ public class FileServiceImpl implements FileService {
 
         try {
             mediator.getNode().callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-        }
-        catch (RemoteException e){
+        } catch (RemoteException e) {
             e.printStackTrace();
         }
 
@@ -614,22 +616,22 @@ public class FileServiceImpl implements FileService {
             try {
                 tmpColl = node.getHashMap().values();
 
-            if (tmpColl != null) {
-                for (NetNodeLocation nnl : tmpColl) {
-                    if (nnl.toUrl().compareTo(mediator.getNode().getOwnLocation().toUrl()) != 0)
-                    nodeList.add(nnl);
+                if (tmpColl != null) {
+                    for (NetNodeLocation nnl : tmpColl) {
+                        if (nnl.toUrl().compareTo(mediator.getNode().getOwnLocation().toUrl()) != 0)
+                            nodeList.add(nnl);
+                    }
                 }
-            }
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
 
-            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOfConnectedNodeForLongTime(nodeList);
             selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
         } else {
             ArrayList<NetNodeLocation> nodeList = hm.get(repWr.getUFID()).getLocations();
             nodeList = removeLocalNode(nodeList, node);
-            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOConnectedNodeWithMinOccupiedSpace(nodeList);
+            ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOfConnectedNodeForLongTime(nodeList);
             selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
         }
 

@@ -86,13 +86,15 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback) {
 
-        FSTreeNode nodeToReturn;
+        FSTreeNode nodeToReturn = null;
 
         if (!nodeToDelete.getFiles().isEmpty() || !nodeToDelete.getChildren().isEmpty()) {
             int dialogResult = JOptionPane.showConfirmDialog(null,
                     "The folder is not empty. Would you like to delete all?", "Warning", JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
                 // Saving code here
+                ArrayList<FileWrapper> allFilesUFID = nodeToDelete.getAllFilesWhenDeleteDirectory();
+                MediatorFsNet.getInstance().deleteDirectoryFiles(allFilesUFID);
                 FSTreeNode parent = nodeToDelete.getParent();
                 nodeToDelete.setLastEditTime(System.currentTimeMillis());
                 nodeToDelete.updateAncestorTime();

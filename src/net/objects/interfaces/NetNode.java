@@ -37,7 +37,9 @@ public interface NetNode extends Remote, Serializable {
 
     HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
 
-    void setFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
+    void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) throws RemoteException;
+
+    void modifyFileNodeList(HashMap<String, ListFileWrapper> toModify) throws RemoteException;
 
     void beginFileNodeList()throws RemoteException;
 
@@ -47,7 +49,7 @@ public interface NetNode extends Remote, Serializable {
 
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
-    boolean deleteFile(String UFID, String treeFileDirectoryUFID) throws RemoteException;
+    boolean deleteFile(String UFID, String treeFileDirectoryUFID, long fileSize) throws RemoteException;
 
     NetNodeLocation getOwnLocation() throws RemoteException;
 
@@ -218,7 +220,7 @@ public interface NetNode extends Remote, Serializable {
 
     void setJson(String gson, boolean up) throws RemoteException;
 
-    void updateJson(String gson) throws RemoteException;
+    void connectionMergeJson(String gson) throws RemoteException;
 
     void callUpdateAllJson(String json) throws RemoteException;
 

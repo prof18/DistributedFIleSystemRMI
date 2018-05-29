@@ -4,13 +4,17 @@ import fs.actions.FSStructure;
 import fs.actions.ReplicationMethods;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
+import fs.actions.object.ListFileWrapper;
 import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
+import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 import ui.frame.MainUI;
+import utils.Constants;
 import utils.PropertiesHelper;
 
+import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,5 +124,37 @@ public class MediatorFsNet {
         root.findNodeByUFID(root, treeFileDirectoryUFID).removeOneFile(UFID);
         FSStructure.getInstance().generateJson(root);
         updateJson(root);
+    }
+
+    public void deleteDirectoryFiles(ArrayList<FileWrapper> files){
+        HashMap<String, ListFileWrapper> fileNodeList;
+        try {
+            fileNodeList = node.getFileNodeList();
+
+            if (!fileNodeList.isEmpty() || fileNodeList != null){
+                for (int i = 0; i < files.size() ; i++) {
+                    ArrayList<NetNodeLocation> fileLocations = fileNodeList.get(files.get(i).getUFID()).getLocations();
+
+                    for (int j = 0; j < fileLocations.size() ; j++) {
+                        if(fileLocations.get(j).toUrl().compareTo(node.getOwnLocation().toUrl()) != 0) {
+                            ReplicationMethods.getInstance().deleteFile(files.get(i).getUFID(), fileLocations.get(j), null, files.get(i).getAttribute().getFileLength());
+                        }else{
+                            String localFilePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
+                            File localFile = new File(localFilePath + files.get(i).getUFID());
+                            File localAttribute = new File(localFilePath + files.get(i).getUFID() + ".attr");
+                            localFile.delete();
+                            localAttribute.delete();
+                        }
+                    }
+                    fileNodeList.remove(files.get(i).getUFID());
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+
+
+
     }
 }

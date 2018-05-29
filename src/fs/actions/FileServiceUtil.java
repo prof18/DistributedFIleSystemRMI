@@ -70,6 +70,17 @@ public class FileServiceUtil {
         } catch (AlreadyBoundException e) {
             e.printStackTrace();
         }
+
+        boolean merge = false;
+        try {
+            if(node.getJson()!=null){
+                node.beginFileNodeList();
+                merge = true;
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
         if (locationRet != null) {
             String recPat = locationRet.toUrl();
             try {
@@ -83,7 +94,7 @@ public class FileServiceUtil {
                 JoinWrap jWrap = node1.join(ownIP, port, hostName);
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
-                node.setFileNodeList(jWrap.getFileNodeList());
+                node.setFileNodeList(jWrap.getFileNodeList(),merge);
 
                 System.out.println();
                 Util.plot(retMap);
@@ -113,7 +124,7 @@ public class FileServiceUtil {
                 System.out.println("Updating JSON");
                 if (Constants.PRINT_JSON)
                     System.out.println("JSON = " + node1Gson);
-                node.updateJson(node1Gson);
+                node.connectionMergeJson(node1Gson);
                 mainUI.updateConnectedNode(node.getHashMap());
 
 
@@ -121,17 +132,6 @@ public class FileServiceUtil {
                 e.printStackTrace();
             }
         }
-
-        try {
-            if(locationRet == null && node.getJson()!=null){
-
-                node.beginFileNodeList();
-
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
 
         WrapperFileServiceUtil wfsu = null;
         try {
