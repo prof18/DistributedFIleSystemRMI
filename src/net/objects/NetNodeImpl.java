@@ -781,7 +781,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
-    public synchronized void updateJson(String json) {
+    public synchronized void connectionMergeJson(String json) {
 
 
         GSONHelper helpJson = GSONHelper.getInstance();

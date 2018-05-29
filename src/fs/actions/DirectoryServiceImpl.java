@@ -100,7 +100,8 @@ public class DirectoryServiceImpl implements DirectoryService {
                 nodeToDelete.updateAncestorTime();
                 parent.getChildren().remove(nodeToDelete);
                 nodeToReturn = parent;
-
+            } else {
+                return;
             }
         } else {
             FSTreeNode parent = nodeToDelete.getParent();
