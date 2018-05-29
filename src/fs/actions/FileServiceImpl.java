@@ -405,7 +405,7 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
 
-        //eliminazione in locale
+        //remove local files
         try {
             if (file.exists() && file.isFile()) {
                 if (file.delete() && fileAttr.delete() && mediator.getNode().getFileNodeList().containsKey(fileID)) {
@@ -566,7 +566,13 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
-    private void replication(ReplicationWrapper repWr, NetNode node) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+    /**
+     * Method for the choice of the node where replicate the created file
+     *
+     * @param repWr wrapper for the data file to replicated
+     * @param node local node
+     */
+    private void replication(ReplicationWrapper repWr, NetNode node) {
 
         HashMap<String, ListFileWrapper> hm = null;
         try {
@@ -608,6 +614,7 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
+        // call the method for remotely replication
         ReplicationMethods.getInstance().fileReplication(selectedNode, repWr, node);
     }
 
