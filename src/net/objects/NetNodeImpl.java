@@ -17,7 +17,10 @@ import utils.GSONHelper;
 import utils.PropertiesHelper;
 import utils.Util;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
@@ -125,7 +128,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         GSONHelper helpJson = GSONHelper.getInstance();
         HashMap<String, JsonFolder> folder = helpJson.jsonToFolders(thisJson);
 
-        ArrayList<String> folderToRemove = new ArrayList<>();
+        HashMap<String, String> folderAndFile = new HashMap<>();
+
         HashMap<String, ListFileWrapper> fNodeList = new HashMap();
 
         for (Map.Entry<String, JsonFolder> entry : folder.entrySet()) {
@@ -147,27 +151,25 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         fNodeList.put(files.get(i).getUFID(), tmp);
 
                     } else {
-                        files.remove(i);
+                        folderAndFile.put(files.get(i).getUFID(),entry.getKey());
                     }
                 }
-
-                if (files.size() == 0) {
-                    folderToRemove.add(entry.getKey());
-                }
-
-            } else {
-                folderToRemove.add(entry.getKey());
-            }
-        }
-
-        if (folderToRemove.size() > 0) {
-
-            for (int i = 0; i < folderToRemove.size(); i++) {
-                folder.remove(folderToRemove.get(i));
             }
 
         }
 
+        FSStructure.getInstance().generateTreeStructure();
+        FSTreeNode tree = FSStructure.getInstance().getTree();
+
+        for (Map.Entry<String, String> entry : folderAndFile.entrySet()) {
+
+            FSTreeNode tmp = tree.findNodeByUFID(tree, entry.getValue());
+            tmp.removeOneFile(entry.getKey());
+
+        }
+
+
+        FSStructure.getInstance().generateJson(tree);
         this.setFileNodeList(fNodeList, false);
 
     }
