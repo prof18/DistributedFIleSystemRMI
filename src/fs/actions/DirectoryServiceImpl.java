@@ -65,6 +65,17 @@ public class DirectoryServiceImpl implements DirectoryService {
         node.updateAncestorTime();
         node.setOwner(PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
 
+        System.out.println("Called createDirectory");
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        System.out.println("Called by:");
+        System.out.println(stackTraceElements[0]);
+        System.out.println(stackTraceElements[1]);
+        System.out.println(stackTraceElements[2]);
+        System.out.println(stackTraceElements[3]);
+        System.out.println(stackTraceElements[4]);
+        System.out.println(stackTraceElements[5]);
+        System.out.println(stackTraceElements[6]);
+
         FSStructure.getInstance().generateJson(currentNode.findRoot());
         String json = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
         currentNode.findRoot().setJson(json);

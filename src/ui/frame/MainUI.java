@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -43,8 +45,8 @@ public class MainUI extends JFrame {
     private static JTable table;
     private static JTree tree;
     private SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy HH:mm:ss", getLocale());
-    private FSTreeNode currentNode;
-    private static FSTreeNode directoryTree;
+    private static FSTreeNode currentNode;
+    // private static FSTreeNode directoryTree;
 
     private JMenuItem rename, delete;
     private FileViewTableModel model;
@@ -111,10 +113,10 @@ public class MainUI extends JFrame {
         directoryService.setFileService(fileService);
         fsStructure.generateTreeStructure();
         //Get the structure of the File System
-        directoryTree = fsStructure.getTree();
-        currentNode = directoryTree;
+        //   directoryTree = fsStructure.getTree();
+        currentNode = fsStructure.getTree();
         //if root, disable the navigate up button
-        if (directoryTree.isRoot())
+        if (currentNode.isRoot())
             navigateUpBtn.setEnabled(false);
 
         //Generate Tree View
@@ -206,7 +208,7 @@ public class MainUI extends JFrame {
 
     // Draws the File Tree View
     private void drawTreeView() {
-        FileViewTreeModel treeModel = new FileViewTreeModel(directoryTree);
+        FileViewTreeModel treeModel = new FileViewTreeModel(currentNode.findRoot());
         tree = new JTree();
         tree.setModel(treeModel);
         //Avoid multiple selections
@@ -249,7 +251,7 @@ public class MainUI extends JFrame {
         table.setTableHeader(null);
         table.setModel(model);
         table.setRowHeight(table.getRowHeight() + 8);
-        model.setNode(directoryTree);
+        model.setNode(currentNode.findRoot());
         table.setShowGrid(false);
         //Set width of the first column
         TableColumn tableColumn = table.getColumnModel().getColumn(0);
@@ -490,20 +492,43 @@ public class MainUI extends JFrame {
      * @param treeNode The update FSTreeNode Object
      */
     public static void updateModels(FSTreeNode treeNode, boolean local) {
+
+        Util.printStackTrace();
+
+
+
+        String ufidSeen = currentNode.getUFID();
+        currentNode = treeNode.findRoot();
+      /*  Queue<FSTreeNode> queue = new LinkedList<>();
+        queue.add(currentNode);
+        while (!queue.isEmpty()) {
+            FSTreeNode node = queue.poll();
+            if (node != null) {
+                if (!ufidSeen.equals(node.getUFID())) {
+                    queue.addAll(node.getChildren());
+                } else
+                    node = cur
+            }
+        }*/
+
+      if (!ufidSeen.equals(currentNode.getUFID()))
+          currentNode = currentNode.findNodeByUFID(currentNode, ufidSeen);
+
         FileViewTableModel model = (FileViewTableModel) table.getModel();
-        model.setNode(treeNode);
+        model.setNode(currentNode);
         //get the current node before updating and next select the node to show
 
         TreePath path = tree.getSelectionPath();
         FileViewTreeModel treeModel = (FileViewTreeModel) tree.getModel();
         tree.setModel(null);
-        treeModel.setNode(treeNode.findRoot());
+        treeModel.setNode(currentNode.findRoot());
         tree.setModel(treeModel);
         tree.setSelectionPath(path);
         tree.expandPath(path);
 
+
         if (local) {
-            fsStructure.generateJson(directoryTree);
+            fsStructure.generateJson(treeNode.findRoot());
         } else {
             String json = treeNode.getJson();
             PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
@@ -631,7 +656,7 @@ public class MainUI extends JFrame {
                 String newName = JOptionPane.showInputDialog("New Folder Name: ", item.getTreeNode().getNameNode());
                 if (newName != null && !newName.equals("")) {
                     renameFolder(item.getTreeNode(), newName);
-                    fsStructure.generateJson(directoryTree);
+                    fsStructure.generateJson(currentNode.findRoot());
                 }
             } else {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
@@ -647,7 +672,7 @@ public class MainUI extends JFrame {
                     item.getFileWrapper().setPath(path);
                     item.getFileWrapper().setFileName(newName);
                     updateModels(currentNode, true);
-                    fsStructure.generateJson(directoryTree);
+                    fsStructure.generateJson(currentNode.findRoot());
                 }
             }
 

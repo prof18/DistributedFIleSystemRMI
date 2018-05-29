@@ -29,7 +29,10 @@ public class FSStructure {
     }
 
     public FSTreeNode getTree() {
-        return tree;
+        if (tree.isRoot())
+            return tree;
+        else
+            return tree.findRoot();
     }
 
 
