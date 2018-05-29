@@ -599,7 +599,7 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
-    private void replication(ReplicationWrapper repWr, NetNode node) throws RemoteException { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
+    private void replication(ReplicationWrapper repWr, NetNode node) { //politica replicazione nodo con meno spazio occupato e da maggior tempo connesso
 
         HashMap<String, ListFileWrapper> hm = null;
         try {
@@ -612,7 +612,7 @@ public class FileServiceImpl implements FileService {
 
         if (!hm.containsKey(repWr.getUFID()) || hm.get(repWr.getUFID()).getLocations().size() <= 1) {
             ArrayList<NetNodeLocation> nodeList = new ArrayList<>();
-            Collection<NetNodeLocation> tmpColl = null;
+            Collection<NetNodeLocation> tmpColl;
             try {
                 tmpColl = node.getHashMap().values();
 
