@@ -278,15 +278,15 @@ public class FSTreeNode implements Serializable {
         return name;
     }
 
-    public ArrayList<FileWrapper> getAllFilesWhenDeleteDirectory(){
+    public ArrayList<FileWrapper> getAllFilesWhenDeleteDirectory() {
         ArrayList<FileWrapper> filesUFID = new ArrayList<>();
-        if(!files.isEmpty()){
-            for (int i = 0; i < files.size() ; i++) {
+        if (!files.isEmpty()) {
+            for (int i = 0; i < files.size(); i++) {
                 filesUFID.add(files.get(i));
             }
         }
         Queue<FSTreeNode> queue = new LinkedList<>();
-        if (!childrens.isEmpty()){
+        if (!childrens.isEmpty()) {
             for (int i = 0; i < childrens.size(); i++) {
                 queue.add(childrens.get(i));
             }
@@ -295,12 +295,11 @@ public class FSTreeNode implements Serializable {
         while (!queue.isEmpty()) {
             FSTreeNode nodeExtracted = queue.poll();
             if (nodeExtracted != null) {
-                if (!nodeExtracted.getFiles().isEmpty()){
+                if (!nodeExtracted.getFiles().isEmpty()) {
                     for (int i = 0; i < nodeExtracted.getFiles().size(); i++) {
                         filesUFID.add(nodeExtracted.getFiles().get(i));
                     }
-                }
-                else
+                } else
                     queue.addAll(nodeExtracted.getChildren());
             }
         }

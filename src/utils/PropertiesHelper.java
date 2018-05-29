@@ -64,15 +64,6 @@ public class PropertiesHelper {
      */
     public void writeConfig(String key, String value) {
         try {
-
-            if (key.equals(Constants.FOLDERS_CONFIG)) {
-                System.out.println("Writing JSON");
-                System.out.println("-------------");
-                System.out.println("Json:");
-                System.out.println(value);
-                Util.printStackTrace();
-            }
-
             System.out.println("PropertiesHelper.writeConfig key: " + key);
             System.out.println("PropertiesHelper.writeConfig value: " + value);
             props.setProperty(key, value);
