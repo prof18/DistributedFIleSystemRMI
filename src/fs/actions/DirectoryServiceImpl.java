@@ -86,7 +86,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public void deleteDirectory(FSTreeNode nodeToDelete, NewItemCallback callback) {
 
-        FSTreeNode nodeToReturn = null;
+        FSTreeNode nodeToReturn;
 
         if (!nodeToDelete.getFiles().isEmpty() || !nodeToDelete.getChildren().isEmpty()) {
             int dialogResult = JOptionPane.showConfirmDialog(null,
@@ -98,6 +98,8 @@ public class DirectoryServiceImpl implements DirectoryService {
                 nodeToDelete.updateAncestorTime();
                 parent.getChildren().remove(nodeToDelete);
                 nodeToReturn = parent;
+            } else {
+                return;
             }
         } else {
             FSTreeNode parent = nodeToDelete.getParent();
