@@ -14,6 +14,7 @@ import utils.Util;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.Map;
  */
 
 public class FileServiceUtil {
+    private static String hostName;
 
     /**
      * @param path        path to connect
@@ -38,40 +40,52 @@ public class FileServiceUtil {
      * the hash map of all the nodes in the system and their location
      * the created node
      * the hashMap that has for keys the UFID of the files and values the location of nodes that contain a file
-     * @throws NotBoundException if there are network problems
+     * @throws NotBoundException
+     * @throws UnknownHostException
      */
 
     public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) throws NotBoundException, NullPointerException {
+        System.setProperty("java.rmi.server.hostname", ownIP);
+        HashMap<Integer, NetNodeLocation> ret = new HashMap<>();
+        MediatorFsNet mediatorFsNet = MediatorFsNet.getInstance();
+        RegistryWrapper rw = Util.getNextFreePort();
+        Registry registry = rw.getRegistry();
+        int port = rw.getPort();
+        NetNode node = null;
         try {
-            System.setProperty("java.rmi.server.hostname", ownIP);
-            MediatorFsNet mediatorFsNet = MediatorFsNet.getInstance();
-            RegistryWrapper rw = Util.getNextFreePort();
-            Registry registry = rw.getRegistry();
-            int port = rw.getPort();
-            NetNode node;
-
             node = new NetNodeImpl(path, ownIP, port, mediatorFsNet, mainUI);
-            String hostName = node.getHostName();
-
-            FileService service = new FileServiceImpl(path);
-            mediatorFsNet.addNetService(node);
-            mediatorFsNet.addService(service);
-
+            hostName = node.getHostName();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        FileService service = new FileServiceImpl(path);
+        mediatorFsNet.addNetService(node);
+        mediatorFsNet.addService(service);
+        try {
             String connectPath = "rmi://" + ownIP + ":" + port + "/" + hostName;
             registry.bind(connectPath, node);
+        } catch (RemoteException e) {
+            System.out.println("Problem with the creation of the node");
+            e.printStackTrace();
+        } catch (AlreadyBoundException e) {
+            System.out.println("The chosen port is already occupied");
+            e.printStackTrace();
+        }
 
-
-            boolean merge = false;
-
+        boolean merge = false;
+        try {
             if (node.getJson() != null) {
                 node.beginFileNodeList();
                 merge = true;
             }
+        } catch (RemoteException e) {
+            System.out.println("Communication problem with beginFileNodeList method");
+            e.printStackTrace();
+        }
 
-
-            if (locationRet != null) {
-                String recPat = locationRet.toUrl();
-
+        if (locationRet != null) {
+            String recPat = locationRet.toUrl();
+            try {
                 Registry registryRec = LocateRegistry.getRegistry(locationRet.getIp(), locationRet.getPort());
                 NetNode node1 = (NetNode) registryRec.lookup(recPat);
 
@@ -87,6 +101,7 @@ public class FileServiceUtil {
                 node.setConnectedNodes(retMap);
                 mainUI.updateConnectedNode(retMap);
 
+
                 if ((retMap.size() != 2)) {
                     for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
@@ -98,22 +113,28 @@ public class FileServiceUtil {
                             Registry tmpRegistry = LocateRegistry.getRegistry(tmp.getIp(), tmp.getPort());
                             NetNode tmpNode = (NetNode) tmpRegistry.lookup(tmpPath);
                             tmpNode.setConnectedNodes(node.getHashMap());
+                            ret = node.getHashMap();
 
                         }
                     }
                 }
 
-                String node1Json = node1.getJson();
-                node.connectionMergeJson(node1Json);
+                String node1Gson = node1.getJson();
+                node.connectionMergeJson(node1Gson);
                 mainUI.updateConnectedNode(node.getHashMap());
 
-                return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), node.getHashMap(), service, node);
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
-        } catch (RemoteException | AlreadyBoundException e) {
-            e.printStackTrace();
-            System.out.println("[WRAPPER FILE SERVICE UTIL] Unable to launch the node");
         }
 
-        return null;
+        WrapperFileServiceUtil wfsu = null;
+        try {
+            wfsu = new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), node.getHashMap(), service, node);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return wfsu;
     }
 }
