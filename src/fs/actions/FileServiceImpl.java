@@ -59,23 +59,10 @@ public class FileServiceImpl implements FileService {
     }
 
     /**
-     * It Reads a file using the fileID.
-     * The offset and the count are provide by the user
-     * If the file is not found both locally or remotely the system throws FileNotFoundException
-     */
-
-
-    public ReadWrapper read(String fileID, int offset, int count) throws FileNotFoundException {
-        ReadWrapper ret = read(fileID, offset);
-        byte[] newRet = new byte[count];
-        System.arraycopy(ret.getContent(), 0, newRet, 0, count);
-        return new ReadWrapper(newRet, ret.isWritable());
-    }
-
-    /**
      * This method differs from the previous one
      * because the lenght of the file is automatically assigned to the count.
      */
+    @Override
     public ReadWrapper read(String fileID, int offset) throws FileNotFoundException {
 
         CacheFileWrapper wrapper = getFile(fileID);
@@ -111,6 +98,7 @@ public class FileServiceImpl implements FileService {
         return new ReadWrapper(content, flag);
     }
 
+    @Override
     public void close(String fileID) {
         if (inWriting) {
             try {
@@ -120,24 +108,24 @@ public class FileServiceImpl implements FileService {
                 ReplicationMethods.getInstance().updateWritePermissionMap(fileID, mediator.getNode().getHashMap().values(), listFileWrapper);
             } catch (RemoteException e) {
                 e.printStackTrace();
+                System.out.println("Error while release the writing lock");
             }
         }
         inWriting = false;
-
     }
 
+    @Override
     public void write(String fileID, int offset, int count, byte[] data, String fileDirectoryUFID) throws FileNotFoundException {
         ListFileWrapper nodeList = null;
         try {
             nodeList = mediator.getNode().getFileNodeList().get(fileID);
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[WRITE] Unable to acquire the node list");
         }
         if (nodeList.getLocations().size() == 0) {
             return;
         }
-
-        boolean canReplicate = true;
 
         ArrayList<NetNodeLocation> tempNodeFileList = new ArrayList<>(nodeList.getLocations());
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
@@ -148,19 +136,18 @@ public class FileServiceImpl implements FileService {
             localHost = mediator.getNode().getOwnLocation();
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[WRITE] Unable to acquire the host information");
         }
 
         try {
             if (localHost != null && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
 
-                //fine debug
                 for (int i = 0; i < nodeList.getLocations().size(); i++) {
-                    if (nodeList.getLocations().get(i).equals(localHost)) { //trovo il nodo locale
+                    if (nodeList.getLocations().get(i).equals(localHost)) {
                         tempNodeFileList.remove(i);
                         nodeList.getLocations().get(i).unlockWriting();
                         break;
                     }
-
 
                     for (NetNodeLocation nnl : tempNodeFileList) {
                         int pos = nodeList.getLocations().indexOf(nnl);
@@ -171,10 +158,14 @@ public class FileServiceImpl implements FileService {
                     ReplicationMethods.getInstance().updateWritePermissionMap(fileID, mediator.getNode().getHashMap().values(), nodeList);
                 } catch (RemoteException e) {
                     e.printStackTrace();
+                    System.out.println("[WRITE] Unable to update the write permissions");
+
                 }
             }
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[WRITE] Unable to update the write permissions");
+
         }
 
         if (cacheFileWrapper == null) throw new FileNotFoundException();
@@ -199,15 +190,14 @@ public class FileServiceImpl implements FileService {
             newContent = joinArray(content, data, offset, count);
             repContent = newContent.clone();
             ObjectInputStream ois;
-            Date lastModified = null;
             FileAttribute fileAttribute = null;
             try {
                 ois = new ObjectInputStream(new FileInputStream(path + fileID + ".attr"));
                 fileAttribute = (FileAttribute) ois.readObject();
-                lastModified = fileAttribute.getLastModifiedTime();
                 oldLength = (int) fileAttribute.getFileLength();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
+                System.out.println("[WRITE] Unable to read the file attribute");
             }
 
             try {
@@ -221,6 +211,7 @@ public class FileServiceImpl implements FileService {
                 fileOutputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("[WRITE] Unable to write the file");
             }
 
         } else {
@@ -229,50 +220,40 @@ public class FileServiceImpl implements FileService {
             byte[] context = new byte[oldLength];
             try {
                 fis.read(context);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
                 fis.close();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("[WRITE] Unable to read the cache");
             }
             File newFile = new File(cacheFileWrapper.getUFID());
             FileOutputStream fos = new FileOutputStream(newFile);
             byte[] newctx = joinArray(context, data, offset, count);
             try {
                 fos.write(newctx);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
                 fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("[WRITE] Unable to write the cache");
             }
             repContent = newctx.clone();
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
-
             cacheFileWrapper.getAttribute().setFileLength(repContent.length);
-
         }
 
         try {
             if (mediator.getNode().getHashMap().size() > 1 && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
-
                 ReplicationMethods.getInstance().updateWritePermissionMap(fileID, mediator.getNode().getHashMap().values(), nodeList);
             }
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[WRITE] Unable to write the write permissions");
         }
 
-
         FSStructure.getInstance().generateTreeStructure();
-
         FSTreeNode root = FSStructure.getInstance().getTree();
 
         FSTreeNode fileNode;
-        if (fileDirectoryUFID.compareTo("root") != 0 && fileDirectoryUFID != null && fileDirectoryUFID.compareTo("") != 0) {
+        if (fileDirectoryUFID.compareTo("root") != 0 && fileDirectoryUFID.compareTo("") != 0) {
             fileNode = root.findNodeByUFID(root, fileDirectoryUFID);
         } else {
             fileNode = root;
@@ -280,41 +261,37 @@ public class FileServiceImpl implements FileService {
         FileWrapper fileInTree = fileNode.getFile(fileID);
         fileInTree.setAttribute(cacheFileWrapper.getAttribute());
         fileInTree.setContent(repContent);
-
         FSStructure.getInstance().generateJson(FSStructure.getInstance().getTree());
 
         //file content and attributes replication
-        if (canReplicate) {
-            String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
-            ReplicationWrapper rw = new ReplicationWrapper(fileID, fileName);
-            rw.setAttribute(cacheFileWrapper.getAttribute());
-            rw.setContent(repContent);
-            byte[] fatb = new byte[0];
-            try {
-                fatb = toByteArray(cacheFileWrapper.getAttribute());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            byte[] ftb = repContent;
-            byte[] tftb = Util.append(ftb, fatb);
-            rw.setChecksum(Util.getChecksum(tftb));
-            rw.setPath(mediator.getFsStructure().getTree().getPath());
-            mediator.getFsStructure().generateTreeStructure();
-            rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+        String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
+        ReplicationWrapper rw = new ReplicationWrapper(fileID, fileName);
+        rw.setAttribute(cacheFileWrapper.getAttribute());
+        rw.setContent(repContent);
+        byte[] fatb = new byte[0];
+        try {
+            fatb = toByteArray(cacheFileWrapper.getAttribute());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] ftb = repContent;
+        byte[] tftb = Util.append(ftb, fatb);
+        rw.setChecksum(Util.getChecksum(tftb));
+        rw.setPath(mediator.getFsStructure().getTree().getPath());
+        mediator.getFsStructure().generateTreeStructure();
+        rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
 
+        for (NetNodeLocation aTempNodeFileList : tempNodeFileList) {
+            aTempNodeFileList.reduceOccupiedSpace(oldLength);
+            ReplicationMethods.getInstance().fileReplication(aTempNodeFileList, rw, mediator.getNode());
+        }
 
-            for (int i = 0; i < tempNodeFileList.size(); i++) {
-                tempNodeFileList.get(i).reduceOccupiedSpace(oldLength);
-                ReplicationMethods.getInstance().fileReplication(tempNodeFileList.get(i), rw, mediator.getNode());
-            }
+        root.setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+        mediator.jsonReplication(root);
 
-            root.setJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-            mediator.jsonReplication(root);
-
-            for (NetNodeLocation nnl : tempNodeFileList) {
-                int pos = nodeList.getLocations().indexOf(nnl);
-                nodeList.getLocations().get(pos).unlockWriting();
-            }
+        for (NetNodeLocation nnl : tempNodeFileList) {
+            int pos = nodeList.getLocations().indexOf(nnl);
+            nodeList.getLocations().get(pos).unlockWriting();
         }
 
         try {
@@ -324,6 +301,7 @@ public class FileServiceImpl implements FileService {
             ReplicationMethods.getInstance().updateWritePermissionMap(fileID, mediator.getNode().getHashMap().values(), listFileWrapper);
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[WRITE] Unable to update the write permissions");
         }
 
 
@@ -374,7 +352,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String create(String host, FSTreeNode curDir, String fileName) throws IOException { //crea il file (nomehost+timestamp) in locale
+    public String create(String host, FSTreeNode curDir, String fileName) throws IOException {
         Date date = Date.from(Instant.now());
         FileAttribute attribute = new FileAttribute(0, date, date, 1);
         attribute.setOwner(PropertiesHelper.getInstance().loadConfig(Constants.USERNAME_CONFIG));
@@ -382,6 +360,7 @@ public class FileServiceImpl implements FileService {
 
     }
 
+    @Override
     public void delete(String fileID, FSTreeNode curDir, DeleteFileCallback callback) {
 
         String directoryPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
@@ -389,9 +368,7 @@ public class FileServiceImpl implements FileService {
         File fileAttr = new File(directoryPath + fileID + ".attr");
 
         try {
-
             ArrayList<NetNodeLocation> listOfNode = new ArrayList<>(mediator.getNode().getFileNodeList().get(fileID).getLocations());
-
             if (listOfNode.size() > 1) {
                 for (NetNodeLocation nnl : mediator.getNode().getFileNodeList().get(fileID).getLocations()) {
                     if (nnl.toString().compareTo(mediator.getNode().getOwnLocation().toString()) != 0) {
@@ -403,6 +380,7 @@ public class FileServiceImpl implements FileService {
 
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[DELETE] Unable to delete the file: " + fileID);
         }
 
         //remove local files
@@ -412,11 +390,11 @@ public class FileServiceImpl implements FileService {
                     mediator.getNode().getFileNodeList().remove(fileID);
                     curDir.removeOneFile(fileID);
                 }
-
             }
 
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[DELETE] Unable to delete the local file: " + fileID);
         }
 
         //removing the deleted file from the cache
@@ -441,17 +419,20 @@ public class FileServiceImpl implements FileService {
             mediator.getNode().callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[DELETE] Unable to update the JSON");
         }
 
         callback.onItemChanged(curDir);
     }
 
+    @Override
     public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         if (cacheFileWrapper == null) throw new FileNotFoundException();
         return cacheFileWrapper.getAttribute();
     }
 
+    @Override
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(path + fileID + ".attr");
@@ -459,6 +440,7 @@ public class FileServiceImpl implements FileService {
             objectOutputStream.writeObject(attr);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("[SET-ATTRIBUTES] Unable to set the attributes");
         }
     }
 
@@ -485,8 +467,6 @@ public class FileServiceImpl implements FileService {
         }
 
         return cleanArray(ret);
-
-
     }
 
     private byte[] cleanArray(byte[] tmp) {
@@ -516,17 +496,14 @@ public class FileServiceImpl implements FileService {
     }
 
     private FileAttribute getLocalAttributeFile(String UFID) {
-        ObjectInputStream ois = null;
-        try {
-            ois = new ObjectInputStream(new FileInputStream(path + UFID + ".attr"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ObjectInputStream ois;
         FileAttribute ret = null;
         try {
+            ois = new ObjectInputStream(new FileInputStream(path + UFID + ".attr"));
             ret = (FileAttribute) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+            System.out.println("[GET-LOCAL-ATTRIBUTE-FILE] Unable to read the attributes in local");
         }
         return ret;
     }
@@ -534,7 +511,6 @@ public class FileServiceImpl implements FileService {
     private CacheFileWrapper getCacheFile(String UFID) {
         CacheFileWrapper retFile = readingCache.get(UFID);
         if (retFile != null) {
-            //devo controllare se è ancora valido il file salvato nella cache
             long elapsedTime = Date.from(Instant.now()).getTime() - retFile.getLastValidatedTime();
             if (elapsedTime < readingCache.getTimeInterval()) {
                 return retFile;
@@ -551,17 +527,16 @@ public class FileServiceImpl implements FileService {
 
     public CacheFileWrapper getFileAndAttribute(String UFID) {
         File file = new File(path + UFID);
-        FileAttribute ret = null;
+        FileAttribute ret;
         if (file.exists()) {
             try {
                 ret = getAttributes(UFID);
                 return new CacheFileWrapper(file, ret, UFID, true);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
+                System.out.println("[GET-FILE-AND-ATTRIBUTES] Unable to get the file: " + UFID);
             }
 
-        } else {
-            return null;
         }
         return null;
     }
@@ -570,7 +545,7 @@ public class FileServiceImpl implements FileService {
      * Method for the choice of the node where replicate the created file
      *
      * @param repWr wrapper for the data file to replicated
-     * @param node local node
+     * @param node  local node
      */
     private void replication(ReplicationWrapper repWr, NetNode node) {
 
@@ -579,6 +554,7 @@ public class FileServiceImpl implements FileService {
             hm = node.getFileNodeList();
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[REPLICATION] Unable to get the node file list");
         }
 
         NetNodeLocation selectedNode;
@@ -588,15 +564,14 @@ public class FileServiceImpl implements FileService {
             Collection<NetNodeLocation> tmpColl;
             try {
                 tmpColl = node.getHashMap().values();
-
-                if (tmpColl != null) {
-                    for (NetNodeLocation nnl : tmpColl) {
-                        if (nnl.toUrl().compareTo(mediator.getNode().getOwnLocation().toUrl()) != 0)
-                            nodeList.add(nnl);
-                    }
+                for (NetNodeLocation nnl : tmpColl) {
+                    if (nnl.toUrl().compareTo(mediator.getNode().getOwnLocation().toUrl()) != 0)
+                        nodeList.add(nnl);
                 }
+
             } catch (RemoteException e) {
                 e.printStackTrace();
+                System.out.println("[REPLICATION] Unable to add a node in the Node List");
             }
 
             ArrayList<NetNodeLocation> nodeSmallerOccupiedSpace = Util.listOfConnectedNodeForLongTime(nodeList);
@@ -608,9 +583,8 @@ public class FileServiceImpl implements FileService {
             selectedNode = Util.selectedNode(nodeSmallerOccupiedSpace);
         }
 
-
         if (selectedNode == null) {
-            System.out.println("There isn't a node available for replication");
+            System.out.println("[REPLICATION] There isn't a node available for replication");
             return;
         }
 
@@ -627,9 +601,9 @@ public class FileServiceImpl implements FileService {
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();
+                System.out.println("[REMOVE-LOCAL-NODE] Unable to remove the node");
             }
         }
-
         return nodeList;
     }
 

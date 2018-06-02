@@ -21,8 +21,6 @@ import java.util.Date;
  */
 public class DirectoryServiceImpl implements DirectoryService {
 
-    //A reference to the File System in the host PC
-    private String hostFSPath;
     private FileService fileService;
 
     private static DirectoryServiceImpl INSTANCE = null;
@@ -38,10 +36,6 @@ public class DirectoryServiceImpl implements DirectoryService {
         this.fileService = fileService;
     }
 
-    private DirectoryServiceImpl() {
-        hostFSPath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-    }
-
     @Override
     public void createDirectory(FSTreeNode currentNode, String dirName, NewItemCallback callback) {
 
@@ -49,7 +43,8 @@ public class DirectoryServiceImpl implements DirectoryService {
         try {
             host = MediatorFsNet.getInstance().getNode().getHostName();
         } catch (RemoteException e) {
-            System.out.println("Hostname null during folder creation");
+            e.printStackTrace();
+            System.out.println("[CREATE-DIRECTORY] Hostname null during folder creation");
         }
 
         FSTreeNode node = new FSTreeNode();
@@ -143,6 +138,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            System.out.println("[ADD-NAME] Unable to find the attribute of the file. Please retry");
         }
     }
 }
