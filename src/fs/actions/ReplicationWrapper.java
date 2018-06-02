@@ -9,7 +9,6 @@ import java.io.Serializable;
  */
 public class ReplicationWrapper implements Serializable {
     private String path;
-    private String fileName;
     private String UFID;
     private FileAttribute attribute;
     private byte[] content;
@@ -17,9 +16,8 @@ public class ReplicationWrapper implements Serializable {
     private String json;
 
 
-    public ReplicationWrapper(String UFID, String fileName) {
-        this.UFID = UFID;
-        this.fileName = fileName;
+    public ReplicationWrapper(String UFID) {
+        this.UFID = UFID;;
     }
 
     public String getPath() {
@@ -28,10 +26,6 @@ public class ReplicationWrapper implements Serializable {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public String getFileName() {
-        return fileName;
     }
 
     public String getUFID() {
@@ -64,10 +58,6 @@ public class ReplicationWrapper implements Serializable {
 
     public void setChecksum(String checksum) {
         this.checksum = checksum;
-    }
-
-    public String getJSON() {
-        return json;
     }
 
     public void setJSON(String json) {
