@@ -70,7 +70,7 @@ public class ReplicationWrapper implements Serializable {
         return json;
     }
 
-    public void setJSON(String jSon) {
+    public void setJSON(String json) {
         this.json = json;
     }
 }
