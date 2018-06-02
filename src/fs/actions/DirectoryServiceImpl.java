@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * We have to do two things: update the json and create new file in the PC FS
+ * This class implements all the higher level operation related to a directory
  */
 public class DirectoryServiceImpl implements DirectoryService {
 
