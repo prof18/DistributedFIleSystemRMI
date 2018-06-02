@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
-
+/**
+ * This class contain all the information about the connected nodes
+ */
 public class NetNodeLocation implements Serializable {
     private String ip;
     private int port;
