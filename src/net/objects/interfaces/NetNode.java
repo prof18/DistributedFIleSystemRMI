@@ -44,10 +44,30 @@ public interface NetNode extends Remote, Serializable {
 
     void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
 
+    /**
+     * This method change the updated list associated with the file
+     * @param UFID file identifier
+     * @param list list of node with the file saved in local
+     * @throws RemoteException
+     */
     void updateWritePermissionMap(String UFID, ListFileWrapper list) throws RemoteException;
 
+    /**
+     * This method update the list of nodes where a specific file is saved
+     * @param UFID file identifier
+     * @param netNode node to add in the list
+     * @throws RemoteException
+     */
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
+    /**
+     * This method delete local file in the node and update the total occupied space.
+     * @param UFID file identifier
+     * @param treeFileDirectoryUFID directory identifier
+     * @param fileSize the file size
+     * @return true if the file and it's attributes are deleted, false otherwise
+     * @throws RemoteException
+     */
     boolean deleteFile(String UFID, String treeFileDirectoryUFID, long fileSize) throws RemoteException;
 
     NetNodeLocation getOwnLocation() throws RemoteException;
