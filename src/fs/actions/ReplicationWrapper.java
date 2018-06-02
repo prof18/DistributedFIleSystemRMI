@@ -4,6 +4,9 @@ import fs.objects.structure.FileAttribute;
 
 import java.io.Serializable;
 
+/**
+ * This object contains all the information necessary for the replication stuff
+ */
 public class ReplicationWrapper implements Serializable {
     private String path;
     private String fileName;
@@ -11,7 +14,7 @@ public class ReplicationWrapper implements Serializable {
     private FileAttribute attribute;
     private byte[] content;
     private String checksum;
-    private String jSon;
+    private String json;
 
 
     public ReplicationWrapper(String UFID, String fileName) {
@@ -63,11 +66,11 @@ public class ReplicationWrapper implements Serializable {
         this.checksum = checksum;
     }
 
-    public String getjSon() {
-        return jSon;
+    public String getJSON() {
+        return json;
     }
 
-    public void setjSon(String jSon) {
-        this.jSon = jSon;
+    public void setJSON(String json) {
+        this.json = json;
     }
 }

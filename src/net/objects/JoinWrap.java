@@ -13,7 +13,7 @@ public class JoinWrap implements Serializable {
 
     private String name;
     private HashMap<Integer, NetNodeLocation> coNodes;
-    HashMap<String, ListFileWrapper> fileNodeList;
+    private HashMap<String, ListFileWrapper> fileNodeList;
 
     /**
      * It is the constructor of the class
@@ -21,7 +21,7 @@ public class JoinWrap implements Serializable {
      * @param name    is the name of the service
      * @param coNodes is the list of connected nodes
      */
-    public JoinWrap(String name, HashMap<Integer, NetNodeLocation> coNodes , HashMap<String, ListFileWrapper> fileNodeList ) {
+    public JoinWrap(String name, HashMap<Integer, NetNodeLocation> coNodes, HashMap<String, ListFileWrapper> fileNodeList) {
         this.name = name;
         this.coNodes = coNodes;
         this.fileNodeList = fileNodeList;
@@ -45,5 +45,7 @@ public class JoinWrap implements Serializable {
         return coNodes;
     }
 
-    public HashMap<String, ListFileWrapper> getFileNodeList(){return fileNodeList; }
+    public HashMap<String, ListFileWrapper> getFileNodeList() {
+        return fileNodeList;
+    }
 }

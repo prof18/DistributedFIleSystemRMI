@@ -4,17 +4,13 @@ import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.ListFileWrapper;
 import fs.objects.structure.FSTreeNode;
-import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
 import net.objects.NetNodeLocation;
 
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.HashMap;
-
-//import net.objects.NetNodeWrap;
 
 /**
  * This interface is dedicated in order to manage all the operation related to communication
@@ -105,16 +101,6 @@ public interface NetNode extends Remote, Serializable {
      */
 
     int getOwnPort() throws RemoteException;
-
-    /**
-     * This method returns the instance of the related mediator
-     *
-     * @return
-     * @throws RemoteException
-     */
-
-    MediatorFsNet getMediator() throws RemoteException;
-
 
     /**
      * This method is used to get a specific file in the distributed filesystem
@@ -238,29 +224,6 @@ public interface NetNode extends Remote, Serializable {
 
     void setNameLocation(String name) throws RemoteException;
 
-    /**
-     * This method is used to replace a specific file in the distributed filesystem after an edit
-     *
-     * @param fileWrappers is an object that wraps the edited file and its new attribute
-     * @throws RemoteException if there are problems in the RMI communication
-     */
-
-
-    void replaceFileFromFS(ArrayList<CacheFileWrapper> fileWrappers) throws RemoteException;
-
-
-    /**
-     * This method is called to modify a file in the own node and if there is not this file call through
-     * the mediator replaceFileFromFS
-     *
-     * @param newFile      is an instance of an object that contain the edit file and its attribute
-     * @param lastModified is the time of the lastModified
-     * @param UFID         is the unique name of the file
-     * @throws RemoteException if there are problems in the RMI communication
-     */
-
-
-    void replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) throws RemoteException;
 
     /**
      * Is used to call saveFileReplica in another node
@@ -295,7 +258,7 @@ public interface NetNode extends Remote, Serializable {
 
     String getJson() throws RemoteException;
 
-    void setJson(String gson, boolean up) throws RemoteException;
+    void setJson(String json, boolean up) throws RemoteException;
 
     /**
      * Is used in order to merge json when a new node joins the network and it contains already a json and some file

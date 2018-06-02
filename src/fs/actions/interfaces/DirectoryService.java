@@ -46,7 +46,7 @@ public interface DirectoryService {
      * @param currentNode is the node that represents the directory where add the file
      * @param name        is the name to assign to the file
      * @param fileID      is the unique identifier of the file
-     * @param callback    is the callback used to inform the UI about the adding of the filr
+     * @param callback    is the callback used to inform the UI about the adding of the file
      */
     void addName(FSTreeNode currentNode, String name, String fileID, NewItemCallback callback);
 
