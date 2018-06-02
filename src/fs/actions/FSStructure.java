@@ -11,7 +11,7 @@ import utils.PropertiesHelper;
 import java.util.*;
 
 /**
- * In this class there is ALWAYS a reference of the File System Tree
+ * This class provides some actions to handle the internal structure of the file system
  */
 public class FSStructure {
 
@@ -24,10 +24,6 @@ public class FSStructure {
         return INSTANCE;
     }
 
-    private FSStructure() {
-
-    }
-
     public FSTreeNode getTree() {
         if (tree.isRoot())
             return tree;
@@ -35,14 +31,16 @@ public class FSStructure {
             return tree.findRoot();
     }
 
-
+    /**
+     * This method save the structure of the FS as a JSON File
+     * @param tree The structure of the FS
+     */
     public void generateJson(FSTreeNode tree) {
 
         //update the tree reference
         this.tree = tree;
 
         Queue<FSTreeNode> queue = new LinkedList<>();
-
         queue.add(tree);
 
         HashMap<String, JsonFolder> folderMap = new HashMap<>();
@@ -75,28 +73,24 @@ public class FSStructure {
                 files.add(file);
             }
             jsonFolder.setFiles(files);
-
             folderMap.put(jsonFolder.getUFID(), jsonFolder);
-
         }
 
         String json = GSONHelper.getInstance().foldersToJson(folderMap);
-
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
-
-
     }
 
+    /**
+     * This method creates the internal FS structure starting from the JSON
+     */
     public void generateTreeStructure() {
 
-        //create the tree from the Json or generate the tree with only a root
         String structureJson = PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
         if (structureJson != null) {
             //load the tree structure
             HashMap<String, JsonFolder> folderMap = GSONHelper.getInstance().jsonToFolders(structureJson);
 
             JsonFolder jsonFolderRoot = null;
-
             for (Map.Entry<String, JsonFolder> entry : folderMap.entrySet()) {
 
                 JsonFolder folder = entry.getValue();
@@ -135,7 +129,7 @@ public class FSStructure {
                             queue.add(child);
                         }
                     }
-                    node.setChildrens(nodeChildren);
+                    node.setChildren(nodeChildren);
 
                     //Files
                     ArrayList<FileWrapper> files = new ArrayList<>();
@@ -153,7 +147,7 @@ public class FSStructure {
                     node.setFiles(files);
                 }
             } else {
-                System.err.println("There wasn't a root in the json");
+                System.out.println("[GENERATE TREE STRUCTURE] There wasn't a root in the JSON");
             }
 
         } else {
@@ -163,7 +157,7 @@ public class FSStructure {
             tree.setParent(null);
             tree.setUFID("root");
             tree.setNameNode("root");
-            tree.setChildrens(new ArrayList<>());
+            tree.setChildren(new ArrayList<>());
             tree.setFiles(new ArrayList<>());
             tree.setLastEditTime(System.currentTimeMillis());
 

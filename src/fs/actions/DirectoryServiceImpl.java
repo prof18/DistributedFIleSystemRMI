@@ -51,7 +51,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         node.setParent(currentNode);
         node.setNameNode(dirName);
         node.setUFID(host + "_" + Date.from(Instant.now()).hashCode());
-        node.setChildrens(new ArrayList<>());
+        node.setChildren(new ArrayList<>());
         node.setFiles(new ArrayList<>());
         currentNode.addChild(node);
         node.setLastEditTime(System.currentTimeMillis());
