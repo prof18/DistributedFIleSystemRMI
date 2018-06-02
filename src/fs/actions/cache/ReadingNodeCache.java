@@ -24,6 +24,7 @@ public class ReadingNodeCache {
         return cache.get(UFID);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean remove(String UFID) {
         CacheFileWrapper ret = cache.remove(UFID);
         return ret != null;

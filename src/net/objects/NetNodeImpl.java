@@ -569,7 +569,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public boolean saveFile(CacheFileWrapper cacheFileWrapper) {
+    public void saveFile(CacheFileWrapper cacheFileWrapper) {
 
         File f = new File(path + cacheFileWrapper.getUFID());
         File fileAtt = new File(path + cacheFileWrapper.getUFID() + ".attr");
@@ -589,11 +589,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("[SAVE FILE] Unable to save file");
-            return false;
         }
-
-        return true;
-
 
     }
 
