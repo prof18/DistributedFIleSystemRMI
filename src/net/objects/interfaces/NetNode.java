@@ -276,6 +276,11 @@ public interface NetNode extends Remote, Serializable {
 
     String verify() throws RemoteException;
 
+    /**
+     * This method return the file system structure in JSON format
+     * @return String that describe the file system structure in JSON format
+     * @throws RemoteException
+     */
     String getJson() throws RemoteException;
 
     void setJson(String json, boolean up) throws RemoteException;
