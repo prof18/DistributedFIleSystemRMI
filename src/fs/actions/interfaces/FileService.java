@@ -14,19 +14,6 @@ import java.rmi.Remote;
  * This interface represent all the operation related to the manage of the file
  */
 public interface FileService extends Remote, Serializable {
-    /**
-     * This method is used to read a subset of a file content
-     *
-     * @param fileID is the unique identifier of the file
-     * @param offset indicates the first byte to read
-     * @param count  is the number of byte to read
-     * @return the array of byte to read
-     * @throws FileNotFoundException
-     *
-     *
-     */
-
-    ReadWrapper read(String fileID, int offset, int count) throws FileNotFoundException;
 
     /**
      * This method is used to read all the content of a file
@@ -41,6 +28,7 @@ public interface FileService extends Remote, Serializable {
 
     /**
      * Close is used to freed the writing privilege
+     *
      * @param fileID is the unique identifier of the file
      */
     void close(String fileID);
@@ -59,8 +47,8 @@ public interface FileService extends Remote, Serializable {
     /**
      * This method is used to create a new file in the filesystem
      *
-     * @param host   is the host that creates the new file
-     * @param curDir is the current directory where saving the file
+     * @param host     is the host that creates the new file
+     * @param curDir   is the current directory where saving the file
      * @param fileName
      * @return the unique identifier UFID of the new file
      * @throws IOException

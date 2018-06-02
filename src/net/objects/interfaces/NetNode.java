@@ -3,7 +3,6 @@ package net.objects.interfaces;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.ListFileWrapper;
-import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import mediator_fs_net.MediatorFsNet;
 import net.objects.JoinWrap;
@@ -178,7 +177,7 @@ public interface NetNode extends Remote, Serializable {
      */
 
 
-    void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) throws RemoteException;
+    void replaceFileFromFS(ArrayList<CacheFileWrapper> fileWrappers) throws RemoteException;
 
 
     /**

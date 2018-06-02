@@ -4,7 +4,6 @@ import fs.actions.FSStructure;
 import fs.actions.ReplicationWrapper;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.ListFileWrapper;
-import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.json.JsonFile;
 import fs.objects.json.JsonFolder;
 import fs.objects.structure.FSTreeNode;
@@ -266,8 +265,8 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public void replaceFileFromFS(ArrayList<WritingCacheFileWrapper> fileWrappers) {
-        for (WritingCacheFileWrapper fileWrapper : fileWrappers) {
+    public void replaceFileFromFS(ArrayList<CacheFileWrapper> fileWrappers) {
+        for (CacheFileWrapper fileWrapper : fileWrappers) {
             for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
                 if (!entry.getValue().equals(ownLocation)) {
                     NetNodeLocation location = entry.getValue();

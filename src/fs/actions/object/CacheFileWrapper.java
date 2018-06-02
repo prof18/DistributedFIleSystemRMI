@@ -1,9 +1,11 @@
 package fs.actions.object;
 
 import fs.objects.structure.FileAttribute;
-import net.objects.NetNodeLocation;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 
@@ -12,7 +14,6 @@ public class CacheFileWrapper implements Serializable {
     private File file;
     private FileAttribute attribute;
     private Date lastValidatedTime;
-    private Date lastModifiedBeforeDownloadTime;
     private boolean isLocal;
     private byte[] content;
 
@@ -22,16 +23,13 @@ public class CacheFileWrapper implements Serializable {
         this.file = file;
         this.attribute = attribute;
         this.isLocal = isLocal;
-        FileInputStream fis = null;
+        FileInputStream fis;
         try {
             fis = new FileInputStream(file);
             content = fis.readAllBytes();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         lastValidatedTime = Date.from(Instant.now());
     }
 
@@ -51,10 +49,6 @@ public class CacheFileWrapper implements Serializable {
         return UFID;
     }
 
-    public Date getLastModifiedBeforeDownloadTime() {
-        return lastModifiedBeforeDownloadTime;
-    }
-
     public File getFile() {
         return file;
     }
@@ -67,7 +61,4 @@ public class CacheFileWrapper implements Serializable {
         return lastValidatedTime.getTime();
     }
 
-    public void setLastValidatedTime(Date lastValidatedTime) {
-        this.lastValidatedTime = lastValidatedTime;
-    }
 }

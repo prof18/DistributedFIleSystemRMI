@@ -5,7 +5,6 @@ import fs.actions.ReplicationMethods;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.ListFileWrapper;
-import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;
@@ -132,7 +131,7 @@ public class MediatorFsNet {
     /**
      * This method is used to delete a local file
      *
-     * @param UFID file UFID
+     * @param UFID                  file UFID
      * @param treeFileDirectoryUFID is the directory where the file is saved
      */
     public void removeFileFromTree(String UFID, String treeFileDirectoryUFID) {
@@ -147,28 +146,28 @@ public class MediatorFsNet {
      *
      * @param files list of files to delete
      */
-    public void deleteDirectoryFiles(ArrayList<FileWrapper> files){
+    public void deleteDirectoryFiles(ArrayList<FileWrapper> files) {
         HashMap<String, ListFileWrapper> fileNodeList;
         try {
             fileNodeList = node.getFileNodeList();
 
-            if (!fileNodeList.isEmpty() || fileNodeList != null){
-                for (int i = 0; i < files.size() ; i++) {
+            if (!fileNodeList.isEmpty() || fileNodeList != null) {
+                for (int i = 0; i < files.size(); i++) {
                     ArrayList<NetNodeLocation> fileLocations = fileNodeList.get(files.get(i).getUFID()).getLocations();
 
-                    for (int j = 0; j < fileLocations.size() ; j++) {
-                        if(fileLocations.get(j).toUrl().compareTo(node.getOwnLocation().toUrl()) != 0) {
+                    for (int j = 0; j < fileLocations.size(); j++) {
+                        if (fileLocations.get(j).toUrl().compareTo(node.getOwnLocation().toUrl()) != 0) {
                             boolean fileDelete = ReplicationMethods.getInstance().deleteFile(files.get(i).getUFID(), fileLocations.get(j), null, files.get(i).getAttribute().getFileLength());
-                            if (fileDelete){
+                            if (fileDelete) {
                                 fileLocations.get(j).reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
                             }
-                        }else{
+                        } else {
                             String localFilePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
                             File localFile = new File(localFilePath + files.get(i).getUFID());
                             File localAttribute = new File(localFilePath + files.get(i).getUFID() + ".attr");
                             boolean deleteLocalFile = localFile.delete();
                             boolean deleteAttrFile = localAttribute.delete();
-                            if (deleteLocalFile && deleteAttrFile){
+                            if (deleteLocalFile && deleteAttrFile) {
                                 MediatorFsNet.getInstance().getNode().getOwnLocation().reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
                             }
                         }
@@ -179,8 +178,6 @@ public class MediatorFsNet {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-
 
 
     }
