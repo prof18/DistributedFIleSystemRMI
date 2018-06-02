@@ -147,7 +147,6 @@ public class FileServiceImpl implements FileService {
 
         /**These method are used to update the information about the lock**/
 
-        boolean canReplicate = true;
         ArrayList<NetNodeLocation> tempNodeFileList = new ArrayList<>(nodeList.getLocations());
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         byte[] repContent;

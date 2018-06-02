@@ -58,6 +58,7 @@ public class ReplicationMethods {
             } while (!rep && it <= 10);
 
         } catch (RemoteException | NotBoundException e) {
+            System.out.println("Communication problem");
             e.printStackTrace();
         }
     }
@@ -77,6 +78,7 @@ public class ReplicationMethods {
             node.updateUI(root);
 
         } catch (RemoteException | NotBoundException e) {
+            System.out.println("Communication problem");
             e.printStackTrace();
         }
     }
@@ -105,6 +107,7 @@ public class ReplicationMethods {
             }
 
         } catch (RemoteException | NotBoundException e) {
+            System.out.println("Communication problem");
             e.printStackTrace();
         }
 
@@ -120,6 +123,7 @@ public class ReplicationMethods {
                 node.updateWritePermissionMap(fileID, listFileWrapper);
             }
         } catch (RemoteException | NotBoundException e) {
+            System.out.println("Communication problem");
             e.printStackTrace();
         }
     }
