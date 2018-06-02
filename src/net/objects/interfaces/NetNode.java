@@ -68,7 +68,7 @@ public interface NetNode extends Remote, Serializable {
     /**
      * Is used to update the fileNodeList through the network
      *
-     * @param fileNodeList
+     * @param fileNodeList is the list that contains the entry of the nodes that contains a file and the writing permission
      * @throws RemoteException if there are problems in the RMI communication
      */
 
@@ -217,7 +217,6 @@ public interface NetNode extends Remote, Serializable {
      * Is used to save a file replica that has been removed manually
      *
      * @param e is a wrap of a file and its attributes
-     * @return false if the routine fails
      * @throws RemoteException if there are problems in the RMI communication
      */
 
@@ -278,7 +277,7 @@ public interface NetNode extends Remote, Serializable {
     /**
      * This method return the file system structure in JSON format
      * @return String that describe the file system structure in JSON format
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
     String getJson() throws RemoteException;
 
@@ -286,7 +285,7 @@ public interface NetNode extends Remote, Serializable {
      * This method overwrite the old structure of the file system with the new structure
      * @param json new file system structure in JSON format
      * @param up if true overwrite file system structure, generate the new file system tree and update UI, only overwrite the file system structure otherwise
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
     void setJson(String json, boolean up) throws RemoteException;
 
