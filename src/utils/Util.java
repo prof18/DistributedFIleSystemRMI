@@ -263,9 +263,9 @@ public class Util {
         long currentTime = new Date().getTime();
         ArrayList<NetNodeLocation> selectedNodesList = new ArrayList<>();
 
-        for (int i = 0; i < list.size(); i++) {
-            if (currentTime - list.get(i).getTimeStamp() >= connectedTimeThreshold) {
-                selectedNodesList.add(list.get(i));
+        for (NetNodeLocation aList : list) {
+            if (currentTime - aList.getTimeStamp() >= connectedTimeThreshold) {
+                selectedNodesList.add(aList);
             }
         }
 

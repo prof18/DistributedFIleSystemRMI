@@ -2,7 +2,6 @@ package net.actions;
 
 import net.objects.interfaces.NetNode;
 import utils.Constants;
-import utils.PropertiesHelper;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -38,10 +37,8 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
 
     }
 
-
     @Override
     public void run() {
-        int i = 0;
         while (true) {
             String path = null;
             try {
@@ -54,20 +51,19 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
 
                 //the check methods is called if only there are other nodes in the list
                 if (!(node.getHashMap().size() == 1)) {
-                    i++;
                     node.checkNodesAndReplica();
                 }
 
             } catch (InterruptedException e) {
-                System.out.println("InterruptedException Verify Thread");
+                System.out.println("[GARGAGE-SERVICE] InterruptedException Verify Thread");
                 e.printStackTrace();
 
             } catch (RemoteException e) {
-                System.out.println("RemoteException Verify Thread");
+                System.out.println("[GARGAGE-SERVICE] RemoteException Verify Thread");
                 e.printStackTrace();
 
             } catch (NotBoundException e) {
-                System.out.println("NotBoundException Verify Thread " + path);
+                System.out.println("[GARGAGE-SERVICE] NotBoundException Verify Thread " + path);
                 e.printStackTrace();
             }
 

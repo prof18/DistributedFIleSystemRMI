@@ -23,7 +23,7 @@ public class PropertiesHelper {
     }
 
     /**
-     * Load the Proprieties file from a specific path
+     * Load the Properties file from a specific path
      *
      * @param path The path of the properties file
      */
@@ -34,7 +34,7 @@ public class PropertiesHelper {
             props.load(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            System.out.println("Configuration File Not Found");
+            System.out.println("[SET-PROP-FILE] Configuration File Not Found");
         }
     }
 
@@ -51,7 +51,7 @@ public class PropertiesHelper {
             inputStream.close();
             return props.getProperty(key);
         } catch (IOException e) {
-            System.out.println("Config not found");
+            System.out.println("[LOAD-CONFIG] Config not found");
             return null;
         }
     }
@@ -69,9 +69,9 @@ public class PropertiesHelper {
             props.store(outputStream, "DFS settings");
             outputStream.close();
         } catch (IOException e) {
-            System.out.println("Configuration not Saved");
+            System.out.println("[WRITE-CONFIG]Configuration not Saved");
         } catch (NullPointerException f) {
-            System.out.println("NPE during writing config");
+            System.out.println("[WRITE-CONFIG] NPE during writing config");
         }
     }
 
