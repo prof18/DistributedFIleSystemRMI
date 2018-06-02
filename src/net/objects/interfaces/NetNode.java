@@ -272,6 +272,7 @@ public interface NetNode extends Remote, Serializable {
      * @throws RemoteException if there are problems in the RMI communication
      */
 
+    @SuppressWarnings("SameReturnValue")
     String verify() throws RemoteException;
 
     /**

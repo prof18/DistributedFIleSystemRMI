@@ -24,12 +24,11 @@ public class ReadingNodeCache {
         return cache.get(UFID);
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public boolean remove(String UFID) {
+    public void remove(String UFID) {
         CacheFileWrapper ret = cache.remove(UFID);
-        return ret != null;
     }
 
+    @SuppressWarnings("SameReturnValue")
     public long getTimeInterval() {
         return 100000L;
     }

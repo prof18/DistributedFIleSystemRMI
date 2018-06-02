@@ -23,6 +23,7 @@ import java.util.*;
 /**
  * This class is on a higher level compared to NetNodeImpl and so FileServiceImpl initialize it.
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class FileServiceImpl implements FileService {
 
     private final String path;
@@ -378,8 +379,6 @@ public class FileServiceImpl implements FileService {
         fw.setChecksum(Util.getChecksum(tftb));
 
         //Replication
-        HashMap<String, ListFileWrapper> t = mediator.getNode().getFileNodeList();
-        HashMap<Integer, NetNodeLocation> t1 = mediator.getNode().getHashMap();
 
         if (mediator.getNode().getHashMap().size() > 1) {
             ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
@@ -500,7 +499,6 @@ public class FileServiceImpl implements FileService {
      * @param fileID is the unique identifier of a file
      * @param attr   is the new instance of the class FileAttribute to save
      */
-    @Override
     public void setAttributes(String fileID, FileAttribute attr) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(path + fileID + ".attr");

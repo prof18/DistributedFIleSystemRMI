@@ -37,6 +37,7 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
 
     }
 
+    @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
         while (true) {
@@ -44,7 +45,7 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
             try {
                 Thread.sleep(timeInterval);
 
-                Registry registry = null;
+                Registry registry;
                 registry = LocateRegistry.getRegistry(ipNode, portNode);
                 path = "rmi://" + ipNode + ":" + portNode + "/" + hostname;
                 NetNode node = (NetNode) registry.lookup(path);

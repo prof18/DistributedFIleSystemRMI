@@ -30,6 +30,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     private MediatorFsNet mediatorFsNet;
@@ -80,6 +81,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return fileNodeList;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public synchronized void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) {
 
@@ -702,6 +704,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public synchronized void connectionMergeJson(String json) {
 

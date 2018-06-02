@@ -278,7 +278,7 @@ public class Util {
      * @param nodeList list of candidate nodes for the replication
      * @return sorted list of candidate nodes
      */
-    @SuppressWarnings("UnusedReturnValue")
+
     private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
         NetNodeLocation temp;
         for (int i = 1; i < nodeList.size(); i++) {
@@ -300,7 +300,7 @@ public class Util {
      * @return candidate node for replication
      */
     public static NetNodeLocation selectedNode(ArrayList<NetNodeLocation> list) {
-        ascSort(list);
+        list=ascSort(list);
         return list.get(0);
     }
 

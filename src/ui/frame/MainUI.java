@@ -635,14 +635,14 @@ public class MainUI extends JFrame {
                 String newName = JOptionPane.showInputDialog("New File Name: ", item.getFileWrapper().getFileName());
 
                 if (newName != null && !newName.equals("")) {
-                    String path = item.getFileWrapper().getPath();
-                    String[] arrayPath = path.split("/");
-                    path = "";
+                    StringBuilder path = new StringBuilder(item.getFileWrapper().getPath());
+                    String[] arrayPath = path.toString().split("/");
+                    path = new StringBuilder();
                     for (int i = arrayPath.length - 2; i >= 0; i--) {
-                        path = arrayPath[i] + "/" + path;
+                        path.insert(0, arrayPath[i] + "/");
                     }
-                    path = path + newName;
-                    item.getFileWrapper().setPath(path);
+                    path.append(newName);
+                    item.getFileWrapper().setPath(path.toString());
                     item.getFileWrapper().setFileName(newName);
                     updateModels(currentNode, true);
                     fsStructure.generateJson(currentNode.findRoot());

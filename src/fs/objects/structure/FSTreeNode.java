@@ -8,6 +8,7 @@ import java.util.Queue;
 /**
  * This objects represents the internal structure of the File System
  */
+@SuppressWarnings("ALL")
 public class FSTreeNode implements Serializable {
 
 
@@ -20,6 +21,7 @@ public class FSTreeNode implements Serializable {
     private String jsonTree;
     private String owner;
 
+    @SuppressWarnings("unused")
     public FSTreeNode(String UFID, String nameNode, ArrayList<FSTreeNode> children, FSTreeNode parent) {
         this.UFID = UFID;
         this.nameNode = nameNode;

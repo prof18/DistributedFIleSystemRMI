@@ -54,10 +54,6 @@ public class FileWrapper implements Serializable {
         this.attribute = attribute;
     }
 
-    public byte[] getContent() {
-        return content;
-    }
-
     public void setContent(byte[] content) {
         this.content = content;
     }

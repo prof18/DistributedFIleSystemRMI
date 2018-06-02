@@ -3,6 +3,7 @@ package fs.objects.structure;
 import java.io.Serializable;
 import java.util.Date;
 
+@SuppressWarnings("ALL")
 public class FileAttribute implements Serializable {
 
     private long fileLength;
@@ -32,10 +33,6 @@ public class FileAttribute implements Serializable {
         this.fileLength = fileLength;
     }
 
-    public Date getCreationTime() {
-        return creationTime;
-    }
-
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
@@ -48,6 +45,7 @@ public class FileAttribute implements Serializable {
         this.lastModifiedTime = lastModifiedTime;
     }
 
+    @SuppressWarnings("unused")
     public int getReferenceCount() {
         return referenceCount;
     }
@@ -70,10 +68,6 @@ public class FileAttribute implements Serializable {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public Object getAcl() {
-        return acl;
     }
 
     public void setAcl(Object acl) {

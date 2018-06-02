@@ -15,6 +15,7 @@ import static javax.swing.JOptionPane.showMessageDialog;
 /**
  * Generate a window to edit a file
  */
+
 public class EditFileUI extends JFrame {
 
     private FileService fileService;

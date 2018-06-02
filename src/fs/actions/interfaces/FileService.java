@@ -83,14 +83,6 @@ public interface FileService extends Remote, Serializable {
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
     /**
-     * This method is used to update the information about a file
-     *
-     * @param fileID is the unique identifier of a file
-     * @param attr   is the new instance of the class FileAttribute to save
-     */
-    void setAttributes(String fileID, FileAttribute attr);
-
-    /**
      * Is the callback used to inform the UI of the deletion a file
      */
     interface DeleteFileCallback {
