@@ -82,7 +82,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     public synchronized void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) {
-        //this.fileNodeList = fileNodeList;
 
         if (typeSet) {
 
