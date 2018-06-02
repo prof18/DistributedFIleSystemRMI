@@ -4,7 +4,6 @@ import fs.actions.interfaces.FileService;
 import net.objects.NetNodeLocation;
 import net.objects.interfaces.NetNode;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -40,6 +39,5 @@ public class WrapperFileServiceUtil {
     public NetNode getNetNode() {
         return netNode;
     }
-
 
 }

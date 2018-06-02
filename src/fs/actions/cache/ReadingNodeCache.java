@@ -24,16 +24,12 @@ public class ReadingNodeCache {
         return cache.get(UFID);
     }
 
-    public boolean remove(String UFID){
-        CacheFileWrapper ret=cache.remove(UFID);
-        if(ret==null){
-            return false;
-        }
-        return true;
+    public boolean remove(String UFID) {
+        CacheFileWrapper ret = cache.remove(UFID);
+        return ret != null;
     }
 
     public long getTimeInterval() {
-        long timeInterval = 100000;
-        return timeInterval;
+        return 100000L;
     }
 }

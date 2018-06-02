@@ -15,15 +15,11 @@ public class ListFileWrapper implements Serializable {
 
     public ListFileWrapper(ArrayList<NetNodeLocation> locations) {
         this.locations = locations;
-        writable=true;
+        writable = true;
     }
 
     public ArrayList<NetNodeLocation> getLocations() {
         return locations;
-    }
-
-    public void setLocations(ArrayList<NetNodeLocation> locations) {
-        this.locations = locations;
     }
 
     public boolean isWritable() {
