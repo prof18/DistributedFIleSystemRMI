@@ -4,21 +4,15 @@ import fs.objects.structure.FileAttribute;
 
 import java.util.Objects;
 
+/**
+ * This object represent a file in the JSON
+ */
 public class JsonFile {
 
     private String fileName;
     private String UFID;
     private String path;
     private FileAttribute attribute;
-
-    public JsonFile() {
-    }
-
-    public JsonFile(String fileName, String UFID, FileAttribute attribute) {
-        this.fileName = fileName;
-        this.UFID = UFID;
-        this.attribute = attribute;
-    }
 
     public String getFileName() {
         return fileName;
@@ -73,7 +67,6 @@ public class JsonFile {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(fileName, UFID);
     }
 }

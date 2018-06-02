@@ -2,6 +2,9 @@ package fs.objects.structure;
 
 import java.io.Serializable;
 
+/**
+ * This object contains all the information needed to describe a file
+ */
 public class FileWrapper implements Serializable {
 
     private String fileName;

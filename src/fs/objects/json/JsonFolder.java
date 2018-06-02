@@ -2,6 +2,9 @@ package fs.objects.json;
 
 import java.util.ArrayList;
 
+/**
+ * This object represent a folder in the JSON
+ */
 public class JsonFolder {
 
     private String UFID;
@@ -14,15 +17,6 @@ public class JsonFolder {
     private String owner;
 
     public JsonFolder() {
-    }
-
-    public JsonFolder(String UFID, boolean isRoot, String folderName, String parentUFID, ArrayList<String> children, ArrayList<JsonFile> files) {
-        this.UFID = UFID;
-        this.isRoot = isRoot;
-        this.folderName = folderName;
-        this.parentUFID = parentUFID;
-        this.children = children;
-        this.files = files;
     }
 
     public String getOwner() {
