@@ -311,7 +311,7 @@ public class FileServiceImpl implements FileService {
         rw.setChecksum(Util.getChecksum(tftb));
         rw.setPath(mediator.getFsStructure().getTree().getPath());
         mediator.getFsStructure().generateTreeStructure();
-        rw.setjSon(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+        rw.setJSON(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
 
         for (NetNodeLocation aTempNodeFileList : tempNodeFileList) {
             aTempNodeFileList.reduceOccupiedSpace(oldLength);

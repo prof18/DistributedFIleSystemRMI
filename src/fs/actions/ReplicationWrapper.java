@@ -63,11 +63,11 @@ public class ReplicationWrapper implements Serializable {
         this.checksum = checksum;
     }
 
-    public String getjSon() {
+    public String getJSON() {
         return jSon;
     }
 
-    public void setjSon(String jSon) {
+    public void setJSON(String jSon) {
         this.jSon = jSon;
     }
 }

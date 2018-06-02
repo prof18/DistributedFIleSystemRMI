@@ -80,8 +80,8 @@ public class FSTreeNode implements Serializable {
         return jsonTree;
     }
 
-    public void setJson(String gsonTree) {
-        this.jsonTree = gsonTree;
+    public void setJson(String jsonTree) {
+        this.jsonTree = jsonTree;
     }
 
     public void setUFID(String UFID) {

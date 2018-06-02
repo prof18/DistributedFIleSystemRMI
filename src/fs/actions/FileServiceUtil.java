@@ -103,8 +103,8 @@ public class FileServiceUtil {
                     }
                 }
 
-                String node1Gson = node1.getJson();
-                node.connectionMergeJson(node1Gson);
+                String node1Json = node1.getJson();
+                node.connectionMergeJson(node1Json);
                 mainUI.updateConnectedNode(node.getHashMap());
 
                 return new WrapperFileServiceUtil(new NetNodeLocation(ownIP, port, hostName), node.getHashMap(), service, node);

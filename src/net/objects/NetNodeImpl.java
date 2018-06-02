@@ -40,7 +40,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private NetNodeLocation ownLocation;
     //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
-    private HashMap<String, ListFileWrapper> fileNodeList = new HashMap(); //hashmap file-nodi che possiedono una copia di tale file.
+    private HashMap<String, ListFileWrapper> fileNodeList = new HashMap();
     private MainUI mainUI;
 
     public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
@@ -285,7 +285,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public CacheFileWrapper getFile(String UFID) {
-        return mediatorFsNet.getFilefromFS(UFID);
+        return mediatorFsNet.getFileFromFS(UFID);
     }
 
     public void replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) {
@@ -295,9 +295,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             file1.delete();
             file1 = new File(path + UFID + ".attr");
             file1.delete();
-            File newFileh = new File(path + UFID);
+            File newFileCreated = new File(path + UFID);
             try {
-                FileOutputStream writer = new FileOutputStream(newFileh);
+                FileOutputStream writer = new FileOutputStream(newFileCreated);
                 writer.write(newFile.getContent());
                 ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path + UFID + ".attr"));
                 ois.writeObject(newFile.getAttribute());
@@ -323,7 +323,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     public synchronized void checkNodesAndReplica() {
 
-        System.out.println("[ CHECKNODES ]");
+        System.out.println("[ CHECK NODES ]");
 
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
 
@@ -489,10 +489,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     nodeTemp.modifyFileNodeList(fileNodeList);
 
                 } catch (RemoteException e) {
-                    System.out.println("[updateAllFileNodeList] problemi connessione" + tmpPort + "; Ip: " + tmpIp);
+                    System.out.println("[updateAllFileNodeList] connection problem" + tmpPort + "; Ip: " + tmpIp);
 
                 } catch (NotBoundException e) {
-                    System.out.println("[NotBoundException-updateAllFileNodeList] problemi connessione\" + tmpPort + \"; Ip: \" + tmpIp");
+                    System.out.println("[NotBoundException-updateAllFileNodeList] connection problem\" + tmpPort + \"; Ip: \" + tmpIp");
                     e.printStackTrace();
 
                 }
