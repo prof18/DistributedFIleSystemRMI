@@ -30,13 +30,47 @@ public interface NetNode extends Remote, Serializable {
 
     JoinWrap join(String ipNode, int port, String name) throws RemoteException;
 
+    /**
+     * @return the fileNodeList of the node
+     * @throws RemoteException
+     */
+
     HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
 
-    void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) throws RemoteException;
+    /**
+     * Is used to set or merge the fileNodeList of new connected node
+     *
+     * @param receivedFNL received fileNodeList
+     * @param merge is used to decide if a merge is necessary or not
+     * @throws RemoteException
+     */
 
-    void modifyFileNodeList(HashMap<String, ListFileWrapper> toModify) throws RemoteException;
+    void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean merge) throws RemoteException;
+
+    /**
+     * Is used to update a fileNodeList with an entry is modified by another nodes
+     *
+     * @param entriesFileNodelist entries that must be modified
+     * @throws RemoteException
+     */
+
+    void modifyFileNodeList(HashMap<String, ListFileWrapper> entriesFileNodelist ) throws RemoteException;
+
+    /**
+     * Is used to create the fileNodeList of the node if it contains already a json
+     * and also to update the json with only the existing files
+     *
+     * @throws RemoteException
+     */
 
     void beginFileNodeList() throws RemoteException;
+
+    /**
+     * Is used to update the fileNodeList through the network
+     *
+     * @param fileNodeList
+     * @throws RemoteException
+     */
 
     void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
 
@@ -146,11 +180,47 @@ public interface NetNode extends Remote, Serializable {
 
     void checkNodesAndReplica() throws RemoteException;
 
+    /**
+     * Is used to call verifyFile on a node
+     *
+     * @param e
+     * @param fileName
+     * @return
+     * @throws RemoteException
+     */
+
     boolean checkSecReplica(NetNodeLocation e, String fileName) throws RemoteException;
 
-    boolean verifyFile(String fileName) throws RemoteException;
+    /**
+     * Is used to verify if a replica exist
+     *
+     * @param UFID
+     * @return true if it exists
+     * @throws RemoteException
+     */
+
+    boolean verifyFile(String UFID) throws RemoteException;
+
+
+    /**
+     * Is used to call saveFile in another node
+     *
+     * @param e                location where the file must be save
+     * @param cacheFileWrapper is a wrap of a file and its attributes
+     * @return
+     * @throws RemoteException
+     */
 
     boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) throws RemoteException;
+
+
+    /**
+     * Is used to save a file replica that has been removed manually
+     *
+     * @param e
+     * @return
+     * @throws RemoteException
+     */
 
     boolean saveFile(CacheFileWrapper e) throws RemoteException;
 
@@ -161,7 +231,6 @@ public interface NetNode extends Remote, Serializable {
      * @param connectedNodes is the list of connected nodes
      * @throws RemoteException if there are problems in the RMI communication
      */
-
 
     void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) throws RemoteException;
 
@@ -175,6 +244,15 @@ public interface NetNode extends Remote, Serializable {
 
     void setNameLocation(String name) throws RemoteException;
 
+
+    /**
+     * Is used to call saveFileReplica in another node
+     *
+     * @param cacheFileWrapper
+     * @param UFID
+     * @return
+     * @throws RemoteException
+     */
 
     NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) throws RemoteException;
 
@@ -202,7 +280,21 @@ public interface NetNode extends Remote, Serializable {
 
     void setJson(String json, boolean up) throws RemoteException;
 
-    void connectionMergeJson(String gson) throws RemoteException;
+    /**
+     * Is used in order to merge json when a new node joins the network and it contains already a json and some file
+     *
+     * @param json json from the network
+     * @throws RemoteException
+     */
+
+    void connectionMergeJson(String json) throws RemoteException;
+
+    /**
+     * Is used to send the update json through the network
+     *
+     * @param json to send
+     * @throws RemoteException
+     */
 
     void callUpdateAllJson(String json) throws RemoteException;
 
