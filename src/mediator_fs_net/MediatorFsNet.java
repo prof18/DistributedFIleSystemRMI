@@ -73,6 +73,7 @@ public class MediatorFsNet {
             return node.getFileOtherHost(UFID);
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[GET-FILE] Unable to get the file");
         }
         return null;
     }
@@ -89,7 +90,6 @@ public class MediatorFsNet {
 
 
     public FSStructure getFsStructure() {
-
         if (fsStructure == null) {
             fsStructure = FSStructure.getInstance();
         }
@@ -116,6 +116,7 @@ public class MediatorFsNet {
             }
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[JSON-REPLICATION] Unable to update the structure in all connected nodes");
         }
     }
 
@@ -151,32 +152,31 @@ public class MediatorFsNet {
         try {
             fileNodeList = node.getFileNodeList();
 
-            if (!fileNodeList.isEmpty() || fileNodeList != null) {
-                for (int i = 0; i < files.size(); i++) {
-                    ArrayList<NetNodeLocation> fileLocations = fileNodeList.get(files.get(i).getUFID()).getLocations();
+            for (FileWrapper file : files) {
+                ArrayList<NetNodeLocation> fileLocations = fileNodeList.get(file.getUFID()).getLocations();
 
-                    for (int j = 0; j < fileLocations.size(); j++) {
-                        if (fileLocations.get(j).toUrl().compareTo(node.getOwnLocation().toUrl()) != 0) {
-                            boolean fileDelete = ReplicationMethods.getInstance().deleteFile(files.get(i).getUFID(), fileLocations.get(j), null, files.get(i).getAttribute().getFileLength());
-                            if (fileDelete) {
-                                fileLocations.get(j).reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
-                            }
-                        } else {
-                            String localFilePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
-                            File localFile = new File(localFilePath + files.get(i).getUFID());
-                            File localAttribute = new File(localFilePath + files.get(i).getUFID() + ".attr");
-                            boolean deleteLocalFile = localFile.delete();
-                            boolean deleteAttrFile = localAttribute.delete();
-                            if (deleteLocalFile && deleteAttrFile) {
-                                MediatorFsNet.getInstance().getNode().getOwnLocation().reduceOccupiedSpace((int) files.get(i).getAttribute().getFileLength());
-                            }
+                for (NetNodeLocation fileLocation : fileLocations) {
+                    if (fileLocation.toUrl().compareTo(node.getOwnLocation().toUrl()) != 0) {
+                        boolean fileDelete = ReplicationMethods.getInstance().deleteFile(file.getUFID(), fileLocation, null, file.getAttribute().getFileLength());
+                        if (fileDelete) {
+                            fileLocation.reduceOccupiedSpace((int) file.getAttribute().getFileLength());
+                        }
+                    } else {
+                        String localFilePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
+                        File localFile = new File(localFilePath + file.getUFID());
+                        File localAttribute = new File(localFilePath + file.getUFID() + ".attr");
+                        boolean deleteLocalFile = localFile.delete();
+                        boolean deleteAttrFile = localAttribute.delete();
+                        if (deleteLocalFile && deleteAttrFile) {
+                            MediatorFsNet.getInstance().getNode().getOwnLocation().reduceOccupiedSpace((int) file.getAttribute().getFileLength());
                         }
                     }
-                    fileNodeList.remove(files.get(i).getUFID());
                 }
+                fileNodeList.remove(file.getUFID());
             }
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.out.println("[DELETE-DIRECTORY-FILES] Unable to delete all the files inside a directory in all the nodes");
         }
 
 

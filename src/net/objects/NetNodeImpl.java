@@ -35,12 +35,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     private MediatorFsNet mediatorFsNet;
     private String ownIP;
     private int port;
-    //private String hostName = "host";
     private String path;
     private NetNodeLocation ownLocation;
-    //<host,ip>
     private HashMap<Integer, NetNodeLocation> connectedNodes;
-    private HashMap<String, ListFileWrapper> fileNodeList = new HashMap();
+    private HashMap<String, ListFileWrapper> fileNodeList = new HashMap<>();
     private MainUI mainUI;
 
     public NetNodeImpl(String path, String ownIP, int port, MediatorFsNet mediatorFsNet1, MainUI mainUI) throws RemoteException {
@@ -71,18 +69,19 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             Thread t = new Thread(v);
             t.start();
         } catch (RemoteException e) {
-            System.out.println("Error in the initialization of the garbage collector, please restart the program");
+            System.out.println("[NET-NODE-IMPL] Error in the initialization of the garbage collector, please restart the program");
             System.exit(-1);
         }
 
     }
 
+    @Override
     public HashMap<String, ListFileWrapper> getFileNodeList() {
         return fileNodeList;
     }
 
+    @Override
     public synchronized void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean typeSet) {
-        //this.fileNodeList = fileNodeList;
 
         if (typeSet) {
 
@@ -98,7 +97,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 } else {
                     receivedFNL.put(entry.getKey(), entry.getValue());
                 }
-
             }
 
             this.fileNodeList = receivedFNL;
@@ -110,6 +108,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
+    @Override
     public void modifyFileNodeList(HashMap<String, ListFileWrapper> toModify) {
 
         for (Map.Entry<String, ListFileWrapper> entry : toModify.entrySet()) {
@@ -117,9 +116,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 this.fileNodeList.replace(entry.getKey(), entry.getValue());
             }
         }
-
     }
 
+    @Override
     public void beginFileNodeList() {
 
         String thisJson = this.getJson();
@@ -129,28 +128,26 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         HashMap<String, String> folderAndFile = new HashMap<>();
 
-        HashMap<String, ListFileWrapper> fNodeList = new HashMap();
+        HashMap<String, ListFileWrapper> fNodeList = new HashMap<>();
 
         for (Map.Entry<String, JsonFolder> entry : folder.entrySet()) {
 
             ArrayList<JsonFile> files = entry.getValue().getFiles();
 
             if (files.size() > 0) {
-                for (int i = 0; i < files.size(); i++) {
+                for (JsonFile file1 : files) {
 
-                    File file = new File(path + "/" + files.get(i).getUFID());
-                    File attr = new File(path + "/" + files.get(i).getUFID() + ".attr");
+                    File file = new File(path + "/" + file1.getUFID());
+                    File attr = new File(path + "/" + file1.getUFID() + ".attr");
 
                     if ((file.exists() && attr.exists())) {
-
                         ArrayList<NetNodeLocation> locations = new ArrayList<>();
                         locations.add(this.ownLocation);
                         ListFileWrapper tmp = new ListFileWrapper(locations);
-
-                        fNodeList.put(files.get(i).getUFID(), tmp);
+                        fNodeList.put(file1.getUFID(), tmp);
 
                     } else {
-                        folderAndFile.put(files.get(i).getUFID(), entry.getKey());
+                        folderAndFile.put(file1.getUFID(), entry.getKey());
                     }
                 }
             }
@@ -161,18 +158,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         FSTreeNode tree = FSStructure.getInstance().getTree();
 
         for (Map.Entry<String, String> entry : folderAndFile.entrySet()) {
-
             FSTreeNode tmp = tree.findNodeByUFID(tree, entry.getValue());
             tmp.removeOneFile(entry.getKey());
-
         }
-
 
         FSStructure.getInstance().generateJson(tree);
         this.setFileNodeList(fNodeList, false);
-
     }
 
+    @Override
     public void updateWritePermissionMap(String UFID, ListFileWrapper listFileWrapper) {
         if (fileNodeList.containsKey(UFID)) {
             fileNodeList.replace(UFID, fileNodeList.get(UFID), listFileWrapper);
@@ -181,6 +175,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
     }
 
+    @Override
     public NetNodeLocation getOwnLocation() {
         return ownLocation;
     }
@@ -236,18 +231,21 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return ownLocation.getName();
     }
 
+    @Override
     public int getOwnPort() {
         return ownLocation.getPort();
     }
 
+    @Override
     public HashMap<Integer, NetNodeLocation> getHashMap() {
         return connectedNodes;
     }
 
+    @Override
     public CacheFileWrapper getFileOtherHost(String UFID) {
         for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
             NetNodeLocation location = entry.getValue();
-            Registry registry = null;
+            Registry registry;
             CacheFileWrapper fileWrapper = null;
             try {
                 registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
@@ -255,6 +253,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 fileWrapper = node.getFile(UFID);
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
+                System.out.println("[GET-FILE-OTHER-HOST] Unable to get the file: " + UFID + " from other host");
             }
 
             if (fileWrapper != null) {
@@ -264,56 +263,17 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return null;
     }
 
-    @Override
-    public void replaceFileFromFS(ArrayList<CacheFileWrapper> fileWrappers) {
-        for (CacheFileWrapper fileWrapper : fileWrappers) {
-            for (Map.Entry<Integer, NetNodeLocation> entry : connectedNodes.entrySet()) {
-                if (!entry.getValue().equals(ownLocation)) {
-                    NetNodeLocation location = entry.getValue();
-                    Registry registry;
-                    try {
-                        registry = LocateRegistry.getRegistry(location.getIp(), location.getPort());
-                        NetNode node = (NetNode) registry.lookup(location.toUrl());
-                        node.replaceFile(fileWrapper, fileWrapper.getAttribute().getLastModifiedTime().getTime(), fileWrapper.getUFID());
-                    } catch (RemoteException | NotBoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public CacheFileWrapper getFile(String UFID) {
         return mediatorFsNet.getFileFromFS(UFID);
     }
 
-    public void replaceFile(CacheFileWrapper newFile, long lastModified, String UFID) {
-        CacheFileWrapper file = getFile(UFID);
-        if (file != null) {
-            File file1 = new File(path + UFID);
-            file1.delete();
-            file1 = new File(path + UFID + ".attr");
-            file1.delete();
-            File newFileCreated = new File(path + UFID);
-            try {
-                FileOutputStream writer = new FileOutputStream(newFileCreated);
-                writer.write(newFile.getContent());
-                ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(path + UFID + ".attr"));
-                ois.writeObject(newFile.getAttribute());
-                ois.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-
+    @Override
     public synchronized void setConnectedNodes(HashMap<Integer, NetNodeLocation> connectedNodes) {
         this.connectedNodes = connectedNodes;
         Util.plot(this.connectedNodes);
         mainUI.updateConnectedNode(this.connectedNodes);
-
     }
 
     @Override
@@ -321,6 +281,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return "--Connection Verified--";
     }
 
+    @Override
     public synchronized void checkNodesAndReplica() {
 
         System.out.println("[ CHECK NODES ]");
@@ -331,9 +292,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             if (!((ownIP + port).hashCode() == entry.getKey())) {
 
-
                 Registry registry;
-
                 String tmpIp = "-NOT UPDATE-";
                 int tmpPort = -1;
                 String tmpName;
@@ -343,19 +302,18 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     tmpIp = entry.getValue().getIp();
                     tmpPort = entry.getValue().getPort();
                     tmpName = entry.getValue().getName();
-
                     registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
-
                     String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
 
                     NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
                     System.out.println(nodeTemp.verify());
 
                 } catch (RemoteException e) {
-                    System.out.println("Node not found on port: " + tmpPort + "; Ip: " + tmpIp);
+                    System.out.println("[CHECK-NODES-AND-REPLICA] Node not found on port: " + tmpPort + "; Ip: " + tmpIp);
                     downNodes.put(entry.getKey(), entry.getValue());
 
                 } catch (NotBoundException e) {
+                    System.out.println("[CHECK-NODES-AND-REPLICA] Node not found on port: " + tmpPort + "; Ip: " + tmpIp);
                     e.printStackTrace();
                 }
 
@@ -378,7 +336,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         if (downNodes.size() != 0) {
 
             Util.plot(downNodes);
-
             Collection<NetNodeLocation> tmpColl = downNodes.values();
 
             for (NetNodeLocation nnl : tmpColl) {
@@ -394,15 +351,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         System.out.println("Node deleted:");
                         System.out.println(entry.getValue().getLocations().get(1).toString());
                         entry.getValue().getLocations().remove(1);
-
                     }
-
                 }
-
             }
-
         }
-
 
         HashMap<String, NetNodeLocation> updateToDo = new HashMap<>();
 
@@ -437,9 +389,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     NetNodeLocation newLoc = callSaveFileReplica(cacheFileWrapper, entry.getKey());
                     updateToDo.put(entry.getKey(), newLoc);
                     updateFileNodeList = true;
-
                 }
-
             }
         }
 
@@ -451,17 +401,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                 ListFileWrapper tmp = new ListFileWrapper(fileNodeList.get(entry.getKey()).getLocations());
                 UpFNL.put(entry.getKey(), tmp);
-
-
             }
         }
 
         if (updateFileNodeList) {
             updateAllFileNodeList(UpFNL);
         }
-
     }
 
+    @Override
     public void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) {
 
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
@@ -474,7 +422,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 String tmpName;
 
                 try {
-
                     tmpIp = entry.getValue().getIp();
                     tmpPort = entry.getValue().getPort();
                     tmpName = entry.getValue().getName();
@@ -484,23 +431,21 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
 
                     NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
-
-//                    nodeTemp.setFileNodeList(fileNodeList);
                     nodeTemp.modifyFileNodeList(fileNodeList);
 
                 } catch (RemoteException e) {
-                    System.out.println("[updateAllFileNodeList] connection problem" + tmpPort + "; Ip: " + tmpIp);
+                    System.out.println("[UPDATE-ALL-FILE-NODE-LIST] connection problem" + tmpPort + "; Ip: " + tmpIp);
 
                 } catch (NotBoundException e) {
-                    System.out.println("[NotBoundException-updateAllFileNodeList] connection problem\" + tmpPort + \"; Ip: \" + tmpIp");
+                    System.out.println("[UPDATE-ALL-FILE-NODE-LIST] connection problem\" + tmpPort + \"; Ip: \" + tmpIp");
                     e.printStackTrace();
 
                 }
             }
         }
-
     }
 
+    @Override
     public NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) {
 
         ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID(), null);
@@ -542,15 +487,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         } catch (RemoteException | NotBoundException er) {
             er.printStackTrace();
+            System.out.println("[CALL-SAVE-FILE-REPLICA] Unable to save file replica");
         }
 
         return selectedNode;
 
     }
 
+    @Override
     public boolean checkSecReplica(NetNodeLocation e, String fileName) {
-
-        System.out.println("[ CHECKReplica]");
 
         Registry registry;
 
@@ -559,7 +504,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         boolean ver = false;
 
         try {
-
             tmpIp = e.getIp();
             tmpPort = e.getPort();
             registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
@@ -571,12 +515,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         } catch (RemoteException | NotBoundException er) {
             er.printStackTrace();
+            System.out.println("[CHECK-SEC-REPLICA] Unable to check replica");
         }
 
         return ver;
 
     }
 
+    @Override
     public boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) {
 
         Registry registry;
@@ -596,18 +542,19 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         } catch (RemoteException | NotBoundException er) {
             er.printStackTrace();
+            System.out.println("[CALL-SAVE-FILE] Unable to save file");
         }
 
         return true;
     }
 
+    @Override
     public boolean saveFile(CacheFileWrapper cacheFileWrapper) {
 
         File f = new File(path + cacheFileWrapper.getUFID());
         File fileAtt = new File(path + cacheFileWrapper.getUFID() + ".attr");
 
         try {
-
             FileOutputStream fos = new FileOutputStream(f, false);
             fos.write(cacheFileWrapper.getContent());
             fos.flush();
@@ -621,6 +568,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("[SAVE FILE] Unable to save file");
             return false;
         }
 
@@ -629,10 +577,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
+    @Override
     public boolean verifyFile(String fileName) {
         return (new File(path + "/" + fileName).isFile() && new File(path + "/" + fileName + ".attr").isFile());
     }
 
+    @Override
     public boolean saveFileReplica(ReplicationWrapper rw) {
 
         String filePath = path;
@@ -641,7 +591,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         File fileAtt = new File(filePath + rw.getUFID() + ".attr");
 
         try {
-
             FileOutputStream fos = new FileOutputStream(f, false);
             fos.write(rw.getContent());
             fos.flush();
@@ -655,6 +604,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("[SAVE-FILE-REPLICA] Unable to save file replica");
             return false;
         }
 
@@ -666,12 +616,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             bytesArray = Util.append(ftb, fatb);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("[SAVE-FILE-REPLICA] Unable to save file replica");
+
         }
 
         String checksum = Util.getChecksum(bytesArray);
         return checksum.compareTo(rw.getChecksum()) == 0;
     }
 
+    @Override
     public boolean deleteFile(String UFID, String treeFileDirectoryUFID, long fileSize) {
         String filePath = PropertiesHelper.getInstance().loadConfig(Constants.WORKING_DIR_CONFIG);
         String totalFilePath = filePath + UFID;
@@ -694,17 +647,15 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
         }
 
-        if (filesDeleted && fileNodeList.containsKey(UFID)) {
+        if (filesDeleted) {
             fileNodeList.remove(UFID);
         }
 
         return filesDeleted;
     }
 
-    public MediatorFsNet getMediator() {
-        return mediatorFsNet;
-    }
 
+    @Override
     public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {
         if (!fileNodeList.containsKey(UFID)) {
             ArrayList<NetNodeLocation> a = new ArrayList<>();
@@ -717,8 +668,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 if (fileNodeList.get(UFID).getLocations().get(i).equals(netNode)) {
                     t = true;
                 }
-
-
             }
             if (!t) {
                 fileNodeList.get(UFID).getLocations().add(netNode);
@@ -726,17 +675,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         }
 
         for (NetNodeLocation nnl : connectedNodes.values()) {
-            Registry registry = null;
+            Registry registry;
             try {
                 registry = LocateRegistry.getRegistry(nnl.getIp(), nnl.getPort());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            try {
                 NetNode nn = (NetNode) registry.lookup(nnl.toUrl());
                 nn.updateWritePermissionMap(UFID, fileNodeList.get(UFID));
             } catch (RemoteException | NotBoundException e) {
                 e.printStackTrace();
+                System.out.println("[NODE-FILE-ASSOCIATION] Unable to associate the file with the node");
             }
 
         }
@@ -746,10 +692,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         MediatorFsNet.getInstance().updateJson(treeRoot);
     }
 
+    @Override
     public String getJson() {
         return PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG);
     }
 
+    @Override
     public synchronized void setJson(String json, boolean up) {
         PropertiesHelper.getInstance().writeConfig(Constants.FOLDERS_CONFIG, json);
 
@@ -760,6 +708,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     }
 
+    @Override
     public synchronized void connectionMergeJson(String json) {
 
 
@@ -778,10 +727,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             if (ownFilesRoot.size() != 0) {
 
-                for (int i = 0; i < ownFilesRoot.size(); i++) {
+                for (JsonFile anOwnFilesRoot : ownFilesRoot) {
 
-                    String currentName = ownFilesRoot.get(i).getFileName();
-                    String currentUFID = ownFilesRoot.get(i).getUFID();
+                    String currentName = anOwnFilesRoot.getFileName();
+                    String currentUFID = anOwnFilesRoot.getUFID();
 
                     File file = new File(path + "/" + currentUFID);
                     File attr = new File(path + "/" + currentUFID + ".attr");
@@ -807,21 +756,18 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     }
 
                     if (sameName) {
-
                         String newName = currentName + " ( " + "offline different file" + " " + time + " ) ";
-                        ownFilesRoot.get(i).setFileName(newName);
-                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+                        anOwnFilesRoot.setFileName(newName);
+                        receivedFolder.get("root").getFiles().add(anOwnFilesRoot);
 
 
                     } else if (sameUFID) {
-
                         file.delete();
                         attr.delete();
 
                     } else {
-                        receivedFolder.get("root").getFiles().add(ownFilesRoot.get(i));
+                        receivedFolder.get("root").getFiles().add(anOwnFilesRoot);
                     }
-
                 }
             }
 
@@ -829,20 +775,17 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
             for (Map.Entry<String, JsonFolder> entry : ownFolder.entrySet()) {
 
-                //Se non è contenuto lo aggiungo al received Folder
                 if (receivedFolder.containsKey(entry.getKey())) {
 
-                    //Prendo i file della cartella
                     ArrayList<JsonFile> files = entry.getValue().getFiles();
-                    //Salvo i file che possiedo in locale
                     ArrayList<JsonFile> filesExist = new ArrayList<>();
 
-                    for (int i = 0; i < files.size(); i++) {
-                        File file = new File(path + "/" + files.get(i).getUFID());
-                        File attr = new File(path + "/" + files.get(i).getUFID() + ".attr");
+                    for (JsonFile file1 : files) {
+                        File file = new File(path + "/" + file1.getUFID());
+                        File attr = new File(path + "/" + file1.getUFID() + ".attr");
 
                         if (file.exists() && attr.exists()) {
-                            filesExist.add(files.get(i));
+                            filesExist.add(file1);
                         }
                     }
 
@@ -852,17 +795,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
                         if (receivedFiles.size() > 0) {
 
-                            for (int j = 0; j < receivedFiles.size(); j++) {
-
+                            for (JsonFile receivedFile : receivedFiles) {
                                 for (int i = 0; i < filesExist.size(); i++) {
-
-                                    if (receivedFiles.get(j).equals(filesExist.get(i))) {
+                                    if (receivedFile.equals(filesExist.get(i))) {
                                         filesExist.remove(i);
                                         break;
                                     }
 
                                 }
-
                             }
 
                             if (filesExist.size() > 0) {
@@ -872,12 +812,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                         } else {
                             receivedFolder.get(entry.getKey()).setFiles(filesExist);
                         }
-
                     }
 
                 } else {
-                    // il receivedFolder non contiene una cartella con lo stesso ufid
-
                     ArrayList<JsonFile> filesExist = entry.getValue().getFiles();
 
                     String currentName = entry.getValue().getFolderName();
@@ -886,14 +823,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     for (Map.Entry<String, JsonFolder> entry2 : receivedFolder.entrySet()) {
 
                         if (entry2.getValue().getFolderName().equals(currentName)) {
-
                             newName = currentName + " ( offline different folder " + time + " )";
                             break;
                         }
                     }
 
                     receivedFolder.put(entry.getKey(), entry.getValue());
-
                     receivedFolder.get(entry.getKey()).setFiles(filesExist);
                     receivedFolder.get(entry.getKey()).setFolderName(newName);
 
@@ -907,13 +842,13 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             this.setJson(newJson, false);
             this.callUpdateAllJson(newJson);
 
-
         } else {
             this.setJson(json, false);
         }
 
     }
 
+    @Override
     public void callUpdateAllJson(String json) {
 
         for (Map.Entry<Integer, NetNodeLocation> entry : this.connectedNodes.entrySet()) {
@@ -935,16 +870,14 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                     registry = LocateRegistry.getRegistry(tmpIp, tmpPort);
 
                     String tmpPath = "rmi://" + tmpIp + ":" + tmpPort + "/" + tmpName;
-
                     NetNode nodeTemp = (NetNode) registry.lookup(tmpPath);
-                    //nodeTemp.updateJson(json, true);
                     nodeTemp.setJson(json, true);
 
                 } catch (RemoteException e) {
-                    System.out.println("[callUpdateAllJson] Connection problems" + tmpPort + "; Ip: " + tmpIp);
+                    System.out.println("[CALL-UPDATE-ALL-JSON] Connection problems" + tmpPort + "; Ip: " + tmpIp);
 
                 } catch (NotBoundException e) {
-                    System.out.println("[NotBoundException-callUpdateAllJson] Connections Problems\" + tmpPort + \"; Ip: \" + tmpIp");
+                    System.out.println("[CALL-UPDATE-ALL-JSON] Connections Problems\" + tmpPort + \"; Ip: \" + tmpIp");
                     e.printStackTrace();
 
                 }
