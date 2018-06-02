@@ -147,7 +147,6 @@ public class FileServiceImpl implements FileService {
 
         /**These method are used to update the information about the lock**/
 
-        boolean canReplicate = true;
         ArrayList<NetNodeLocation> tempNodeFileList = new ArrayList<>(nodeList.getLocations());
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
         byte[] repContent;
@@ -642,7 +641,6 @@ public class FileServiceImpl implements FileService {
 
     /**
      * Method for the choice of the node where replicate the created file
-     *
      * @param repWr wrapper for the data file to replicated
      * @param node  local node
      */
@@ -691,6 +689,12 @@ public class FileServiceImpl implements FileService {
         ReplicationMethods.getInstance().fileReplication(selectedNode, repWr, node);
     }
 
+    /**
+     * This method is used to removes a node from the node list
+     * @param nodeList is the list of nodes
+     * @param node is the node to remove
+     * @return the updated list of the node
+     */
     private ArrayList<NetNodeLocation> removeLocalNode(ArrayList<NetNodeLocation> nodeList, NetNode node) {
 
         for (int i = 0; i < nodeList.size(); i++) {
