@@ -21,7 +21,7 @@ public interface FileService extends Remote, Serializable {
      * @param fileId is the unique identifier of the file
      * @param offset indicates the first byte to read
      * @return the array of byte to read
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file not exists
      */
     ReadWrapper read(String fileId, int offset) throws FileNotFoundException;
 
@@ -40,7 +40,7 @@ public interface FileService extends Remote, Serializable {
      * @param offset is the start index where begin to write
      * @param count  is the number of byte to write
      * @param data   is the array of byte to write
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file not exists
      */
     void write(String fileID, int offset, int count, byte[] data, String fileDirectoryUFID) throws FileNotFoundException;
 
@@ -49,9 +49,9 @@ public interface FileService extends Remote, Serializable {
      *
      * @param host     is the host that creates the new file
      * @param curDir   is the current directory where saving the file
-     * @param fileName
+     * @param fileName is the name of the file
      * @return the unique identifier UFID of the new file
-     * @throws IOException
+     * @throws IOException if there are reading or writing problem
      */
     String create(String host, FSTreeNode curDir, String fileName) throws IOException;
 
@@ -78,7 +78,7 @@ public interface FileService extends Remote, Serializable {
      *
      * @param fileID is the unique identifier of the file
      * @return an instance of FileAttribute that contains all the file attributes
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file not exists
      */
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 

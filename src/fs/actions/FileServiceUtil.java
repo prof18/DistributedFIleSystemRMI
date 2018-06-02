@@ -38,7 +38,7 @@ public class FileServiceUtil {
      * the hash map of all the nodes in the system and their location
      * the created node
      * the hashMap that has for keys the UFID of the files and values the location of nodes that contain a file
-     * @throws NotBoundException
+     * @throws NotBoundException if there are network problems
      */
 
     public static WrapperFileServiceUtil create(String path, String ownIP, NetNodeLocation locationRet, MainUI mainUI) throws NotBoundException, NullPointerException {

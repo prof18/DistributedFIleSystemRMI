@@ -127,12 +127,12 @@ public class FileServiceImpl implements FileService {
      * @param count             is the number of byte to write
      * @param data              is the array of byte to write
      * @param fileDirectoryUFID is the identifier of the directory that contains the file
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file not exists
      */
     @Override
     public void write(String fileID, int offset, int count, byte[] data, String fileDirectoryUFID) throws FileNotFoundException {
 
-        /**These commands are used to obtain the list of nodes that keep a file in own memory**/
+        /*These commands are used to obtain the list of nodes that keep a file in own memory**/
 
         ListFileWrapper nodeList = null;
         try {
@@ -145,7 +145,7 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
-        /**These method are used to update the information about the lock**/
+        /*These method are used to update the information about the lock**/
 
         ArrayList<NetNodeLocation> tempNodeFileList = new ArrayList<>(nodeList.getLocations());
         CacheFileWrapper cacheFileWrapper = getFile(fileID);
@@ -190,7 +190,7 @@ public class FileServiceImpl implements FileService {
         }
 
 
-        /**These commands are used to update the content of the file**/
+        /*These commands are used to update the content of the file**/
 
         if (cacheFileWrapper == null) throw new FileNotFoundException();
 
@@ -264,7 +264,7 @@ public class FileServiceImpl implements FileService {
             cacheFileWrapper.getAttribute().setFileLength(repContent.length);
         }
 
-        /**These command update the information about the writing lock**/
+        /*These command update the information about the writing lock**/
 
         try {
             if (mediator.getNode().getHashMap().size() > 1 && mediator.getNode().getFileNodeList().get(fileID).getLocations().size() > 1) {
@@ -275,7 +275,7 @@ public class FileServiceImpl implements FileService {
             System.out.println("[WRITE] Unable to write the write permissions");
         }
 
-        /**
+        /*
          * These command are used to update the structure of the directory three and subsequently of the json representation
          */
         FSStructure.getInstance().generateTreeStructure();
@@ -293,7 +293,7 @@ public class FileServiceImpl implements FileService {
         FSStructure.getInstance().generateJson(FSStructure.getInstance().getTree());
 
         //file content and attributes replication
-        /**
+        /*
          * These commands manage the replication of the updated file in the other nodes
          */
         String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
@@ -347,7 +347,7 @@ public class FileServiceImpl implements FileService {
      * @param curDir    is the directory where the file is created
      * @param fileName  is tge name of the file
      * @return the unique identifier of the new file
-     * @throws IOException
+     * @throws IOException if there are reading or writing problem
      */
     public String create(String host, FileAttribute attribute, FSTreeNode curDir, String fileName) throws IOException {
         String UFID = host + "_" + Date.from(Instant.now()).hashCode();
@@ -400,7 +400,7 @@ public class FileServiceImpl implements FileService {
      * @param curDir   is the current directory where saving the file
      * @param fileName is the name of the file
      * @return the unique identifier of the new file
-     * @throws IOException
+     * @throws IOException if there are reading or writing problems
      */
     @Override
     public String create(String host, FSTreeNode curDir, String fileName) throws IOException {
@@ -486,7 +486,7 @@ public class FileServiceImpl implements FileService {
     /**
      * @param fileID is the unique identifier of the file
      * @return the class that wraps all the attribute about a file
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file not exists
      */
     @Override
     public FileAttribute getAttributes(String fileID) throws FileNotFoundException {
@@ -519,7 +519,7 @@ public class FileServiceImpl implements FileService {
      * @param offset is the position where put the new content
      * @param count is the number of bytes to add of the new content
      * @return the updated array of byte
-     * @throws IndexOutOfBoundsException
+     * @throws IndexOutOfBoundsException if indexes are wrong
      */
     private byte[] joinArray(byte[] first, byte[] second, int offset, int count) throws IndexOutOfBoundsException {
         if (first == null) {
@@ -558,7 +558,7 @@ public class FileServiceImpl implements FileService {
      * This method return a file and the own attribute
      * @param UFID is the identifier of the file
      * @return is the wrapper that contains all the required information
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file not exists
      */
     private CacheFileWrapper getFile(String UFID) throws FileNotFoundException {
         File file = new File(path + UFID);
@@ -621,7 +621,7 @@ public class FileServiceImpl implements FileService {
     /**
      * This method is used to get a file and own attribute in a local node
      * @param UFID is the unique identifier of the selected file
-     * @return
+     * @return a wrapper that holds the file and own attribute
      */
     public CacheFileWrapper getFileAndAttribute(String UFID) {
         File file = new File(path + UFID);

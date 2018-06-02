@@ -32,7 +32,7 @@ public interface NetNode extends Remote, Serializable {
 
     /**
      * @return the fileNodeList of the node
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     HashMap<String, ListFileWrapper> getFileNodeList() throws RemoteException;
@@ -42,7 +42,7 @@ public interface NetNode extends Remote, Serializable {
      *
      * @param receivedFNL received fileNodeList
      * @param merge is used to decide if a merge is necessary or not
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     void setFileNodeList(HashMap<String, ListFileWrapper> receivedFNL, boolean merge) throws RemoteException;
@@ -51,7 +51,7 @@ public interface NetNode extends Remote, Serializable {
      * Is used to update a fileNodeList with an entry is modified by another nodes
      *
      * @param entriesFileNodelist entries that must be modified
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     void modifyFileNodeList(HashMap<String, ListFileWrapper> entriesFileNodelist ) throws RemoteException;
@@ -60,7 +60,7 @@ public interface NetNode extends Remote, Serializable {
      * Is used to create the fileNodeList of the node if it contains already a json
      * and also to update the json with only the existing files
      *
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     void beginFileNodeList() throws RemoteException;
@@ -68,8 +68,8 @@ public interface NetNode extends Remote, Serializable {
     /**
      * Is used to update the fileNodeList through the network
      *
-     * @param fileNodeList
-     * @throws RemoteException
+     * @param fileNodeList 
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
@@ -78,7 +78,7 @@ public interface NetNode extends Remote, Serializable {
      * This method change the write permission of a file.
      * @param UFID file identifier.
      * @param list class that contain the list of nodes with the file saved in local and the write permission for that file.
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
     void updateWritePermissionMap(String UFID, ListFileWrapper list) throws RemoteException;
 
@@ -86,7 +86,7 @@ public interface NetNode extends Remote, Serializable {
      * This method update the list of nodes where a specific file is saved.
      * @param UFID file identifier.
      * @param netNode node to add in the list.
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
@@ -96,7 +96,7 @@ public interface NetNode extends Remote, Serializable {
      * @param treeFileDirectoryUFID directory identifier.
      * @param fileSize the file size.
      * @return true if the file and it's attributes are deleted, false otherwise.
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
     boolean deleteFile(String UFID, String treeFileDirectoryUFID, long fileSize) throws RemoteException;
 
@@ -108,7 +108,7 @@ public interface NetNode extends Remote, Serializable {
      * This method is used to get the own ip address
      *
      * @return own Ip
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     String getOwnIp() throws RemoteException;
@@ -117,7 +117,7 @@ public interface NetNode extends Remote, Serializable {
      * This method is used to get the own port number
      *
      * @return own port number
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     int getOwnPort() throws RemoteException;
@@ -186,7 +186,7 @@ public interface NetNode extends Remote, Serializable {
      * @param e
      * @param fileName
      * @return
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     boolean checkSecReplica(NetNodeLocation e, String fileName) throws RemoteException;
@@ -196,7 +196,7 @@ public interface NetNode extends Remote, Serializable {
      *
      * @param UFID
      * @return true if it exists
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     boolean verifyFile(String UFID) throws RemoteException;
@@ -208,7 +208,7 @@ public interface NetNode extends Remote, Serializable {
      * @param e                location where the file must be save
      * @param cacheFileWrapper is a wrap of a file and its attributes
      * @return
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) throws RemoteException;
@@ -219,7 +219,7 @@ public interface NetNode extends Remote, Serializable {
      *
      * @param e
      * @return
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     boolean saveFile(CacheFileWrapper e) throws RemoteException;
@@ -251,7 +251,7 @@ public interface NetNode extends Remote, Serializable {
      * @param cacheFileWrapper
      * @param UFID
      * @return
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) throws RemoteException;
@@ -261,7 +261,7 @@ public interface NetNode extends Remote, Serializable {
      *
      * @param rw is a wrapper that contains all the needed about the file
      * @return a boolean that indicates the success of the operation
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     boolean saveFileReplica(ReplicationWrapper rw) throws RemoteException;
@@ -284,7 +284,7 @@ public interface NetNode extends Remote, Serializable {
      * Is used in order to merge json when a new node joins the network and it contains already a json and some file
      *
      * @param json json from the network
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     void connectionMergeJson(String json) throws RemoteException;
@@ -293,7 +293,7 @@ public interface NetNode extends Remote, Serializable {
      * Is used to send the update json through the network
      *
      * @param json to send
-     * @throws RemoteException
+     * @throws RemoteException if there are problems in the RMI communication
      */
 
     void callUpdateAllJson(String json) throws RemoteException;

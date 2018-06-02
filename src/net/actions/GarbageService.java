@@ -55,15 +55,15 @@ public class GarbageService extends UnicastRemoteObject implements Runnable {
                 }
 
             } catch (InterruptedException e) {
-                System.out.println("[GARGAGE-SERVICE] InterruptedException Verify Thread");
+                System.out.println("[GARBAGE-SERVICE] InterruptedException Verify Thread");
                 e.printStackTrace();
 
             } catch (RemoteException e) {
-                System.out.println("[GARGAGE-SERVICE] RemoteException Verify Thread");
+                System.out.println("[GARBAGE-SERVICE] RemoteException Verify Thread");
                 e.printStackTrace();
 
             } catch (NotBoundException e) {
-                System.out.println("[GARGAGE-SERVICE] NotBoundException Verify Thread " + path);
+                System.out.println("[GARBAGE-SERVICE] NotBoundException Verify Thread " + path);
                 e.printStackTrace();
             }
 
