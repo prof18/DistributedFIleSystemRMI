@@ -91,7 +91,6 @@ public class FileServiceUtil {
 
                 System.out.println("[Updating Nodes]");
 
-                //Modifiche per il nome Host random
                 JoinWrap jWrap = node1.join(ownIP, port, hostName);
                 HashMap<Integer, NetNodeLocation> retMap = jWrap.getCoNodesJoin();
                 node.setNameLocation(jWrap.getNameJoin());
@@ -101,9 +100,8 @@ public class FileServiceUtil {
                 Util.plot(retMap);
                 node.setConnectedNodes(retMap);
                 mainUI.updateConnectedNode(retMap);
-                ret = retMap;
 
-                //Se i nodi sono solo 2 le Map saranno già aggiornate
+
                 if ((retMap.size() != 2)) {
                     for (Map.Entry<Integer, NetNodeLocation> entry : node.getHashMap().entrySet()) {
 
