@@ -142,7 +142,6 @@ public class SettingsDialog extends JDialog {
         });
 
 
-
         //ok button
         JButton okBtn = new JButton("OK");
         okBtn.addActionListener((ActionListener) -> {
@@ -168,16 +167,15 @@ public class SettingsDialog extends JDialog {
                 dispose();
                 main = new MainUI();
                 main.showUI(true);
-            } catch (NotBoundException e ) {
+            } catch (NotBoundException e) {
                 //if the info aren't correct exit from the program
                 new SettingsDialog(true);
-                showMessageDialog(null, "Settings are incorrect! [NotBoundException]");
+                showMessageDialog(null, "Settings are incorrect!");
                 e.printStackTrace();
                 System.exit(0);
-            }
-            catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 new SettingsDialog(true);
-                showMessageDialog(null, "Settings are incorrect! [NullPointerException]");
+                showMessageDialog(null, "Settings are incorrect!");
                 e.printStackTrace();
                 System.exit(0);
             }
