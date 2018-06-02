@@ -282,6 +282,12 @@ public interface NetNode extends Remote, Serializable {
      */
     String getJson() throws RemoteException;
 
+    /**
+     * This method overwrite the old structure of the file system with the new structure
+     * @param json new file system structure in JSON format
+     * @param up if true overwrite file system structure, generate the new file system tree and update UI, only overwrite the file system structure otherwise
+     * @throws RemoteException
+     */
     void setJson(String json, boolean up) throws RemoteException;
 
     /**
