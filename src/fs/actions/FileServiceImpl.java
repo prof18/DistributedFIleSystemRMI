@@ -60,21 +60,7 @@ public class FileServiceImpl implements FileService {
 
     /**
      * It Reads a file using the fileID.
-     * The offset and the count are provide by the user
      * If the file is not found both locally or remotely the system throws FileNotFoundException
-     */
-
-
-    public ReadWrapper read(String fileID, int offset, int count) throws FileNotFoundException {
-        ReadWrapper ret = read(fileID, offset);
-        byte[] newRet = new byte[count];
-        System.arraycopy(ret.getContent(), 0, newRet, 0, count);
-        return new ReadWrapper(newRet, ret.isWritable());
-    }
-
-    /**
-     * This method differs from the previous one
-     * because the lenght of the file is automatically assigned to the count.
      */
     @Override
     public ReadWrapper read(String fileID, int offset) throws FileNotFoundException {
