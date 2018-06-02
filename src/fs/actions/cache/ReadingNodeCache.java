@@ -4,6 +4,10 @@ import fs.actions.object.CacheFileWrapper;
 
 import java.util.HashMap;
 
+/**
+ * This class implements the reading cache used by the nodes to
+ * improved the performance and reduces the information exchange
+ */
 
 public class ReadingNodeCache {
     private HashMap<String, CacheFileWrapper> cache;

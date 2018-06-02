@@ -7,6 +7,10 @@ import java.io.*;
 import java.time.Instant;
 import java.util.Date;
 
+/**
+ * This class is used to wrap all the information
+ * related to a file inserted in a cache
+ */
 public class CacheFileWrapper implements Serializable {
     private String UFID;
     private File file;

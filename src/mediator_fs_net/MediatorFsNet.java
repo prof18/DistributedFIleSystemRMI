@@ -5,7 +5,6 @@ import fs.actions.ReplicationMethods;
 import fs.actions.interfaces.FileService;
 import fs.actions.object.CacheFileWrapper;
 import fs.actions.object.ListFileWrapper;
-import fs.actions.object.WritingCacheFileWrapper;
 import fs.objects.structure.FSTreeNode;
 import fs.objects.structure.FileWrapper;
 import net.objects.NetNodeLocation;

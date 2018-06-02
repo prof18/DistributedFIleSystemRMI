@@ -7,6 +7,9 @@ import net.objects.interfaces.NetNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * This class is used to keeps and pass all the information related to the initialization of a node
+ */
 public class WrapperFileServiceUtil {
     private NetNodeLocation ownLocation;
     private HashMap<Integer, NetNodeLocation> locationHashMap;

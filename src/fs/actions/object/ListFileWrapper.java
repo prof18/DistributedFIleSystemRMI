@@ -5,6 +5,10 @@ import net.objects.NetNodeLocation;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * This class is used to contain all the
+ * information about nodes that keeps a specific file
+ */
 public class ListFileWrapper implements Serializable {
     private ArrayList<NetNodeLocation> locations;
     private boolean writable;
