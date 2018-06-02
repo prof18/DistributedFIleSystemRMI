@@ -523,7 +523,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     }
 
     @Override
-    public boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) {
+    public void callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) {
 
         Registry registry;
         String tmpIp;
@@ -544,8 +544,6 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             er.printStackTrace();
             System.out.println("[CALL-SAVE-FILE] Unable to save file");
         }
-
-        return true;
     }
 
     @Override

@@ -41,7 +41,7 @@ public interface NetNode extends Remote, Serializable {
      * Is used to set or merge the fileNodeList of new connected node
      *
      * @param receivedFNL received fileNodeList
-     * @param merge is used to decide if a merge is necessary or not
+     * @param merge       is used to decide if a merge is necessary or not
      * @throws RemoteException
      */
 
@@ -54,7 +54,7 @@ public interface NetNode extends Remote, Serializable {
      * @throws RemoteException
      */
 
-    void modifyFileNodeList(HashMap<String, ListFileWrapper> entriesFileNodelist ) throws RemoteException;
+    void modifyFileNodeList(HashMap<String, ListFileWrapper> entriesFileNodelist) throws RemoteException;
 
     /**
      * Is used to create the fileNodeList of the node if it contains already a json
@@ -163,18 +163,18 @@ public interface NetNode extends Remote, Serializable {
     /**
      * Is used to call verifyFile on a node
      *
-     * @param e
-     * @param fileName
-     * @return
+     * @param location where the replica is
+     * @param UFID is the filename
+     * @return true if verified
      * @throws RemoteException
      */
 
-    boolean checkSecReplica(NetNodeLocation e, String fileName) throws RemoteException;
+    boolean checkSecReplica(NetNodeLocation location, String UFID) throws RemoteException;
 
     /**
      * Is used to verify if a replica exist
      *
-     * @param UFID
+     * @param UFID is the filename
      * @return true if it exists
      * @throws RemoteException
      */
@@ -185,20 +185,19 @@ public interface NetNode extends Remote, Serializable {
     /**
      * Is used to call saveFile in another node
      *
-     * @param e                location where the file must be save
+     * @param location where the file must be save
      * @param cacheFileWrapper is a wrap of a file and its attributes
-     * @return
      * @throws RemoteException
      */
 
-    boolean callSaveFile(NetNodeLocation e, CacheFileWrapper cacheFileWrapper) throws RemoteException;
+    void callSaveFile(NetNodeLocation location, CacheFileWrapper cacheFileWrapper) throws RemoteException;
 
 
     /**
      * Is used to save a file replica that has been removed manually
      *
-     * @param e
-     * @return
+     * @param e is a wrap of a file and its attributes
+     * @return false if the routine fails
      * @throws RemoteException
      */
 
@@ -228,9 +227,9 @@ public interface NetNode extends Remote, Serializable {
     /**
      * Is used to call saveFileReplica in another node
      *
-     * @param cacheFileWrapper
-     * @param UFID
-     * @return
+     * @param cacheFileWrapper is a wrap of a file and its attributes
+     * @param UFID is the filename
+     * @return the location where the replica is saved
      * @throws RemoteException
      */
 
