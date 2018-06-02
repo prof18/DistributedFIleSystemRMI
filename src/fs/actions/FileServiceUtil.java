@@ -65,8 +65,10 @@ public class FileServiceUtil {
             String connectPath = "rmi://" + ownIP + ":" + port + "/" + hostName;
             registry.bind(connectPath, node);
         } catch (RemoteException e) {
+            System.out.println("Problem with the creation of the node");
             e.printStackTrace();
         } catch (AlreadyBoundException e) {
+            System.out.println("The chosen port is already occupied");
             e.printStackTrace();
         }
 
@@ -77,6 +79,7 @@ public class FileServiceUtil {
                 merge = true;
             }
         } catch (RemoteException e) {
+            System.out.println("Communication problem with beginFileNodeList method");
             e.printStackTrace();
         }
 
