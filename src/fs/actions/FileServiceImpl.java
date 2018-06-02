@@ -298,7 +298,7 @@ public class FileServiceImpl implements FileService {
          * These commands manage the replication of the updated file in the other nodes
          */
         String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
-        ReplicationWrapper rw = new ReplicationWrapper(fileID, fileName);
+        ReplicationWrapper rw = new ReplicationWrapper(fileID);
         rw.setAttribute(cacheFileWrapper.getAttribute());
         rw.setContent(repContent);
         byte[] fatb = new byte[0];
@@ -381,7 +381,7 @@ public class FileServiceImpl implements FileService {
         //Replication
 
         if (mediator.getNode().getHashMap().size() > 1) {
-            ReplicationWrapper rw = new ReplicationWrapper(UFID, file.getName());
+            ReplicationWrapper rw = new ReplicationWrapper(UFID);
             rw.setPath(curDir.getPath());
             rw.setAttribute(attribute);
             rw.setContent(ftb);

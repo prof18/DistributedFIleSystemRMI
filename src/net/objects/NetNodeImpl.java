@@ -472,7 +472,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     @Override
     public NetNodeLocation callSaveFileReplica(CacheFileWrapper cacheFileWrapper, String UFID) {
 
-        ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID(), null);
+        ReplicationWrapper rw = new ReplicationWrapper(cacheFileWrapper.getUFID());
         rw.setAttribute(cacheFileWrapper.getAttribute());
 
         byte[] ftb = Util.fileToBytes(path + "/" + UFID);
