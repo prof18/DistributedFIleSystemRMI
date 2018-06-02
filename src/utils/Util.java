@@ -78,7 +78,7 @@ public class Util {
     /**
      * This method is used in debug phase, in order to create a fictional system
      *
-     * @return
+     * @return the fake generated hash map
      */
     private static HashMap<String, JsonFolder> generateFakeObjects() {
 
@@ -278,6 +278,7 @@ public class Util {
      * @param nodeList list of candidate nodes for the replication
      * @return sorted list of candidate nodes
      */
+    @SuppressWarnings("UnusedReturnValue")
     private static ArrayList<NetNodeLocation> ascSort(ArrayList<NetNodeLocation> nodeList) {
         NetNodeLocation temp;
         for (int i = 1; i < nodeList.size(); i++) {
