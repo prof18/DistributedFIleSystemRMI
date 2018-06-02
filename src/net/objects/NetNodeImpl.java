@@ -286,6 +286,10 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
     @Override
     public synchronized void checkNodesAndReplica() {
 
+        /*
+        This routine verifies the nodes connection on the network and update the hashMap ConnectedNodes
+         */
+
         System.out.println("[ CHECK NODES ]");
 
         HashMap<Integer, NetNodeLocation> downNodes = new HashMap<>();
@@ -329,11 +333,23 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }
 
-        //REPLICATION CHECK
+        /*
+
+        This second part of the routine instead verifies if the replica on the network are reachable or exist
+
+        DISCLAIMER each node verifies only the replica of the files that it contains in local
+        each node check its own files replica
+
+         */
 
         boolean updateFileNodeList = false;
 
         System.out.println("[ CHECK REPLICA ]");
+
+        /*
+        If in the previous part a node is unreachable for sure some replica are lost
+        and it is necessary to update the fileNodeList to remove the location of these replica
+         */
 
         if (downNodes.size() != 0) {
 
@@ -357,6 +373,12 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
                 }
             }
         }
+
+        /*
+
+        Here it verifies if all its files have a replica and in case it creates it
+
+         */
 
         HashMap<String, NetNodeLocation> updateToDo = new HashMap<>();
 
