@@ -74,10 +74,30 @@ public interface NetNode extends Remote, Serializable {
 
     void updateAllFileNodeList(HashMap<String, ListFileWrapper> fileNodeList) throws RemoteException;
 
+    /**
+     * This method change the write permission of a file.
+     * @param UFID file identifier.
+     * @param list class that contain the list of nodes with the file saved in local and the write permission for that file.
+     * @throws RemoteException
+     */
     void updateWritePermissionMap(String UFID, ListFileWrapper list) throws RemoteException;
 
+    /**
+     * This method update the list of nodes where a specific file is saved.
+     * @param UFID file identifier.
+     * @param netNode node to add in the list.
+     * @throws RemoteException
+     */
     void nodeFileAssociation(String UFID, NetNodeLocation netNode) throws RemoteException;
 
+    /**
+     * This method delete local file in the node and update the total occupied space.
+     * @param UFID file identifier.
+     * @param treeFileDirectoryUFID directory identifier.
+     * @param fileSize the file size.
+     * @return true if the file and it's attributes are deleted, false otherwise.
+     * @throws RemoteException
+     */
     boolean deleteFile(String UFID, String treeFileDirectoryUFID, long fileSize) throws RemoteException;
 
     NetNodeLocation getOwnLocation() throws RemoteException;
@@ -255,6 +275,11 @@ public interface NetNode extends Remote, Serializable {
 
     String verify() throws RemoteException;
 
+    /**
+     * This method return the file system structure in JSON format
+     * @return String that describe the file system structure in JSON format
+     * @throws RemoteException
+     */
     String getJson() throws RemoteException;
 
     void setJson(String json, boolean up) throws RemoteException;
