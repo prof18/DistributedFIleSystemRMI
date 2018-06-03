@@ -73,9 +73,9 @@ public class FileViewTableModel extends AbstractTableModel {
         switch (col) {
             case 0:
                 if (item.isFile())
-                    return new ImageIcon("img/file.png");
+                    return new ImageIcon(getClass().getResource("/file.png"));
                 else
-                    return new ImageIcon("img/folder.png");
+                    return new ImageIcon(getClass().getResource("/folder.png"));
 
             case 1:
                 if (item.isFile()) {

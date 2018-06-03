@@ -15,9 +15,10 @@ public class TreeCellRenderer extends DefaultTreeCellRenderer {
 
         super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
         if (leaf) {
-            setIcon(new ImageIcon("img/file.png"));
+
+            setIcon(new ImageIcon(getClass().getResource("/file.png")));
         } else {
-            setIcon(new ImageIcon("img/folder.png"));
+            setIcon(new ImageIcon(getClass().getResource("/folder.png")));
         }
         return this;
     }
