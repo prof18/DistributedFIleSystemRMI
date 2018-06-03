@@ -83,6 +83,8 @@ public interface FileService extends Remote, Serializable {
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
 
+    void removeFileFromRemote(String fileID);
+
     void removeFromCache(String fileID);
 
 

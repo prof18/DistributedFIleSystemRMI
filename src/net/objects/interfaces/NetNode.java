@@ -312,6 +312,7 @@ public interface NetNode extends Remote, Serializable {
     void callUpdateAllJson(String json) throws RemoteException;
 
 
+    void removeFile(String fileID) throws RemoteException;
 
     void removeFromCache(String fileID) throws RemoteException;
 }

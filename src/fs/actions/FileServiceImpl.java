@@ -443,14 +443,27 @@ public class FileServiceImpl implements FileService {
                     curDir.removeOneFile(fileID);
                 }
             }
+            else{
+                for(NetNodeLocation nodeLocation:mediator.getNode().getFileNodeList().get(fileID).getLocations()){
+                    Registry registry=LocateRegistry.getRegistry(nodeLocation.getIp(),nodeLocation.getPort());
+                    NetNode node=(NetNode)registry.lookup(nodeLocation.toUrl());
+                    node.removeFile(fileID);
+                }
+                mediator.getNode().getFileNodeList().remove(fileID);
+                curDir.removeOneFile(fileID);
+            }
 
         } catch (RemoteException e) {
             e.printStackTrace();
             System.out.println("[DELETE] Unable to delete the local file: " + fileID);
+        } catch (NotBoundException e) {
+            e.printStackTrace();
         }
 
         //removing the deleted file from the cache
         readingCache.remove(fileID);
+
+    /*
         FSTreeNode root = mediator.getFsStructure().getTree();
         int removeIndex = -1;
 
@@ -464,8 +477,12 @@ public class FileServiceImpl implements FileService {
         if (removeIndex != -1) {
             root.getFiles().remove(removeIndex);
         }
+       */
+        mediator.getFsStructure().generateJson(curDir.findRoot());
 
-        mediator.getFsStructure().generateJson(root);
+        System.out.println("ERRORE");
+        System.out.println(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
+
 
         try {
             mediator.getNode().callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
@@ -713,6 +730,13 @@ public class FileServiceImpl implements FileService {
             }
         }
         return nodeList;
+    }
+
+    public void removeFileFromRemote(String fileID){
+        File file=new File(path+fileID+".txt");
+        System.out.println("removed file : "+file.delete());
+        file=new File(path+fileID+".attr");
+        System.out.println("removed attribute file : "+file.delete());
     }
 
 }

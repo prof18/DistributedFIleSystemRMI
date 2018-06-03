@@ -909,4 +909,9 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
             }
         }
     }
+
+    @Override
+    public void removeFile(String fileID){
+        mediatorFsNet.removeFile(fileID);
+    }
 }
