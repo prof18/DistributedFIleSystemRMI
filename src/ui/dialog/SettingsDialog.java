@@ -77,6 +77,7 @@ public class SettingsDialog extends JDialog {
         panel.add(portLabel, cs);
 
         JTextField portTextField = new JTextField(20);
+        portTextField.setText("1099");
         cs.gridx = 1;
         cs.gridy = 2;
         panel.add(portTextField, cs);
