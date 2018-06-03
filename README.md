@@ -8,7 +8,7 @@ Si consideri il problema dei diritti di accesso, si possono considerare i compon
 Le modifiche sono propagate alla chiusura del file (no write through).
 
 ### Progetto 3
-Ogni singolo file creato viene replicato sin dall�inizio per garantire fault tolerance. La directory e� distribuita e replicata (in parte o completamente) per essere resistente alla sparizione di un nodo.
+Ogni singolo file creato viene replicato sin dall'inizio per garantire fault tolerance. La directory e' distribuita e replicata (in parte o completamente) per essere resistente alla sparizione di un nodo.
 
 ### Utilizzo:
 Avviare il sistema tramite il file ***distributiti.jar***
