@@ -259,7 +259,7 @@ public class Util {
      * @return list of candidate nodes
      */
     public static ArrayList<NetNodeLocation> listOfConnectedNodeForLongTime(ArrayList<NetNodeLocation> list) {
-        long connectedTimeThreshold = maxTimeConnection(list) / 3;
+        long connectedTimeThreshold = maxTimeConnection(list) / 2;
         long currentTime = new Date().getTime();
         ArrayList<NetNodeLocation> selectedNodesList = new ArrayList<>();
 
@@ -284,6 +284,10 @@ public class Util {
         for (int i = 1; i < nodeList.size(); i++) {
             for (int j = i; j > 0; j--) {
                 if (nodeList.get(j).getTotalByte() < nodeList.get(j - 1).getTotalByte()) {
+                    temp = nodeList.get(j);
+                    nodeList.set(j, nodeList.get(j - 1));
+                    nodeList.set((j - 1), temp);
+                }else if ((nodeList.get(j).getTotalByte() == nodeList.get(j - 1).getTotalByte()) && (nodeList.get(j).getTimeStamp() < nodeList.get(j).getTimeStamp())){
                     temp = nodeList.get(j);
                     nodeList.set(j, nodeList.get(j - 1));
                     nodeList.set((j - 1), temp);
