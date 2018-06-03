@@ -674,6 +674,7 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
 
     @Override
     public void removeFromCache(String fileID){
+        System.out.println("mediator called cache invalidation");
         mediatorFsNet.updateCache(fileID);
 
     }

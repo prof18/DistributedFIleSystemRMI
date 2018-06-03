@@ -183,6 +183,7 @@ public class MediatorFsNet {
     }
 
     public void updateCache(String fileID){
+        System.out.println("cache invalidation for file : "+fileID);
         service.removeFromCache(fileID);
     }
 }

@@ -298,7 +298,6 @@ public interface NetNode extends Remote, Serializable {
      */
 
 
-    void removeFromCache(String fileID) throws RemoteException;
 
 
     void connectionMergeJson(String json) throws RemoteException;
@@ -313,4 +312,6 @@ public interface NetNode extends Remote, Serializable {
     void callUpdateAllJson(String json) throws RemoteException;
 
 
+
+    void removeFromCache(String fileID) throws RemoteException;
 }
