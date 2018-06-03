@@ -181,4 +181,8 @@ public class MediatorFsNet {
 
 
     }
+
+    public void updateCache(String fileID){
+        service.removeFromCache(fileID);
+    }
 }

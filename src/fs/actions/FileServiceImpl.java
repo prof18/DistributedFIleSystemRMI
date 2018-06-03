@@ -549,6 +549,10 @@ public class FileServiceImpl implements FileService {
         return Arrays.copyOfRange(tmp, 0, count + 1);
     }
 
+    @Override
+    public void removeFromCache(String fileID){
+        readingCache.remove(fileID);
+    }
     /**
      * This method return a file and the own attribute
      *

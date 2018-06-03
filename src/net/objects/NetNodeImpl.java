@@ -672,6 +672,11 @@ public class NetNodeImpl extends UnicastRemoteObject implements NetNode {
         return filesDeleted;
     }
 
+    @Override
+    public void removeFromCache(String fileID){
+        mediatorFsNet.updateCache(fileID);
+
+    }
 
     @Override
     public void nodeFileAssociation(String UFID, NetNodeLocation netNode) {

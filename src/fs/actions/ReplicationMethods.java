@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
+import java.util.Map;
 
 
 /**
@@ -59,6 +60,18 @@ public class ReplicationMethods {
 
         } catch (RemoteException | NotBoundException e) {
             System.out.println("[FILE-REPLICATION] Communication problem");
+            e.printStackTrace();
+        }
+
+        try {
+            for(Map.Entry<Integer,NetNodeLocation> entry:nNode.getHashMap().entrySet()){
+                Registry registry1=LocateRegistry.getRegistry(entry.getValue().getIp(),entry.getValue().getPort());
+                NetNode node=(NetNode)registry1.lookup(entry.getValue().toUrl());
+
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
             e.printStackTrace();
         }
     }

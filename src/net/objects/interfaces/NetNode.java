@@ -297,6 +297,10 @@ public interface NetNode extends Remote, Serializable {
      * @throws RemoteException if there are problems in the RMI communication
      */
 
+
+    void removeFromCache(String fileID) throws RemoteException;
+
+
     void connectionMergeJson(String json) throws RemoteException;
 
     /**
