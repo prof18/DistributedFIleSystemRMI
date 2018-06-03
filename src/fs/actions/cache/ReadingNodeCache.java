@@ -25,7 +25,9 @@ public class ReadingNodeCache {
     }
 
     public void remove(String UFID) {
-        CacheFileWrapper ret = cache.remove(UFID);
+        if(cache.size()!=0) {
+            CacheFileWrapper ret = cache.remove(UFID);
+        }
     }
 
     @SuppressWarnings("SameReturnValue")
