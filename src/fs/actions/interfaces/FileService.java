@@ -82,9 +82,16 @@ public interface FileService extends Remote, Serializable {
      */
     FileAttribute getAttributes(String fileID) throws FileNotFoundException;
 
-
+    /**
+     * used for remove file from remote in the removing procedure
+     * @param fileID is the unique identifier of the file
+     */
     void removeFileFromRemote(String fileID);
 
+    /**
+     * used for cache invalidation
+     * @param fileID is the unique identifier of the file
+     */
     void removeFromCache(String fileID);
 
 

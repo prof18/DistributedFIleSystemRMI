@@ -480,9 +480,6 @@ public class FileServiceImpl implements FileService {
        */
         mediator.getFsStructure().generateJson(curDir.findRoot());
 
-        System.out.println("ERRORE");
-        System.out.println(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
-
 
         try {
             mediator.getNode().callUpdateAllJson(PropertiesHelper.getInstance().loadConfig(Constants.FOLDERS_CONFIG));
