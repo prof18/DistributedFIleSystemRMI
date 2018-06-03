@@ -16,7 +16,10 @@ import utils.PropertiesHelper;
 import utils.Util;
 
 import java.io.*;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.time.Instant;
 import java.util.*;
 
@@ -88,9 +91,7 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
         File file = wrapper.getFile();
-        int count = (int) file.length();
-        byte[] content = new byte[count];
-        content=wrapper.getContent();
+        byte[] content = wrapper.getContent();
         return new ReadWrapper(content, flag);
     }
 
@@ -235,29 +236,29 @@ public class FileServiceImpl implements FileService {
             }
 
         } else {
-            FileInputStream fis = new FileInputStream(cacheFileWrapper.getFile());
-            oldLength = (int) cacheFileWrapper.getFile().length();
-            byte[] context = new byte[oldLength];
-            try {
-                fis.read(context);
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("[WRITE] Unable to read the cache");
-            }
-            File newFile = new File(cacheFileWrapper.getUFID());
-            FileOutputStream fos = new FileOutputStream(newFile);
-            byte[] newctx = joinArray(context, data, offset, count);
-            try {
-                fos.write(newctx);
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("[WRITE] Unable to write the cache");
-            }
+            byte[] content = cacheFileWrapper.getContent();
+            byte[] newctx = joinArray(content, data, offset, count);
             repContent = newctx.clone();
+            cacheFileWrapper.setContent(repContent);
             cacheFileWrapper.getAttribute().setLastModifiedTime(Date.from(Instant.now()));
             cacheFileWrapper.getAttribute().setFileLength(repContent.length);
+
+
+            try {
+                ListFileWrapper listFile=mediator.getNode().getFileNodeList().get(fileID);
+                for (NetNodeLocation nodeLocation:listFile.getLocations()) {
+                    Registry registry=LocateRegistry.getRegistry(nodeLocation.getIp(),nodeLocation.getPort());
+                    NetNode node=(NetNode)registry.lookup(nodeLocation.toUrl());
+                    node.saveFile(cacheFileWrapper);
+                }
+            } catch (RemoteException e) {
+                System.out.println("problem with the replication of not local file");
+                e.printStackTrace();
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+            }
+
+
         }
 
         /*These command update the information about the writing lock**/
@@ -292,7 +293,6 @@ public class FileServiceImpl implements FileService {
         /*
          * These commands manage the replication of the updated file in the other nodes
          */
-        String fileName = mediator.getFsStructure().getTree().getFileName(fileID);
         ReplicationWrapper rw = new ReplicationWrapper(fileID);
         rw.setAttribute(cacheFileWrapper.getAttribute());
         rw.setContent(repContent);
@@ -491,6 +491,7 @@ public class FileServiceImpl implements FileService {
 
     /**
      * This method is used to update the attribute of a file
+     *
      * @param fileID is the unique identifier of a file
      * @param attr   is the new instance of the class FileAttribute to save
      */
@@ -507,10 +508,11 @@ public class FileServiceImpl implements FileService {
 
     /**
      * This method is used to concatenate the old and the new content of a file
-     * @param first is the old content
+     *
+     * @param first  is the old content
      * @param second is the new content
      * @param offset is the position where put the new content
-     * @param count is the number of bytes to add of the new content
+     * @param count  is the number of bytes to add of the new content
      * @return the updated array of byte
      * @throws IndexOutOfBoundsException if indexes are wrong
      */
@@ -549,6 +551,7 @@ public class FileServiceImpl implements FileService {
 
     /**
      * This method return a file and the own attribute
+     *
      * @param UFID is the identifier of the file
      * @return is the wrapper that contains all the required information
      * @throws FileNotFoundException if the file not exists
@@ -573,6 +576,7 @@ public class FileServiceImpl implements FileService {
 
     /**
      * This method is used to gather the attribute of a local file
+     *
      * @param UFID is the unique identifier of the file
      * @return the attribute of the file
      */
@@ -591,6 +595,7 @@ public class FileServiceImpl implements FileService {
 
     /**
      * This method is used to gat a file from the reading cache of the node
+     *
      * @param UFID is the unique identifier of the file
      * @return all the information related to a file wrap in a CacheFileWrapper
      */
@@ -613,6 +618,7 @@ public class FileServiceImpl implements FileService {
 
     /**
      * This method is used to get a file and own attribute in a local node
+     *
      * @param UFID is the unique identifier of the selected file
      * @return a wrapper that holds the file and own attribute
      */
@@ -634,6 +640,7 @@ public class FileServiceImpl implements FileService {
 
     /**
      * Method for the choice of the node where replicate the created file
+     *
      * @param repWr wrapper for the data file to replicated
      * @param node  local node
      */
@@ -684,8 +691,9 @@ public class FileServiceImpl implements FileService {
 
     /**
      * This method is used to removes a node from the node list
+     *
      * @param nodeList is the list of nodes
-     * @param node is the node to remove
+     * @param node     is the node to remove
      * @return the updated list of the node
      */
     private ArrayList<NetNodeLocation> removeLocalNode(ArrayList<NetNodeLocation> nodeList, NetNode node) {

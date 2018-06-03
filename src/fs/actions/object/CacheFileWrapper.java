@@ -41,6 +41,10 @@ public class CacheFileWrapper implements Serializable {
         return content;
     }
 
+    public void setContent(byte[] content1){
+        this.content=content1;
+    }
+
     public boolean isLocal() {
         return isLocal;
     }
