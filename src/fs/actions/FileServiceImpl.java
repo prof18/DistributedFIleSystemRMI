@@ -90,12 +90,7 @@ public class FileServiceImpl implements FileService {
         File file = wrapper.getFile();
         int count = (int) file.length();
         byte[] content = new byte[count];
-        FileInputStream fileInputStream = new FileInputStream(file);
-        try {
-            fileInputStream.read(content, offset, count);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+        content=wrapper.getContent();
         return new ReadWrapper(content, flag);
     }
 
