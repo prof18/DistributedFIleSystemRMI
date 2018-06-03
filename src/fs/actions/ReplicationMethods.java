@@ -67,6 +67,7 @@ public class ReplicationMethods {
             for(Map.Entry<Integer,NetNodeLocation> entry:nNode.getHashMap().entrySet()){
                 Registry registry1=LocateRegistry.getRegistry(entry.getValue().getIp(),entry.getValue().getPort());
                 NetNode node=(NetNode)registry1.lookup(entry.getValue().toUrl());
+                node.removeFromCache(repWr.getUFID());
 
             }
         } catch (RemoteException e) {
