@@ -213,7 +213,7 @@ public class SettingsDialog extends JDialog {
                 Enumeration<InetAddress> ee = net.getInetAddresses();
                 while (ee.hasMoreElements()) {
                     InetAddress i = ee.nextElement();
-                    list.add(i.getHostName());
+                    list.add(i.getHostAddress());
                 }
 
             }
