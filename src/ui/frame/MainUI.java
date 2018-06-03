@@ -323,7 +323,7 @@ public class MainUI extends JFrame {
             fileNameVLabel.setText(node.getNameNode());
             typeVLabel.setText("folder");
             pathVLabel.setText(node.getPath());
-            fileSizeVLabel.setText(node.getFolderSize() + "KB");
+            fileSizeVLabel.setText(node.getFolderSize() + " KB");
             lastEditVLabel.setText(sdf.format(node.getLastEditTime()));
             ownerVLabel.setText(node.getOwner());
         }
@@ -501,7 +501,7 @@ public class MainUI extends JFrame {
             fileNameVLabel.setText(fw.getFileName());
             typeVLabel.setText(fw.getAttribute().getType());
             pathVLabel.setText(fw.getPath());
-            fileSizeVLabel.setText(String.valueOf(fw.getAttribute().getFileLength()) + "KB");
+            fileSizeVLabel.setText(String.valueOf(fw.getAttribute().getFileLength()) + " KB");
             ownerVLabel.setText(fw.getAttribute().getOwner());
             if (fw.getAttribute().getLastModifiedTime() != null)
                 lastEditVLabel.setText(sdf.format(fileWrapper.getAttribute().getLastModifiedTime()));
