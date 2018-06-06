@@ -11,4 +11,4 @@ Le modifiche sono propagate alla chiusura del file (no write through).
 Ogni singolo file creato viene replicato sin dall'inizio per garantire fault tolerance. La directory e' distribuita e replicata (in parte o completamente) per essere resistente alla sparizione di un nodo.
 
 ### Utilizzo:
-Avviare il sistema tramite il file ***distributiti.jar***
+Avviare il sistema tramite il file ***distribuiti.jar***
